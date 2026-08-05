@@ -1,0 +1,108 @@
+#compdef fuzzel
+
+_arguments \
+    -s \
+    '--config[path to configuration file (XDG_CONFIG_HOME/fuzzel/fuzzel.ini)]:config:_files' \
+    '--cache[file to load most recently launched applications from (XDG_CACHE_HOME/fuzzel)]:cache:_files' \
+    '(-n --namespace)'{-n,--namespace}'[layer shell surface namespace (launcher)]:()' \
+    '--check-config[verify configuration and exit with 0 if ok, otherwise exit with 1]' \
+    '(-v --version)'{-v,--version}'[show the version number and quit]' \
+    '(-h --help)'{-h,--help}'[show help message and quit]' \
+    '(-o --output)'{-o,--output}'[output (monitor) to display on (none)]:output:->outputs' \
+    '(-f --font)'{-f,--font}'[font name and style in fontconfig format (monospace)]:font:->fonts' \
+    '(-D --dpi-aware)'{-D,--dpi-aware}"[scale fonts using the monitor's DPI (auto)]:dpi_aware:(no yes auto)" \
+    '--gamma-correct[do gamma-correct blending]' \
+    '--use-bold[allow fuzzel to use bold fonts]' \
+    '--icon-theme[icon theme name (default)]:theme:->icon_theme' \
+    '(-I --no-icons)'{-I,--no-icons}'[do not render any icons]' \
+    '--hide-before-typing[hide application list until something is typed]' \
+    '(-F --fields)'{-F,--fields}'[comma separated list of XDG Desktop entry fields to match ]:fields:(filename name generic exec categories keywords comment)' \
+    '(-p --prompt)'{-p,--prompt}'[string to use as input prompt ("> ")]:()' \
+    '--prompt-only[same as prompt, and implies --lines=0]:()' \
+    '--hide-prompt[hide the prompt line]' \
+    '--placeholder[placeholder text in the input box]:()' \
+    '--search[initial search/filter string]:()' \
+    '--password[render all input using either "*", or the specified character]:()' \
+    '(-T --terminal)'{-T,--terminal}'[terminal command, with arguments ($TERMINAL -e)]:terminal:_command_names -e' \
+    '(-a --anchor)'{-a,--anchor}'[set window anchor (center)]:anchors:(top-left top top-right left center right bottom-left bottom bottom-right)' \
+    '--x-margin[horizontal margin away from the anchor point in pixels (0)]:()' \
+    '--y-margin[vertical margin away from the anchor point in pixels (0)]:()' \
+    '--select[select the first entry that matches the given string]:()' \
+    '--auto-select[automatically select when only one match remains]' \
+    '--select-index[select the entry with index]:()' \
+    '(-l --lines)'{-l,--lines}'[maximum number of matches to display (15)]:()' \
+    '--minimal-lines[adjust lines to minimum of --lines and input lines (dmenu mode only)]' \
+    '(-w --width)'{-w,--width}'[window width, in characters (30)]:()' \
+    '(-x --horizontal-pad)'{-x,--horizontal-pad}'[horizontal padding, in pixels (40)]:()' \
+    '(-y --vertical-pad)'{-y,--vertical-pad}'[vertical padding, in pixels (8)]:()' \
+    '(-P --inner-pad)'{-P,--inner-pad}'[vertical padding between prompt and matches, in pixels (0)]:()' \
+    '(-b --background)'{-b,--background}'[background color (fdf6e3ff)]:background:()' \
+    '(-t --text-color)'{-t,--text-color}'[text color (657b83ff)]:text-color:()' \
+    '--message-color[color of the message text (657b83ff)]:message-color:()' \
+    '--prompt-color[color of the prompt text (586e75ff)]:prompt-color:()' \
+    '--placeholder-color[color of the placeholder text (93a1a1ff)]:()' \
+    '--input-color[color of the input string (657b83ff)]:input-color:()' \
+    '(-m --match-color)'{-m,--match-color}'[color of matched substring (cb4b16ff)]:match-color:()' \
+    '(-s --selection-color)'{-s,--selection-color}'[background color of selected item (eee8d5ff)]:selection-color:()' \
+    '(-S --selection-text-color)'{-S,--selection-text-color}'[text color of selected item (586e75ff)]:selection-text-color:()' \
+    '(-M --selection-match-color)'{-M,--selection-match-color}'[color of matched substring of selected item (cb4b16ff)]:match-color:()' \
+    '--selection-radius[amount of corner "roundness" for the selected entry (0)]:selection-radius:()' \
+    '--counter-color[color of the match count (93a1a1ff)]:counter-color:()' \
+    '(-B --border-width)'{-B,--border-width}'[width of border, in pixels (1)]:border-width:()' \
+    '(-r --border-radius)'{-r,--border-radius}'[amount of corner "roundness" (10)]:border-radius:()' \
+    '(-C --border-color)'{-C,--border-color}'[border color (002b36ff)]:border-color:()' \
+    '--show-actions[include desktop actions (e.g "New Window") in the list]' \
+    '--match-mode[how to match what you type against the entries (fzf)]:match_mode:(exact fzf fuzzy)' \
+    '--no-sort[do not sort the result]' \
+    '--counter[display the match count]' \
+    '--filter-desktop=-[filter desktop entries based on XDG_CURRENT_DESKTOP]: :(no)' \
+    '--list-executables-in-path[list executables present in the PATH environment variable]'\
+    '--fuzzy-min-length[search strings shorter than this will not be fuzzy matched (3)]:()' \
+    '--fuzzy-max-length-discrepancy[maximum allowed length difference between the search string and a fuzzy match (2)]:()' \
+    '--fuzzy-max-distance[maximum allowed levenshtein distance between the search string and a fuzzy match (1)]:()' \
+    '--line-height[override line height from font metrics, in points or pixels]:()' \
+    '--letter-spacing[additional letter spacing, in points or pixels]:()' \
+    '--layer[which layer to render the fuzzel window on (top)]:layer:(top overlay)' \
+    '--keyboard-focus[keyboard focus mode (exclusive)]:keyboard-focus:(exclusive on-demand)' \
+    '--launch-prefix[prefix to add before argv of executed program]:launch_prefix:_files' \
+    '--render-workers[number of render worker threads]:render-workers:()' \
+    '--match-workers[number of match worker threads]:match-workers:()' \
+    '--delayed-filter-ms[time in milliseconds to delay refiltering when there are lots of matches]:delayed-filter-ms:()' \
+    '--delayed-filter-limit[switch to delayed refiltering when there are more matches than this]:delayed-filter-limit:()' \
+    '(-d --dmenu)'{-d,--dmenu}'[dmenu compatibility mode; entries are read from stdin, newline separated]' \
+    '--dmenu0[dmenu compatibility mode; entries are read from stdin, NUL separated]' \
+    '--index[print selected entry'\''s index instead of its text (dmenu mode only)]' \
+    '--with-nth[display the N:th column (tab separated by default) of each input line (dmenu mode only)]:with-nth:()' \
+    '--accept-nth[output the N:th column (tab separated by default) of each input line (dmenu mode only)]:accept-nth:()' \
+    '--match-nth[match against the N:th column (tab separated by default) of each input line (dmenu only)]:match-nth:()' \
+    '--nth-delimiter[field delimiter for --with-nth and --accept-nth]:nth-delim:()' \
+    '--only-match[do not allow custom entries, only return a selected item]:only-match:()' \
+    '--mesg[string to use as informational message above the prompt]:()' \
+    '--mesg-mode[how to deal with message lines longer than the ui (wrap)]:match_mode:(wrap expand)' \
+    '(-R --no-run-if-empty)'{-R,--no-run-if-empty}'[exit immediately without showing the UI if stdin is empty (dmenu mode only)]' \
+    '--log-level[log level (warning)]:loglevel:(info warning error none)' \
+    '--log-colorize[enable or disable colorization of log output on stderr]:logcolor:(never always auto)' \
+    '--log-no-syslog[disable syslog logging]' \
+    '--no-mouse[disable mouse input]' \
+    '--print-timing-info[print timing information, to help debug performance issues]' \
+    '--scaling-filter[filter to use when down scaling PNGs]:scaling-filter:(none nearest bilinear box linear cubic lanczos2 lanczos3 lanczos3-stretched)'
+
+case "${state}" in
+    fonts)
+        if command -v fc-list > /dev/null; then
+            _values 'font families' $(fc-list : family | tr -d ' ')
+        fi
+        ;;
+
+    icon_theme)
+        _values 'icon themes' $(find /usr/share/icons -mindepth 1 -maxdepth 1 -type d -print0 | xargs -0 -n 1 basename | sort)
+        ;;
+
+    outputs)
+        if command -v wlr-randr > /dev/null; then
+            _values 'outputs' $(wlr-randr | grep -e '^[^[:space:]]\+' | cut -d ' ' -f 1)
+        elif command -v swaymsg > /dev/null; then
+            _values 'outputs' $(swaymsg -t get_outputs --raw|grep name|cut -d '"' -f 4)
+        fi
+        ;;
+esac

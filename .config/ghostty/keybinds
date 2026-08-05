@@ -1,0 +1,133 @@
+# Ghostty keybinds — tmux-style prefix (Ctrl+B)
+# Included from config.ghostty via: config-file = ?~/.config/ghostty/keybinds
+#
+# HOW THIS WORKS (read this):
+#   1. Press Ctrl+B and RELEASE it   ← enters prefix mode (one-shot)
+#   2. Press the action key alone    ← e.g. h, v, c, ?
+#   Do NOT hold Ctrl+B and the action key together like a chord.
+#
+# Uses a key table (more reliable than key sequences on GTK).
+# Split naming matches tmux:
+#   h = horizontal split → left/right  (new_split:right)
+#   v = vertical split   → top/bottom  (new_split:down)
+
+# ---------------------------------------------------------------------------
+# Prefix: Ctrl+B -> one-shot "tmux" key table
+# ---------------------------------------------------------------------------
+keybind = tmux/
+keybind = ctrl+b=activate_key_table_once:tmux
+
+# Escape / cancel prefix mode without doing anything
+keybind = tmux/escape=deactivate_key_table
+
+# Ignore unknown keys while in prefix mode (don't leak to the shell)
+keybind = tmux/catch_all=ignore
+
+# Literal Ctrl+B to the running program (prefix then b, or prefix then Ctrl+B)
+keybind = tmux/b=text:\x02
+keybind = tmux/ctrl+b=text:\x02
+
+# ---------------------------------------------------------------------------
+# View keybinds helper
+# ---------------------------------------------------------------------------
+# Command palette — searchable actions + binds (works everywhere)
+keybind = tmux/?=toggle_command_palette
+keybind = tmux/shift+slash=toggle_command_palette
+
+# Doomslayer cheat sheet in a pager (needs a free shell prompt)
+keybind = tmux/ctrl+h=text:less ~/.config/ghostty/keybinds-help\r
+
+# ---------------------------------------------------------------------------
+# Tabs (~ tmux windows)
+# ---------------------------------------------------------------------------
+keybind = tmux/c=new_tab
+keybind = tmux/n=next_tab
+keybind = tmux/p=previous_tab
+keybind = tmux/l=last_tab
+keybind = tmux/,=prompt_tab_title
+keybind = tmux/w=toggle_tab_overview
+
+keybind = tmux/1=goto_tab:1
+keybind = tmux/2=goto_tab:2
+keybind = tmux/3=goto_tab:3
+keybind = tmux/4=goto_tab:4
+keybind = tmux/5=goto_tab:5
+keybind = tmux/6=goto_tab:6
+keybind = tmux/7=goto_tab:7
+keybind = tmux/8=goto_tab:8
+keybind = tmux/9=goto_tab:9
+keybind = tmux/0=last_tab
+
+# Close whole tab (shell Ctrl+D still exits a single pane)
+keybind = tmux/d=close_tab
+
+# ---------------------------------------------------------------------------
+# Windows (OS-level Ghostty windows)
+# ---------------------------------------------------------------------------
+keybind = tmux/shift+c=new_window
+keybind = tmux/&=close_window
+
+# ---------------------------------------------------------------------------
+# Splits (~ tmux panes)
+# ---------------------------------------------------------------------------
+keybind = tmux/h=new_split:right
+keybind = tmux/v=new_split:down
+keybind = tmux/%=new_split:right
+keybind = tmux/"=new_split:down
+
+# Focus splits
+keybind = tmux/left=goto_split:left
+keybind = tmux/down=goto_split:down
+keybind = tmux/up=goto_split:up
+keybind = tmux/right=goto_split:right
+keybind = tmux/shift+h=goto_split:left
+keybind = tmux/shift+j=goto_split:down
+keybind = tmux/shift+k=goto_split:up
+keybind = tmux/shift+l=goto_split:right
+keybind = tmux/o=goto_split:next
+keybind = tmux/;=goto_split:previous
+
+# Zoom / balance
+keybind = tmux/z=toggle_split_zoom
+keybind = tmux/==equalize_splits
+
+# One-shot resize (still available without entering resize mode)
+keybind = tmux/ctrl+left=resize_split:left,40
+keybind = tmux/ctrl+down=resize_split:down,40
+keybind = tmux/ctrl+up=resize_split:up,40
+keybind = tmux/ctrl+right=resize_split:right,40
+
+# Resize mode — prefix then Shift+R (capital R; lowercase r = reload)
+# Stays active so you can mash arrows / hjkl freely. Esc or Enter to exit.
+keybind = resize/
+keybind = tmux/shift+r=activate_key_table:resize
+keybind = resize/escape=deactivate_key_table
+keybind = resize/enter=deactivate_key_table
+keybind = resize/catch_all=ignore
+keybind = resize/left=resize_split:left,40
+keybind = resize/down=resize_split:down,40
+keybind = resize/up=resize_split:up,40
+keybind = resize/right=resize_split:right,40
+keybind = resize/h=resize_split:left,40
+keybind = resize/j=resize_split:down,40
+keybind = resize/k=resize_split:up,40
+keybind = resize/l=resize_split:right,40
+keybind = resize/==equalize_splits
+
+# ---------------------------------------------------------------------------
+# Search / scroll / clipboard
+# ---------------------------------------------------------------------------
+keybind = tmux/f=start_search
+keybind = tmux/slash=start_search
+keybind = tmux/[=scroll_page_up
+keybind = tmux/]=scroll_page_down
+keybind = tmux/g=scroll_to_top
+keybind = tmux/shift+g=scroll_to_bottom
+keybind = tmux/a=select_all
+
+# ---------------------------------------------------------------------------
+# Misc
+# ---------------------------------------------------------------------------
+keybind = tmux/r=reload_config
+keybind = tmux/enter=toggle_fullscreen
+keybind = tmux/i=inspector:toggle

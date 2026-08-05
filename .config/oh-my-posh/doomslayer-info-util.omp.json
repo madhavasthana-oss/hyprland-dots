@@ -1,0 +1,185 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "blocks": [
+    {
+      "alignment": "left",
+      "leading_diamond": "<#FF4500>┏</>",
+      "segments": [
+        {
+          "foreground": "#FF4500",
+          "options": {
+            "time_format": "01/02/2006 @ 3:04:05 PM MST"
+          },
+          "style": "diamond",
+          "template": "[<#F8F8F2></> {{ .CurrentDate | date .Format }}]",
+          "type": "time"
+        },
+        {
+          "foreground": "#FF4500",
+          "style": "plain",
+          "template": "[<#F8F8F2></> {{ .UserName }} :: <#F8F8F2></> {{ .HostName }}]",
+          "type": "session"
+        },
+        {
+          "foreground": "#FFCA80",
+          "style": "diamond",
+          "template": "[<#F8F8F2></> RAM: {{ (div ((sub .PhysicalTotalMemory .PhysicalAvailableMemory)|float64) 1073741824.0) }}/{{ (div .PhysicalTotalMemory 1073741824.0) }}GB]",
+          "type": "sysinfo"
+        },
+        {
+          "foreground": "#CC2200",
+          "foreground_templates": [
+            "{{if eq \"Charging\" .State.String}}#8AFF80{{end}}",
+            "{{if eq \"Discharging\" .State.String}}#FF4500{{end}}",
+            "{{if eq \"Full\" .State.String}}#4caf50{{end}}"
+          ],
+          "options": {
+            "charged_icon": "<#F8F8F2></> ",
+            "charging_icon": " ",
+            "discharging_icon": "<#FFCA80></> "
+          },
+          "style": "plain",
+          "template": "[{{ if not .Error }}{{ .Icon }}{{ .Percentage }}{{ end }}{{ .Error }}]",
+          "type": "battery"
+        },
+        {
+          "foreground": "#FFCA80",
+          "options": {
+            "style": "dallas",
+            "threshold": 0
+          },
+          "style": "diamond",
+          "template": "[<#F8F8F2></> {{ .FormattedMs }}s]",
+          "type": "executiontime"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "alignment": "left",
+      "newline": true,
+      "leading_diamond": "<#FF4500>┣</>",
+      "segments": [
+        {
+          "foreground": "#FF4500",
+          "style": "diamond",
+          "template": "[<#F8F8F2></> Subscription: <#FFCA80>{{ .Name }}</>]",
+          "type": "az"
+        },
+        {
+          "foreground": "#FF4500",
+          "style": "diamond",
+          "template": "[<#F8F8F2></> Azure Developer CLI Environment: <#FFCA80>{{ .DefaultEnvironment }}</> :: <#FFCA80>{{ .Version }}</>]",
+          "type": "azd"
+        },
+        {
+          "foreground": "#FF4500",
+          "style": "diamond",
+          "template": "[<#F8F8F2></> <#FFCA80>{{ .Profile }}</>{{if .Region}}@<#FFCA80>{{ .Region }}</>{{ end }}]",
+          "type": "aws"
+        },
+        {
+          "foreground": "#FF4500",
+          "style": "diamond",
+          "template": "[{{ if .Error }}{{ .Error }}{{ else }}<#F8F8F2></> <#FFCA80>{{ .Project }}</> :: <#FFCA80>{{.Account}}</>{{ end }}]",
+          "type": "gcp"
+        },
+        {
+          "foreground": "#FF80BF",
+          "style": "diamond",
+          "template": "[<#F8F8F2>󱃾</> <#FFCA80>{{.Context}}</>{{if .Namespace}} :: <#FFCA80>{{.Namespace}}</>{{end}}]",
+          "type": "kubectl"
+        },
+        {
+          "foreground": "#FF80BF",
+          "style": "diamond",
+          "template": "[{{ if .Error }}{{ .Error }}{{ else }}{{ if .Name }}<#F8F8F2></> {{ .Name }}{{ end }}{{ if .Target }} {{ .Target }}{{ end }}{{ end }}]",
+          "type": "project"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "alignment": "left",
+      "newline": true,
+      "leading_diamond": "<#FF4500>┣</>",
+      "segments": [
+        {
+          "foreground": "#FF4500",
+          "options": {
+            "style": "full"
+          },
+          "style": "diamond",
+          "template": "[<#F8F8F2></> <#8AFF80>{{ .Path }}</>]",
+          "type": "path"
+        },
+        {
+          "foreground": "#FF80BF",
+          "options": {
+            "fetch_status": true,
+            "fetch_upstream_icon": true
+          },
+          "style": "plain",
+          "template": "[<#F8F8F2>{{ .UpstreamIcon }} </>{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} <#F8F8F2></> {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} <#CC2200></> {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }} <#F8F8F2></> {{ .StashCount }}{{ end }}]",
+          "type": "git"
+        },
+        {
+          "foreground": "#FFCA80",
+          "options": {
+            "display_mode": "environment",
+            "fetch_virtual_env": true,
+            "display_default": false
+          },
+          "style": "diamond",
+          "template": "[<#F8F8F2></> {{ if .Error }}{{ .Error }}{{ else }}{{ if .Venv }}<#8AFF80>{{ .Venv }}</>{{ if .Full }} | {{ end }}{{ end }}{{ if .Full }}{{ .Full }}{{ end }}{{ end }}]",
+          "type": "python"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "foreground": "#FF4500",
+          "style": "plain",
+          "template": "└─",
+          "type": "text"
+        },
+        {
+          "style": "diamond",
+          "template": "<#FFCA80>[#]</>",
+          "type": "root"
+        },
+        {
+          "foreground": "#8AFF80",
+          "foreground_templates": [
+            "{{ if gt .Code 0 }}#CC2200{{ end }}"
+          ],
+          "properties": {
+            "always_enabled": true
+          },
+          "style": "diamond",
+          "template": "[{{ if gt .Code 0 }}</> exit {{ .Code }}{{ else }} nominal{{ end }}] ",
+          "type": "status"
+        }
+      ],
+      "type": "prompt"
+    }
+  ],
+  "final_space": true,
+  "secondary_prompt": {
+    "background": "transparent",
+    "template": " "
+  },
+  "valid_line": {
+    "background": "transparent",
+    "template": "> "
+  },
+  "error_line": {
+    "background": "transparent",
+    "template": "<#CC2200></> "
+  },
+  "version": 4
+}

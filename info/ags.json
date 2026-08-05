@@ -1,0 +1,10 @@
+{
+  "name": "ags",
+  "binary": "/usr/bin/ags",
+  "version": "ags version 3.1.0",
+  "package_version": "",
+  "description": "",
+  "config_dirs": ["~/.config/ags","/usr/share/ags"],
+  "running_processes": ["253833 bash ./toolinfo.sh ags -o info/ags.json","253913 bash ./toolinfo.sh ags -o info/ags.json"],
+  "installed_files": []
+}

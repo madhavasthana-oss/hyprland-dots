@@ -1,0 +1,470 @@
+#!/usr/bin/env bash
+# install — hyprland-dots installer (Arch / CachyOS)
+# Packages from requirements.txt, optional AUR deps, config sync, SDDM greeter.
+#
+# Usage:
+#   ./install                 # packages (full) + configs + sddm
+#   ./install --core          # skip OPTIONAL packages from requirements.txt
+#   ./install --packages      # packages only
+#   ./install --configs       # configs only (hypr, fuzzel, monoshell, …)
+#   ./install --sddm          # SDDM greeter theme only
+#   ./install --no-sddm       # skip SDDM step
+#   ./install --no-configs    # skip config sync
+#   ./install --dry-run       # print actions, do not install
+#   ./install -h | --help
+set -euo pipefail
+
+DOTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REQ_FILE="${DOTS_ROOT}/requirements.txt"
+SCRIPTS="${DOTS_ROOT}/scripts/bash"
+CONFIG_SRC="${DOTS_ROOT}/.config"
+LIVE_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+# ── palette (soft mono for terminal output) ──────────────────────────
+RESET='\033[0m'
+BOLD='\033[1m'
+DIM='\033[2m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+FG='\033[38;5;252m'
+
+# ── flags ────────────────────────────────────────────────────────────
+DO_PACKAGES=1
+DO_CONFIGS=1
+DO_SDDM=1
+CORE_ONLY=0
+DRY_RUN=0
+MODE=full   # full | packages | configs | sddm
+
+usage() {
+  sed -n '2,16p' "$0" | sed -n 's/^# \{0,1\}//p'
+  exit 0
+}
+
+log()  { echo -e "${BOLD}${FG}==>${RESET} $*"; }
+ok()   { echo -e "  ${GREEN}✓${RESET} $*"; }
+warn() { echo -e "  ${YELLOW}!${RESET} $*"; }
+dim()  { echo -e "  ${DIM}$*${RESET}"; }
+die()  { echo -e "${RED}error:${RESET} $*" >&2; exit 1; }
+
+need_root() {
+  if [[ $EUID -ne 0 ]]; then
+    if command -v sudo >/dev/null 2>&1; then
+      if [[ "$DRY_RUN" -eq 1 ]]; then
+        echo "sudo $*"
+      else
+        sudo "$@"
+      fi
+    else
+      die "need root for: $*"
+    fi
+  else
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+      echo "$*"
+    else
+      "$@"
+    fi
+  fi
+}
+
+# ── parse args ───────────────────────────────────────────────────────
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help) usage ;;
+    --dry-run) DRY_RUN=1 ;;
+    --core) CORE_ONLY=1 ;;
+    --packages)
+      MODE=packages
+      DO_PACKAGES=1; DO_CONFIGS=0; DO_SDDM=0
+      ;;
+    --configs)
+      MODE=configs
+      DO_PACKAGES=0; DO_CONFIGS=1; DO_SDDM=0
+      ;;
+    --sddm)
+      MODE=sddm
+      DO_PACKAGES=0; DO_CONFIGS=0; DO_SDDM=1
+      ;;
+    --no-sddm) DO_SDDM=0 ;;
+    --no-configs) DO_CONFIGS=0 ;;
+    --no-packages) DO_PACKAGES=0 ;;
+    *)
+      die "unknown option: $1 (try --help)"
+      ;;
+  esac
+  shift
+done
+
+# ── banner ───────────────────────────────────────────────────────────
+echo -e "${FG}${BOLD}"
+cat <<'EOF'
+  hyprland-dots
+EOF
+echo -e "${RESET}${DIM}  installer · ${DOTS_ROOT}${RESET}"
+echo
+
+[[ -f "$REQ_FILE" ]] || die "requirements.txt not found at $REQ_FILE"
+
+# ── distro check ─────────────────────────────────────────────────────
+if [[ "$DO_PACKAGES" -eq 1 ]]; then
+  if ! command -v pacman >/dev/null 2>&1; then
+    die "pacman not found — this installer targets Arch Linux / CachyOS"
+  fi
+fi
+
+# ── package helpers ──────────────────────────────────────────────────
+aur_helper() {
+  if command -v paru >/dev/null 2>&1; then
+    echo paru
+  elif command -v yay >/dev/null 2>&1; then
+    echo yay
+  else
+    echo ""
+  fi
+}
+
+is_installed() {
+  pacman -Q "$1" &>/dev/null
+}
+
+in_repos() {
+  pacman -Si "$1" &>/dev/null
+}
+
+resolve_pkg() {
+  local pkg="$1"
+  case "$pkg" in
+    oh-my-posh-git)
+      if is_installed oh-my-posh || is_installed oh-my-posh-bin || is_installed oh-my-posh-git; then
+        echo ""
+      elif in_repos oh-my-posh; then
+        echo "oh-my-posh"
+      else
+        echo "oh-my-posh-git"
+      fi
+      ;;
+    *)
+      echo "$pkg"
+      ;;
+  esac
+}
+
+# Collect repo + AUR packages from requirements.txt
+# CORE_ONLY=1 stops at the OPTIONAL section comment.
+collect_packages() {
+  local in_optional=0
+  REPO_PKGS=()
+  AUR_PKGS=()
+  SKIPPED=()
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line#"${line%%[![:space:]]*}"}"
+    line="${line%"${line##*[![:space:]]}"}"
+    [[ -z "$line" ]] && continue
+
+    if [[ "$line" =~ ^# ]]; then
+      if [[ "$line" =~ OPTIONAL ]]; then
+        in_optional=1
+      fi
+      continue
+    fi
+
+    if [[ "$CORE_ONLY" -eq 1 && "$in_optional" -eq 1 ]]; then
+      continue
+    fi
+
+    if [[ "$line" =~ ^@aur[[:space:]]+ ]]; then
+      local aur_pkg
+      aur_pkg="$(awk '{print $2}' <<<"$line")"
+      [[ -n "$aur_pkg" ]] || continue
+      if is_installed "$aur_pkg"; then
+        SKIPPED+=("$aur_pkg (already installed)")
+      else
+        AUR_PKGS+=("$aur_pkg")
+      fi
+      continue
+    fi
+
+    [[ "$line" =~ ^@ ]] && continue
+
+    local resolved
+    resolved="$(resolve_pkg "$line")"
+    if [[ -z "$resolved" ]]; then
+      SKIPPED+=("$line (already satisfied)")
+      continue
+    fi
+
+    if is_installed "$resolved"; then
+      SKIPPED+=("$resolved (already installed)")
+      continue
+    fi
+
+    if in_repos "$resolved"; then
+      REPO_PKGS+=("$resolved")
+    else
+      AUR_PKGS+=("$resolved")
+    fi
+  done < "$REQ_FILE"
+}
+
+resolve_provider_conflicts() {
+  local want_pw_jack=0
+  local p
+  for p in "${REPO_PKGS[@]}"; do
+    [[ "$p" == "pipewire-jack" ]] && want_pw_jack=1
+  done
+  [[ "$want_pw_jack" -eq 1 ]] || return 0
+  is_installed jack2 || return 0
+
+  warn "pipewire-jack conflicts with jack2 — removing jack2 (PipeWire provides JACK)"
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    echo "sudo pacman -Rdd --noconfirm jack2"
+    return 0
+  fi
+  need_root pacman -Rdd --noconfirm jack2
+  ok "removed jack2"
+}
+
+install_packages() {
+  if [[ "$CORE_ONLY" -eq 1 ]]; then
+    log "Collecting packages from requirements.txt (core only)"
+  else
+    log "Collecting packages from requirements.txt"
+  fi
+  collect_packages
+
+  if [[ ${#SKIPPED[@]} -gt 0 ]]; then
+    dim "already present: ${#SKIPPED[@]} package(s)"
+  fi
+
+  if [[ ${#REPO_PKGS[@]} -eq 0 && ${#AUR_PKGS[@]} -eq 0 ]]; then
+    ok "all required packages already installed"
+    return 0
+  fi
+
+  if [[ ${#REPO_PKGS[@]} -gt 0 ]]; then
+    resolve_provider_conflicts
+
+    log "Installing ${#REPO_PKGS[@]} package(s) via pacman"
+    dim "${REPO_PKGS[*]}"
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+      echo "sudo pacman -S --needed --noconfirm ${REPO_PKGS[*]}"
+    else
+      need_root pacman -S --needed --noconfirm "${REPO_PKGS[@]}"
+    fi
+    ok "pacman packages installed"
+  fi
+
+  if [[ ${#AUR_PKGS[@]} -gt 0 ]]; then
+    local helper
+    helper="$(aur_helper)"
+    if [[ -z "$helper" ]]; then
+      warn "AUR packages needed but no yay/paru found:"
+      for p in "${AUR_PKGS[@]}"; do
+        echo "    - $p"
+      done
+      warn "install an AUR helper, then re-run: ./install --packages"
+      return 0
+    fi
+    log "Installing ${#AUR_PKGS[@]} AUR package(s) via $helper"
+    dim "${AUR_PKGS[*]}"
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+      echo "$helper -S --needed --noconfirm ${AUR_PKGS[*]}"
+    else
+      "$helper" -S --needed --noconfirm "${AUR_PKGS[@]}"
+    fi
+    ok "AUR packages installed"
+  fi
+}
+
+# ── config sync ──────────────────────────────────────────────────────
+# Trees under .config/ that map 1:1 into ~/.config/
+CONFIG_DIRS=(
+  hypr
+  fuzzel
+  quickshell
+  ghostty
+  kitty
+  alacritty
+  wezterm
+  nvim
+  oh-my-posh
+  fastfetch
+  zsh
+  fish
+  mako
+  color-schemes
+  rofi
+  sddm
+)
+
+CONFIG_FILES=(
+  dolphinrc
+  kdeglobals
+)
+
+sync_dir() {
+  local name="$1"
+  local src="${CONFIG_SRC}/${name}"
+  local dst="${LIVE_CONFIG}/${name}"
+
+  if [[ ! -d "$src" ]]; then
+    dim "skip ${name}/ (not in dots)"
+    return 0
+  fi
+
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    echo "rsync -a --delete ${src}/ ${dst}/"
+    return 0
+  fi
+
+  mkdir -p "$dst"
+  rsync -a --delete "${src}/" "${dst}/"
+  ok "synced ${name}/"
+}
+
+sync_file() {
+  local name="$1"
+  local src="${CONFIG_SRC}/${name}"
+  local dst="${LIVE_CONFIG}/${name}"
+
+  if [[ ! -f "$src" ]]; then
+    dim "skip ${name} (not in dots)"
+    return 0
+  fi
+
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    echo "install -m 644 ${src} ${dst}"
+    return 0
+  fi
+
+  mkdir -p "$(dirname "$dst")"
+  install -m 644 "$src" "$dst"
+  ok "synced ${name}"
+}
+
+install_configs() {
+  log "Syncing configs: ${CONFIG_SRC} → ${LIVE_CONFIG}"
+  warn "rsync --delete is used for dirs — live-only files under those trees are removed"
+
+  if [[ "$DRY_RUN" -eq 0 ]]; then
+    mkdir -p "$LIVE_CONFIG"
+  fi
+
+  local d f
+  for d in "${CONFIG_DIRS[@]}"; do
+    sync_dir "$d"
+  done
+  for f in "${CONFIG_FILES[@]}"; do
+    sync_file "$f"
+  done
+
+  if [[ -x "${SCRIPTS}/configure_fuzzel.sh" && "$DRY_RUN" -eq 0 ]]; then
+    chmod +x "${LIVE_CONFIG}/fuzzel/launch.sh" 2>/dev/null || true
+  fi
+
+  # Ensure wallust / color loaders are executable
+  if [[ "$DRY_RUN" -eq 0 ]]; then
+    chmod +x "${LIVE_CONFIG}/quickshell/monoshell/utils/scripts/"*.sh 2>/dev/null || true
+  fi
+
+  if [[ "$DRY_RUN" -eq 0 ]] && command -v hyprctl >/dev/null 2>&1; then
+    if hyprctl -j monitors &>/dev/null; then
+      hyprctl reload && ok "hyprctl reload"
+    else
+      dim "hyprland not running — skip reload"
+    fi
+  fi
+
+  ok "configs applied"
+}
+
+# SDDM: install greeter theme from dots (astronaut theme config)
+install_sddm() {
+  local conf_src="${CONFIG_SRC}/sddm"
+  local theme_name="sddm-astronaut-theme"
+  local theme_dir="/usr/share/sddm/themes/${theme_name}"
+  # Prefer neutral conf name if present; fall back to legacy filename in tree
+  local conf_file=""
+  if [[ -f "${conf_src}/theme.conf" ]]; then
+    conf_file="${conf_src}/theme.conf"
+  elif [[ -f "${conf_src}/ash.conf" ]]; then
+    conf_file="${conf_src}/ash.conf"
+  else
+    # any *.conf in sddm/
+    conf_file="$(find "$conf_src" -maxdepth 1 -name '*.conf' -type f 2>/dev/null | head -1 || true)"
+  fi
+
+  log "Configuring SDDM greeter (${theme_name})"
+
+  if [[ -z "$conf_file" || ! -f "$conf_file" ]]; then
+    warn "no SDDM conf under ${conf_src} — skip"
+    return 0
+  fi
+
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    echo "install ${conf_file} → ${theme_dir}/Themes/"
+    return 0
+  fi
+
+  if ! pacman -Q sddm-astronaut-theme &>/dev/null; then
+    warn "sddm-astronaut-theme not installed"
+    local helper
+    helper="$(aur_helper)"
+    if [[ -n "$helper" ]]; then
+      log "Installing sddm-astronaut-theme via $helper"
+      "$helper" -S --needed --noconfirm sddm-astronaut-theme
+    else
+      die "install sddm-astronaut-theme first (AUR), then re-run ./install --sddm"
+    fi
+  fi
+
+  [[ -d "$theme_dir" ]] || die "theme dir missing: $theme_dir"
+
+  local base
+  base="$(basename "$conf_file")"
+  need_root install -d -m 755 "${theme_dir}/Themes"
+  need_root install -m 644 "$conf_file" "${theme_dir}/Themes/${base}"
+  if [[ -f "${theme_dir}/metadata.desktop" ]]; then
+    need_root sed -i "s|^ConfigFile=.*|ConfigFile=Themes/${base}|" "${theme_dir}/metadata.desktop"
+  fi
+
+  # Font used by greeter (from monoshell assets if present)
+  local font_src="${CONFIG_SRC}/quickshell/monoshell/assets/fonts/KogniGear.ttf"
+  if [[ -f "$font_src" ]]; then
+    need_root install -d -m 755 "${theme_dir}/Fonts"
+    need_root install -m 644 "$font_src" "${theme_dir}/Fonts/KogniGear.ttf" 2>/dev/null || true
+  fi
+
+  ok "SDDM greeter ready (log out / reboot to see it)"
+}
+
+# ── main ─────────────────────────────────────────────────────────────
+echo -e "${DIM}mode: packages=${DO_PACKAGES} configs=${DO_CONFIGS} sddm=${DO_SDDM} core_only=${CORE_ONLY} dry_run=${DRY_RUN}${RESET}"
+echo
+
+if [[ "$DO_PACKAGES" -eq 1 ]]; then
+  install_packages
+  echo
+fi
+
+if [[ "$DO_CONFIGS" -eq 1 ]]; then
+  install_configs
+  echo
+fi
+
+if [[ "$DO_SDDM" -eq 1 ]]; then
+  install_sddm
+  echo
+fi
+
+echo -e "${BOLD}${FG}=== done ===${RESET}"
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  warn "dry-run only — nothing was installed"
+else
+  ok "install finished"
+  dim "Hypr: Super+A launcher · shell: quickshell -c monoshell"
+  dim "SDDM: log out or reboot for greeter"
+fi
+echo

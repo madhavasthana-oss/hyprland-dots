@@ -1,0 +1,76 @@
+#compdef satty
+
+autoload -U is-at-least
+
+_satty() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" : \
+'-c+[Path to the config file. Otherwise will be read from XDG_CONFIG_DIR/satty/config.toml]:CONFIG:_default' \
+'--config=[Path to the config file. Otherwise will be read from XDG_CONFIG_DIR/satty/config.toml]:CONFIG:_default' \
+'-f+[Path to input image or '\''-'\'' to read from stdin]:FILENAME:_default' \
+'--filename=[Path to input image or '\''-'\'' to read from stdin]:FILENAME:_default' \
+'--fullscreen=[Start Satty in fullscreen mode. Since 0.20.1, takes optional parameter. --fullscreen without parameter is equivalent to --fullscreen current. Mileage may vary depending on compositor]::FULLSCREEN:(all current-screen)' \
+'--resize=[Resize to coordinates or use smart mode (0.20.1). --resize without parameter is equivalent to --resize smart \[possible values\: smart, WxH.\]]::MODE|WIDTHxHEIGHT:_default' \
+'-o+[Filename to use for saving action or '\''-'\'' to print to stdout. Omit to disable saving to file. Might contain format specifiers\: <https\://docs.rs/chrono/latest/chrono/format/strftime/index.html>. Since 0.20.0, can contain tilde (~) for home dir]:OUTPUT_FILENAME:_default' \
+'--output-filename=[Filename to use for saving action or '\''-'\'' to print to stdout. Omit to disable saving to file. Might contain format specifiers\: <https\://docs.rs/chrono/latest/chrono/format/strftime/index.html>. Since 0.20.0, can contain tilde (~) for home dir]:OUTPUT_FILENAME:_default' \
+'*--early-exit=[Exit directly after save action. 0.21.0\: changed to accommodate different triggers]::EARLY_EXIT:(all copy save save-as)' \
+'--corner-roundness=[Draw corners of rectangles round if the value is greater than 0 (Defaults to 12) (0 disables rounded corners)]:CORNER_ROUNDNESS:_default' \
+'--initial-tool=[Select the tool on startup]:TOOL:(pointer crop line arrow rectangle ellipse text marker blur highlight brush)' \
+'--init-tool=[Select the tool on startup]:TOOL:(pointer crop line arrow rectangle ellipse text marker blur highlight brush)' \
+'--copy-command=[Configure the command to be called on copy, for example \`wl-copy\`]:COPY_COMMAND:_default' \
+'--annotation-size-factor=[Increase or decrease the size of the annotations]:ANNOTATION_SIZE_FACTOR:_default' \
+'*--actions-on-enter=[Actions to perform when pressing Enter]:ACTIONS_ON_ENTER:(save-to-clipboard save-to-file save-to-file-as copy-filepath-to-clipboard exit)' \
+'*--actions-on-escape=[Actions to perform when pressing Escape]:ACTIONS_ON_ESCAPE:(save-to-clipboard save-to-file save-to-file-as copy-filepath-to-clipboard exit)' \
+'*--actions-on-right-click=[Actions to perform when hitting the copy Button]:ACTIONS_ON_RIGHT_CLICK:(save-to-clipboard save-to-file save-to-file-as copy-filepath-to-clipboard exit)' \
+'--font-family=[Font family to use for text annotations]:FONT_FAMILY:_default' \
+'--font-style=[Font style to use for text annotations]:FONT_STYLE:_default' \
+'--primary-highlighter=[The primary highlighter to use, secondary is accessible with CTRL]:PRIMARY_HIGHLIGHTER:(block freehand)' \
+'--brush-smooth-history-size=[Experimental feature\: How many points to use for the brush smoothing algorithm. 0 disables smoothing. The default value is 0 (disabled)]:BRUSH_SMOOTH_HISTORY_SIZE:_default' \
+'--zoom-factor=[Experimental feature (0.20.1)\: The zoom factor to use for the image. 1.0 means no zoom. defaults to 1.1]:ZOOM_FACTOR:_default' \
+'--pan-step-size=[Experimental feature (0.20.1)\: The pan step size to use when panning with arrow keys. defaults to 50.0]:PAN_STEP_SIZE:_default' \
+'--text-move-length=[Experimental feature (0.20.1)\: The length to move the text when using the arrow keys. defaults to 50.0]:TEXT_MOVE_LENGTH:_default' \
+'--input-scale=[Experimental feature (0.20.1)\: Scale the default window size to fit different displays. Note that before 0.21.0 this is ignored with explicit resize]:INPUT_SCALE:_default' \
+'--title=[Experimental feature (0.21.0)\: Set window title]:TITLE:_default' \
+'--app-id=[Experimental feature (0.21.0)\: Set toplevel app_id. Note that this has to match D-Bus well known name format, otherwise GTK does not accept it]:APP_ID:_default' \
+'--action-on-enter=[Action to perform when pressing Enter. Preferably use the \`actions_on_enter\` option instead]:ACTION_ON_ENTER:(save-to-clipboard save-to-file save-to-file-as copy-filepath-to-clipboard exit)' \
+'--man[Show manpage. Pipe to man -l -]' \
+'--license[Show license]' \
+'--floating-hack[Try to enforce floating (0.20.1). Mileage may vary depending on compositor]' \
+'--save-after-copy[After copying the screenshot, save it to a file as well Preferably use the \`action_on_copy\` option instead]' \
+'--auto-copy[Automatically copy to clipboard after every annotation change (0.21.0)]' \
+'-d[Hide toolbars by default]' \
+'--default-hide-toolbars[Hide toolbars by default]' \
+'--focus-toggles-toolbars[Experimental (since 0.20.0)\: Whether to toggle toolbars based on focus. Doesn'\''t affect initial state]' \
+'--default-fill-shapes[Experimental feature (since 0.20.0)\: Fill shapes by default]' \
+'--disable-notifications[Disable notifications]' \
+'--profile-startup[Print profiling]' \
+'--no-window-decoration[Disable the window decoration (title bar, borders, etc.) Please note that the compositor has the final say in this. Requires xdg-decoration-unstable-v1]' \
+'--right-click-copy[Right click to copy. Preferably use the \`action_on_right_click\` option instead]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'-V[Print version]' \
+'--version[Print version]' \
+&& ret=0
+}
+
+(( $+functions[_satty_commands] )) ||
+_satty_commands() {
+    local commands; commands=()
+    _describe -t commands 'satty commands' commands "$@"
+}
+
+if [ "$funcstack[1]" = "_satty" ]; then
+    _satty "$@"
+else
+    compdef _satty satty
+fi

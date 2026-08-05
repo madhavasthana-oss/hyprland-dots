@@ -1,0 +1,216 @@
+/* ---
+ * Monoshell rofi theme — Ash monochrome
+ * Mirrors quickshell/monoshell Theme.qml
+ * bgPrimary #121212 | bgSurface #1A1A1A | bgElevated #242424
+ * accent #C8C8C8 | accentWarm #A3A3A3 | borderIdle #333333
+ * bgConsole #161616 @ ~0.95
+ * --- */
+
+* {
+    bg-primary:   #121212;
+    bg-surface:   #1A1A1A;
+    bg-elevated:  #242424;
+    bg-console:   #161616F2;
+
+    accent:       #C8C8C8;
+    accent-warm:  #A3A3A3;
+    accent-soft:  #737373;
+    glow:         #555555;
+
+    text-primary:   #E5E5E5;
+    text-secondary: #A3A3A3;
+    text-muted:     #6B6B6B;
+    text-dim:       #454545;
+
+    state-critical: #E8E8E8;
+    state-safe:     #8A8A8A;
+    state-warning:  #B8B8B8;
+
+    border-active:  #C8C8C8;
+    border-idle:    #333333;
+
+    transparent:      #00000000;
+    background-color: @transparent;
+    text-color:       @text-secondary;
+    border-color:     @border-idle;
+
+    spacing: 6px;
+}
+
+window {
+    transparency:     "real";
+    location:         center;
+    anchor:           center;
+    width:            520px;
+    x-offset:         0px;
+    y-offset:         0px;
+
+    background-color: @bg-console;
+    border:           2px solid;
+    border-color:     @border-idle;
+    border-radius:    10px;
+    padding:          12px;
+}
+
+mainbox {
+    background-color: @transparent;
+    spacing:          10px;
+    children:         [ inputbar, message, listview, mode-switcher ];
+}
+
+inputbar {
+    background-color: @bg-surface;
+    border:           1px solid;
+    border-color:     @border-idle;
+    border-radius:    6px;
+    padding:          10px 12px;
+    spacing:          8px;
+    children:         [ prompt, entry, case-indicator ];
+}
+
+prompt {
+    background-color: @transparent;
+    text-color:       @accent;
+    font:             "KogniGear 12";
+}
+
+entry {
+    background-color: @transparent;
+    text-color:       @text-primary;
+    placeholder:      "search…";
+    placeholder-color: @text-dim;
+    cursor:           @accent;
+}
+
+case-indicator {
+    background-color: @transparent;
+    text-color:       @text-muted;
+}
+
+listview {
+    background-color: @transparent;
+    columns:          1;
+    lines:            10;
+    cycle:            true;
+    dynamic:          true;
+    scrollbar:        true;
+    layout:           vertical;
+    fixed-height:     true;
+    spacing:          4px;
+    padding:          2px 0 0 0;
+}
+
+scrollbar {
+    background-color: @bg-surface;
+    handle-color:     @accent;
+    handle-width:     4px;
+    border:           0;
+    margin:           0 0 0 6px;
+}
+
+element {
+    background-color: @bg-surface;
+    text-color:       @text-secondary;
+    border:           1px solid;
+    border-color:     @transparent;
+    border-radius:    5px;
+    padding:          8px 10px;
+    spacing:          10px;
+    children:         [ element-icon, element-text ];
+}
+
+element-icon {
+    background-color: @transparent;
+    size:             1.4em;
+    cursor:           inherit;
+}
+
+element-text {
+    background-color: @transparent;
+    text-color:       inherit;
+    cursor:           inherit;
+    vertical-align:   0.5;
+    highlight:        bold underline #C8C8C8;
+}
+
+element normal.normal,
+element alternate.normal {
+    background-color: @bg-surface;
+    text-color:       @text-secondary;
+    border-color:     @transparent;
+}
+
+element normal.urgent,
+element alternate.urgent {
+    background-color: @bg-surface;
+    text-color:       @state-critical;
+}
+
+element normal.active,
+element alternate.active {
+    background-color: @bg-elevated;
+    text-color:       @state-safe;
+}
+
+element selected.normal {
+    background-color: @bg-elevated;
+    text-color:       @text-primary;
+    border-color:     @border-active;
+}
+
+element selected.urgent {
+    background-color: @bg-elevated;
+    text-color:       @state-critical;
+    border-color:     @state-critical;
+}
+
+element selected.active {
+    background-color: @bg-elevated;
+    text-color:       @state-safe;
+    border-color:     @state-safe;
+}
+
+message {
+    background-color: @bg-surface;
+    border:           1px solid;
+    border-color:     @border-idle;
+    border-radius:    5px;
+    padding:          8px 10px;
+}
+
+textbox {
+    background-color: @transparent;
+    text-color:       @text-secondary;
+}
+
+error-message {
+    background-color: @bg-console;
+    border:           2px solid;
+    border-color:     @state-critical;
+    border-radius:    6px;
+    padding:          12px;
+}
+
+mode-switcher {
+    background-color: @transparent;
+    spacing:          6px;
+    border:           1px 0 0 0;
+    border-color:     @border-idle;
+    padding:          8px 0 0 0;
+}
+
+button {
+    background-color: @bg-surface;
+    text-color:       @text-dim;
+    border:           1px solid;
+    border-color:     @border-idle;
+    border-radius:    5px;
+    padding:          6px 10px;
+    font:             "KogniGear 10";
+}
+
+button selected {
+    background-color: @bg-elevated;
+    text-color:       @accent;
+    border-color:     @border-active;
+}

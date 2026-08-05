@@ -1,0 +1,154 @@
+# hyprland-dots — system package requirements
+# Target: Arch Linux / CachyOS (pacman). Package names may differ on other distros.
+#
+# Install (official repos only):
+#   sudo pacman -S --needed $(grep -vE '^\s*(#|$|@)' requirements.txt)
+#
+# Lines starting with # are comments.
+# Lines starting with @aur are AUR-only (install with yay/paru), e.g.:
+#   yay -S $(grep '^@aur ' requirements.txt | awk '{print $2}')
+#
+# This is NOT a Python pip requirements file.
+# CORE — compositor session (required)
+
+hyprland
+awww
+hypridle
+hyprlock
+hyprpicker
+xdg-desktop-portal-hyprland
+xdg-desktop-portal
+xdg-desktop-portal-gtk
+qt5-wayland
+qt6-wayland
+polkit-kde-agent
+libnotify
+
+
+# SHELL / BAR — Doomshell (Quickshell)
+# On CachyOS: quickshell or quickshell-git both work.
+# Prefer: quickshell (repo) or quickshell-git (AUR / newer).
+
+quickshell
+qt6-base
+qt6-declarative
+
+
+# APP LAUNCHER + DMENU (fuzzel — replaces rofi)
+#   Super+A  → app launcher (~/.config/fuzzel/launch.sh)
+#   Super+.  → emoji picker (hyprland/scripts/fuzzel-emoji.sh)
+#   Super+V  → cliphist + fuzzel
+
+wl-clipboard
+cliphist
+fuzzel
+
+
+# SCREENSHOTS + ANNOTATE
+#   grim / slurp capture; satty annotate (Super+Shift+Print)
+
+grim
+slurp
+satty
+
+
+# SCREEN RECORDING + SHARE
+#   wf-recorder keybinds; portal for browsers/OBS/Discord
+
+wf-recorder
+
+
+# AUDIO (PipeWire stack + mixer + effects)
+#   wpctl keybinds; easyeffects started in execs.lua
+
+pipewire
+pipewire-pulse
+pipewire-alsa
+# Conflicts with jack2 — install removes jack2 first; or: sudo pacman -S pipewire-jack
+pipewire-jack
+wireplumber
+pavucontrol
+easyeffects
+playerctl
+
+
+# INPUT / HARDWARE HELPERS
+
+brightnessctl
+bc
+geoclue
+gnome-keyring
+
+
+# WALLPAPERS
+#   Static + animated GIF: awww (above) — transition animations on switch
+#   Live video walls (wallpaper-slayer.sh --live): mpvpaper
+
+mpvpaper
+ffmpeg
+
+
+# APPS used by keybinds / Doomshell console (primary picks)
+# variables.lua falls back through many alternatives; these are the ones
+# this mod actually launches by default / UI buttons.
+
+ghostty
+kitty
+alacritty
+dolphin
+firefox
+code
+neovim
+pavucontrol
+btop
+bottom
+pciutils
+
+
+# TERMINAL / PROMPT / FETCH (configs shipped in .config/)
+
+zsh
+fastfetch
+oh-my-posh-git
+
+
+# FONTS (Quickshell assets also ship JetBrains Mono Nerd locally)
+
+ttf-fira-code
+otf-font-awesome
+noto-fonts
+noto-fonts-emoji
+
+
+# CURSOR theme referenced in execs.lua
+#   hyprctl setcursor Bibata-Modern-Classic 24
+
+@aur bibata-cursor-theme
+
+
+# DISPLAY MANAGER (optional — configs under .config/sddm/)
+
+sddm
+
+
+# UTILITIES used by scripts (snip_to_search, toolinfo, etc.)
+
+jq
+curl
+xdg-utils
+util-linux
+
+# OPTIONAL — nice-to-have / fallbacks in variables.lua
+
+foot
+wezterm
+chromium
+kate
+libreoffice-fresh
+nwg-displays
+swappy
+spotify-launcher
+wtype
+
+# for dolphin and kdeglobals
+plasma-integration

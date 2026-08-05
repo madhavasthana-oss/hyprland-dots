@@ -1,0 +1,38 @@
+/* ---
+ * DEPRECATED: app launcher / emoji moved to fuzzel.
+ *   Super+A  → ~/.config/fuzzel/launch.sh
+ *   Super+.  → hyprland/scripts/fuzzel-emoji.sh
+ *   Theme:   ~/.config/fuzzel/fuzzel.ini
+ * launch.sh in this directory now forwards to fuzzel.
+ * --- */
+
+configuration {
+    modes:                      "drun,run,window,emoji";
+    show-icons:                 true;
+    icon-theme:                 "breeze-dark";
+    display-drun:               "APPS";
+    display-run:                "RUN";
+    display-window:             "WINDOW";
+    drun-display-format:        "{name}";
+    window-format:              "{w} · {c} · {t}";
+    font:                       "Fira Code 12";
+    terminal:                   "ghostty";
+    sorting-method:             "fzf";
+    sort:                       true;
+    case-sensitive:             false;
+    cycle:                      true;
+    sidebar-mode:               true;
+    hover-select:               false;
+    matching:                   "fuzzy";
+    tokenize:                   true;
+    disable-history:            false;
+    /* -1 = auto DPI (do not hardcode 1) */
+    dpi:                        -1;
+    location:                   0;
+    fixed-num-lines:            true;
+    /* Leave kb-* at defaults --- custom binds like Control+j/k collide
+     * with accept-entry / remove-to-eol and show
+     * "Binding X is already bound." */
+}
+
+@theme "themes/ash"

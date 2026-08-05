@@ -1,0 +1,138 @@
+# ─────────────────────────────────────────────────────────────
+#  Monoshell · mako (Ash monochrome)
+#  Mirrors quickshell/monoshell Theme.qml
+#
+#  bgPrimary #121212 | bgSurface #1A1A1A | bgElevated #242424
+#  bgConsole #161616 @ ~0.95 opacity
+#  accent #C8C8C8 | accentWarm #A3A3A3 | borderIdle #333333
+#  textPrimary #E5E5E5 | textSecondary #A3A3A3
+#  stateCritical #E8E8E8 | stateSafe #8A8A8A
+#
+#  Reload:   makoctl reload
+#  DND:      makoctl mode -a do-not-disturb
+#            makoctl mode -r do-not-disturb
+# ─────────────────────────────────────────────────────────────
+
+# ── global ──────────────────────────────────────────────────
+max-history=50
+sort=-time
+max-visible=5
+default-timeout=6000
+ignore-timeout=0
+icons=1
+max-icon-size=48
+icon-location=left
+icon-border-radius=4
+markup=1
+actions=1
+history=1
+layer=overlay
+anchor=top-right
+group-by=app-name
+
+# ── interactions ────────────────────────────────────────────
+on-button-left=invoke-default-action
+on-button-right=dismiss
+on-button-middle=dismiss-all
+on-touch=dismiss
+
+# ── layout ──────────────────────────────────────────────────
+width=360
+height=140
+outer-margin=16
+margin=8
+padding=12,14
+border-size=2
+border-radius=8
+
+# ── palette (bgConsole @ ~0.95) ─────────────────────────────
+font=Fira Code 11
+background-color=#161616F2
+text-color=#A3A3A3FF
+border-color=#333333FF
+progress-color=over #C8C8C8FF
+
+format=<span foreground="#E5E5E5"><b>%s</b></span>\n<span foreground="#A3A3A3">%b</span>
+text-alignment=left
+
+# ── grouped stack header ────────────────────────────────────
+[grouped]
+format=<span foreground="#E5E5E5"><b>(%g) %s</b></span>\n<span foreground="#A3A3A3">%b</span>
+
+[group-index=0]
+
+# ── urgency: low ────────────────────────────────────────────
+[urgency=low]
+border-color=#333333FF
+text-color=#6B6B6BFF
+background-color=#121212E6
+default-timeout=4000
+format=<span foreground="#A3A3A3"><b>%s</b></span>\n<span foreground="#6B6B6B">%b</span>
+
+# ── urgency: normal ─────────────────────────────────────────
+[urgency=normal]
+border-color=#333333FF
+text-color=#A3A3A3FF
+background-color=#161616F2
+default-timeout=6000
+
+# ── urgency: critical ───────────────────────────────────────
+[urgency=critical]
+border-color=#E8E8E8FF
+border-size=3
+text-color=#E5E5E5FF
+background-color=#242424FF
+default-timeout=0
+ignore-timeout=1
+format=<span foreground="#E8E8E8"><b>⚠ %s</b></span>\n<span foreground="#A3A3A3">%b</span>
+progress-color=over #E8E8E8FF
+
+# ── app polish ──────────────────────────────────────────────
+[app-name="Monoshell"]
+border-color=#C8C8C8FF
+format=<span foreground="#E5E5E5"><b>◆ %s</b></span>\n<span foreground="#A3A3A3">%b</span>
+
+[app-name="Quickshell"]
+border-color=#C8C8C8FF
+default-timeout=4000
+format=<span foreground="#E5E5E5"><b>◆ %s</b></span>\n<span foreground="#A3A3A3">%b</span>
+
+[app-name="Settings"]
+border-color=#C8C8C8FF
+default-timeout=4000
+
+[app-name="Bluetooth"]
+border-color=#C8C8C8FF
+default-timeout=4000
+
+[app-name="Network"]
+border-color=#C8C8C8FF
+default-timeout=4000
+
+[app-name="Notifications"]
+border-color=#C8C8C8FF
+default-timeout=3000
+
+[app-name="Hyprland"]
+border-color=#C8C8C8FF
+default-timeout=4000
+
+[app-name="notify-send"]
+
+[app-name="volumectl"]
+format=<span foreground="#E5E5E5"><b>%s</b></span>
+default-timeout=1500
+
+[app-name="brightnessctl"]
+format=<span foreground="#E5E5E5"><b>%s</b></span>
+default-timeout=1500
+
+# ── modes ───────────────────────────────────────────────────
+[mode=do-not-disturb]
+invisible=1
+
+[mode=dnd]
+invisible=1
+
+[mode=silent]
+invisible=1

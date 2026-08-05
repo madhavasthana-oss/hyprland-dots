@@ -1,0 +1,62 @@
+-------------------------------------------------------------
+ Ghostty keybinds  ·  Doomslayer  ·  prefix = Ctrl+B
+
+ HOW: press Ctrl+B, RELEASE it, then the action key.
+      (Not a chord — same idea as tmux prefix.)
+
+ Ctrl+B ?         command palette (search actions/binds)
+ Ctrl+B Ctrl+H    this cheat sheet in less (shell prompt)
+ Esc              cancel prefix mode
+ CLI:             ghostty +list-keybinds
+-------------------------------------------------------------
+
+  PREFIX
+    Ctrl+B            enter prefix mode (one shot)
+    Esc               cancel prefix mode
+    b  or  Ctrl+B     send real Ctrl+B to the app (after prefix)
+
+  TABS  (~ tmux windows)
+    Ctrl+B c          new tab
+    Ctrl+B n / p      next / previous tab
+    Ctrl+B l / 0      last tab
+    Ctrl+B 1 … 9      go to tab N
+    Ctrl+B ,          rename tab
+    Ctrl+B w          tab overview
+    Ctrl+B d          close whole tab (all splits in it)
+
+  WINDOWS
+    Ctrl+B Shift+c    new window
+    Ctrl+B &          close window
+
+  SPLITS  (~ tmux panes)
+    Ctrl+B h          horizontal split  (left | right)
+    Ctrl+B v          vertical split    (top / bottom)
+    Ctrl+B %          same as h
+    Ctrl+B "          same as v
+    Ctrl+B ←↓↑→       focus split
+    Ctrl+B R          resize MODE (then arrows/hjkl; Esc exits)
+    Ctrl+B Ctrl+←…→   one-shot resize
+    Ctrl+B Shift+hjkl focus split (vim)
+    Ctrl+B o / ;      next / previous split
+    Ctrl+B z          zoom / unzoom pane
+    Ctrl+B =          equalize splits
+    Ctrl+B Ctrl+←↓↑→  resize split
+
+  SEARCH / SCROLL
+    Ctrl+B f  or  /   start search
+    Ctrl+B [ / ]      page up / page down
+    Ctrl+B g / G      scroll top / bottom
+    Ctrl+B a          select all
+
+  MISC
+    Ctrl+B ?          VIEW KEYBINDS — command palette
+    Ctrl+B Ctrl+H     VIEW KEYBINDS — this cheat sheet (less)
+
+    Ctrl+B r          reload config
+    Ctrl+B Enter      toggle fullscreen
+    Ctrl+B i          terminal inspector
+
+  NOTES
+    · Shell Ctrl+D already exits a pane (EOF) — no prefix needed.
+    · Prefix+d closes the tab; prefix+& closes the OS window.
+    · h/v use tmux naming: h = side-by-side, v = stacked.
