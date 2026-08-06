@@ -275,7 +275,7 @@ Item {
         }
     }
 
-    // Notification badge --- trailing edge of center bar; opens T.S.S notifications
+    // Notification badge --- trailing edge of center bar; opens console notifications
     Item {
         id: notifBadge
         anchors.right: parent.right

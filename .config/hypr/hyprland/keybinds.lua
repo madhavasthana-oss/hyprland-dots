@@ -377,13 +377,13 @@ hl.bind(
 	hl.dsp.exec_cmd(hyprScripts .. "/fuzzel-emoji.sh both"),
 	{ description = "Utilities: Emoji picker" }
 )
--- ytmdesktop-git installs as youtube-music-desktop-app
+-- Pear Desktop (CachyOS package); youtube-music wrapper; Spotify fallback
 hl.bind(
 	"SUPER + M",
 	hl.dsp.exec_cmd(
-		"~/.config/hypr/hyprland/scripts/launch_first_available.sh 'youtube-music-desktop-app' 'youtube-music' 'spotify'"
+		"~/.config/hypr/hyprland/scripts/launch_first_available.sh 'pear-desktop' 'youtube-music' 'spotify'"
 	),
-	{ description = "App: YouTube Music" }
+	{ description = "App: YouTube Music (Pear Desktop)" }
 )
 hl.bind(
 	"SUPER + ALT + V",

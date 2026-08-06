@@ -1,11 +1,11 @@
-// NetworkFrontend.qml --- wifi list + password + rescan (T.S.S content)
+// NetworkFrontend.qml --- wifi list + password + rescan (console)
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 import Quickshell
-import "../../.."
-import "../../../utils"
+import "../../../.."
+import "../../../../utils"
 import "."
 
 Item {

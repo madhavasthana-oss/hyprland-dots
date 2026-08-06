@@ -11,7 +11,7 @@ QtObject {
     readonly property real dpiScale: primaryScreen ? 
                                          primaryScreen.devicePixelRatio : 1.0
 
-    property real customScale: -1
+    property real customScale: 1.25
 
     readonly property real resScale: primaryScreen ?
         Math.min(primaryScreen.width / 1920, primaryScreen.height / 1080) : 1.0

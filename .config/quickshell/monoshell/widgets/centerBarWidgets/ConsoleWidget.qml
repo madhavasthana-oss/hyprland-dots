@@ -1,16 +1,15 @@
-// ConsoleWidget.qml --- apps list (left) + edge controls (right): wifi/bt/settings/notifs
+// ConsoleWidget.qml --- apps list (left) + console controls (right): wifi/bt/settings/notifs
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell
 import "../.."
 import "../../utils"
-import "../../edges/rightEdge"
-import "../../edges/rightEdge/network"
-import "../../edges/rightEdge/bluetooth"
-import "../../edges/rightEdge/settings"
-import "../../edges/rightEdge/notifications"
 import "console"
+import "console/network"
+import "console/bluetooth"
+import "console/settings"
+import "console/notifications"
 
 Item {
     id: root
@@ -234,7 +233,7 @@ Item {
             }
         }
 
-        // -- RIGHT: wifi / bluetooth / settings / notifications (takes remaining width) ---
+        // -- RIGHT: console control panes (wifi / bt / settings / notifs) ---
         Item {
             id: edgeHost
             Layout.fillWidth: true
@@ -249,7 +248,7 @@ Item {
                 anchors.fill: parent
                 spacing: Tokens.spacingSm
 
-                EdgeTabs {
+                ConsoleTabs {
                     id: edgeTabs
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0

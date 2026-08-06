@@ -1,12 +1,12 @@
-// BluetoothFrontend.qml --- device list + power/scan (T.S.S content)
+// BluetoothFrontend.qml --- device list + power/scan (console)
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Bluetooth
-import "../../.."
-import "../../../utils"
+import "../../../.."
+import "../../../../utils"
 import "."
 
 Item {

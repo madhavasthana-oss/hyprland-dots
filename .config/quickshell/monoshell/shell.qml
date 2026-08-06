@@ -235,8 +235,8 @@ ShellRoot {
         }
     }
 
-    // Right-edge slide panel removed — wifi / bluetooth / settings / notifications
-    // live inside the center CONSOLE tab (see ConsoleWidget.qml).
+    // Wi‑Fi / Bluetooth / settings / notifications live under
+    // widgets/centerBarWidgets/console/ (see ConsoleWidget.qml).
 
     Component.onCompleted: Globals.releaseEdgePanel()
 }

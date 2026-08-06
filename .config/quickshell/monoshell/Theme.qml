@@ -139,6 +139,8 @@ Singleton {
     readonly property string iconScreenshot: iconThemeActions  + "view-fullscreen-symbolic.svg"
     readonly property string iconRecord:     iconThemeActions  + "media-record-symbolic.svg"
     readonly property string iconThemeApp:   iconThemeActions  + "games-config-theme-symbolic.svg"
+    readonly property string iconCaffeine:   iconThemeActions  + "system-suspend-symbolic.svg"
+    readonly property string iconIdleLock:   iconThemeActions  + "system-lock-screen-symbolic.svg"
 
     // TYPOGRAPHY --- family names only, sizes now live in Tokens
     readonly property string fontMono:    "Fira Code"

@@ -1,9 +1,9 @@
-// SettingsBackend.qml --- brightness, kbd, audio, capture tools, gnome, wallust/wallpaper
+// SettingsBackend.qml --- brightness, kbd, audio, capture tools, power inhibit, wallust/wallpaper
 import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
-import "../../.."
+import "../../../.."
 
 Item {
     id: root
@@ -19,13 +19,18 @@ Item {
     property string wallpaperHint: ""
     property bool wallScanning: false
 
+    // Power inhibit --- caffeine (no suspend) + hypridle off (no auto-lock)
+    property bool caffeineActive: false
+    property bool idleLockDisabled: false
+
     readonly property string wallustScript: Quickshell.shellDir + "/utils/scripts/load-wallust-colors.sh"
     readonly property string legacyScript:  Quickshell.shellDir + "/utils/scripts/load-legacy-colors.sh"
+    readonly property string idleToggleScript: Quickshell.shellDir + "/utils/scripts/idle-toggle.sh"
 
     ListModel { id: wallpaperModel }
     property alias wallpapers: wallpaperModel
 
-    signal requestClose()   // parent should collapse edge panel
+    signal requestClose()   // parent should close the center console panel
 
     // --- PipeWire sink (same resilience as Volume.qml) ---
     readonly property var trackedSink: Pipewire.defaultAudioSink
@@ -137,6 +142,102 @@ Item {
         root.tickAudio()
         root.scanWallpapers()
         root.queryWallpaper()
+        root.refreshPowerState()
+    }
+
+    // --- Power inhibit (hyprcaffeine + hypridle) ---
+    function refreshPowerState() {
+        caffeineQuery.running = true
+        idleQuery.running = true
+    }
+
+    function toggleCaffeine() {
+        caffeineToggle.running = true
+    }
+
+    function toggleIdleLock() {
+        idleToggle.running = true
+    }
+
+    function _parseCaffeine(text) {
+        const t = (text || "").trim()
+        return t.indexOf("hc-on") >= 0
+            || /caffeine:\s*active/i.test(t)
+    }
+
+    function _parseIdleDisabled(text) {
+        return (text || "").toUpperCase().indexOf("DISABLED") >= 0
+    }
+
+    Process {
+        id: caffeineQuery
+        // waybar JSON: class "hc-on" | "hc-off"
+        command: ["hyprcaffeine", "waybar"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.caffeineActive = root._parseCaffeine(text)
+            }
+        }
+    }
+
+    Process {
+        id: caffeineToggle
+        // toggle then print status so we can toast the new state
+        command: [
+            "bash", "-c",
+            "hyprcaffeine toggle >/dev/null 2>&1; hyprcaffeine waybar 2>/dev/null"
+        ]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.caffeineActive = root._parseCaffeine(text)
+                root.statusMsg = root.caffeineActive ? "CAFFEINE ON" : "CAFFEINE OFF"
+                Globals.toast(
+                    "Caffeine",
+                    root.caffeineActive ? "Sleep inhibited" : "Sleep allowed",
+                    "Settings"
+                )
+            }
+        }
+    }
+
+    Process {
+        id: idleQuery
+        command: ["bash", root.idleToggleScript, "--status"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.idleLockDisabled = root._parseIdleDisabled(text)
+            }
+        }
+    }
+
+    Process {
+        id: idleToggle
+        command: [
+            "bash", "-c",
+            "bash \"$1\" --toggle >/dev/null 2>&1; bash \"$1\" --status",
+            "idle-toggle",
+            root.idleToggleScript
+        ]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.idleLockDisabled = root._parseIdleDisabled(text)
+                root.statusMsg = root.idleLockDisabled ? "AUTO-LOCK OFF" : "AUTO-LOCK ON"
+                Globals.toast(
+                    root.idleLockDisabled ? "Auto-lock off" : "Auto-lock on",
+                    root.idleLockDisabled ? "hypridle disabled" : "hypridle enabled",
+                    "Settings"
+                )
+            }
+        }
+    }
+
+    // Keep toggle tiles honest while settings stay open (keybind may change state)
+    Timer {
+        id: powerPoll
+        interval: 4000
+        running: true
+        repeat: true
+        onTriggered: root.refreshPowerState()
     }
 
     // --- Wallpaper + palette (awww / wallust / legacy) ---
@@ -443,4 +544,5 @@ Item {
             Globals.toast("Recording stopped", "", "Settings")
         }
     }
+
 }

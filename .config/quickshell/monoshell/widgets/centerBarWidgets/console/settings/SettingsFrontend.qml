@@ -4,8 +4,8 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 import Quickshell
-import "../../.."
-import "../../../utils"
+import "../../../.."
+import "../../../../utils"
 import "."
 
 Item {
@@ -262,12 +262,14 @@ Item {
 
                 Repeater {
                     model: [
-                        { key: "gnome",   label: "GNOME",    icon: Theme.iconThemeApp },
-                        { key: "shot",    label: "CAPTURE",  icon: Theme.iconScreenshot },
-                        { key: "rec",     label: Globals.screenRecording ? "STOP" : "RECORD", icon: Theme.iconRecord },
-                        { key: "mute",    label: backend.muted ? "UNMUTE" : "MUTE", icon: Theme.iconAudio },
-                        { key: "wallust", label: "WALLUST",  icon: Theme.iconThemeApp },
-                        { key: "legacy",  label: "ASH",     icon: Theme.iconThemeApp }
+                        { key: "gnome",    label: "GNOME",    icon: Theme.iconThemeApp },
+                        { key: "shot",     label: "CAPTURE",  icon: Theme.iconScreenshot },
+                        { key: "rec",      label: Globals.screenRecording ? "STOP" : "RECORD", icon: Theme.iconRecord },
+                        { key: "mute",     label: backend.muted ? "UNMUTE" : "MUTE", icon: Theme.iconAudio },
+                        { key: "caffeine", label: "CAFFEINE", icon: Theme.iconCaffeine },
+                        { key: "nolock",   label: backend.idleLockDisabled ? "NO LOCK" : "AUTOLOCK", icon: Theme.iconIdleLock },
+                        { key: "wallust",  label: "WALLUST",  icon: Theme.iconThemeApp },
+                        { key: "legacy",   label: "ASH",      icon: Theme.iconThemeApp }
                     ]
 
                     Rectangle {
@@ -275,9 +277,22 @@ Item {
                         Layout.preferredHeight: Tokens.edgeToggleHeight
                         Layout.maximumHeight: Tokens.edgeToggleHeight
                         radius: Tokens.radiusMd
-                        color: tileMouse.containsMouse ? Theme.bgElevated : Theme.bgSurface
-                        border.color: (modelData.key === "rec" && Globals.screenRecording)
-                            ? Theme.stateCritical : Theme.borderIdle
+                        color: {
+                            if (modelData.key === "caffeine" && backend.caffeineActive)
+                                return Theme.bgElevated
+                            if (modelData.key === "nolock" && backend.idleLockDisabled)
+                                return Theme.bgElevated
+                            return tileMouse.containsMouse ? Theme.bgElevated : Theme.bgSurface
+                        }
+                        border.color: {
+                            if (modelData.key === "rec" && Globals.screenRecording)
+                                return Theme.stateCritical
+                            if (modelData.key === "caffeine" && backend.caffeineActive)
+                                return Theme.borderActive
+                            if (modelData.key === "nolock" && backend.idleLockDisabled)
+                                return Theme.borderActive
+                            return Theme.borderIdle
+                        }
                         border.width: Tokens.strokeWidth
                         clip: true
 
@@ -300,8 +315,15 @@ Item {
                                 ColorOverlay {
                                     anchors.fill: actGlyph
                                     source: actGlyph
-                                    color: (modelData.key === "rec" && Globals.screenRecording)
-                                        ? Theme.stateCritical : Theme.textMuted
+                                    color: {
+                                        if (modelData.key === "rec" && Globals.screenRecording)
+                                            return Theme.stateCritical
+                                        if (modelData.key === "caffeine" && backend.caffeineActive)
+                                            return Theme.accent
+                                        if (modelData.key === "nolock" && backend.idleLockDisabled)
+                                            return Theme.accent
+                                        return Theme.textMuted
+                                    }
                                 }
                             }
 
@@ -310,7 +332,13 @@ Item {
                                 text: modelData.label
                                 font.family: Theme.fontDisplay
                                 font.pixelSize: Tokens.fontSizeLabel
-                                color: Theme.textPrimary
+                                color: {
+                                    if (modelData.key === "caffeine" && backend.caffeineActive)
+                                        return Theme.accent
+                                    if (modelData.key === "nolock" && backend.idleLockDisabled)
+                                        return Theme.accent
+                                    return Theme.textPrimary
+                                }
                                 elide: Text.ElideRight
                                 maximumLineCount: 1
                             }
@@ -323,12 +351,14 @@ Item {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 switch (modelData.key) {
-                                case "gnome":   backend.launchGnome(); break
-                                case "shot":    backend.screenshot(); break
-                                case "rec":     backend.toggleRecord(); break
-                                case "mute":    backend.toggleMute(); break
-                                case "wallust": backend.syncWallust(); break
-                                case "legacy":  backend.activateLegacy(); break
+                                case "gnome":    backend.launchGnome(); break
+                                case "shot":     backend.screenshot(); break
+                                case "rec":      backend.toggleRecord(); break
+                                case "mute":     backend.toggleMute(); break
+                                case "caffeine": backend.toggleCaffeine(); break
+                                case "nolock":   backend.toggleIdleLock(); break
+                                case "wallust":  backend.syncWallust(); break
+                                case "legacy":   backend.activateLegacy(); break
                                 }
                             }
                         }

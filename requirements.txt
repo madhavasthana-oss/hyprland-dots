@@ -148,6 +148,8 @@ libreoffice-fresh
 nwg-displays
 swappy
 spotify-launcher
+# YouTube Music desktop (Pear Desktop — Super+M). CachyOS ships as pear-desktop.
+pear-desktop
 wtype
 
 # for dolphin and kdeglobals

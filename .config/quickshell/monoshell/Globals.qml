@@ -13,10 +13,10 @@ QtObject {
     property string activeCenterPanel : ""
     property string lastCenterPanel   : "dashboard"
 
-    // Right-edge trifold (T.S.S) --- which stack page is active
+    // Console control pane --- which stack page is active (wifi/bt/settings/notifs)
     property string activeEdgePanel : "wifi"   // "wifi" | "bluetooth" | "settings" | "notifications"
     property string lastEdgePanel   : "wifi"
-    // Force edge open (e.g. notif badge) without requiring hover
+    // Legacy force-pin flag (right-edge panel removed; kept for API stability)
     property bool edgeForced : false
 
     // Notification modes (mako) + live count for bar badge
@@ -76,7 +76,6 @@ QtObject {
         Quickshell.execDetached(args)
     }
 
-    // Edge tabs now live inside Console (center panel).
     // open/toggle open the center CONSOLE tab on the requested page (wifi/bt/settings/notifs).
     function openEdgePanel(panel) {
         if (panel !== undefined && panel !== null && String(panel).length) {

@@ -7,5 +7,5 @@ if test -r "$FASTFETCH/config.jsonc"
 end
 
 if test -r "$OH_MY_POSH"
-    oh-my-posh init fish --config "smoothie" | source
+    oh-my-posh init fish --config "$OH_MY_POSH/smoothie.omp.json" | source
 end

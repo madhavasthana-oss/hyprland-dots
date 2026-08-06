@@ -3,7 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Bluetooth
 import Quickshell.Io
-import "../../.."
+import "../../../.."
 
 Item {
     id: root
