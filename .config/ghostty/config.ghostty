@@ -33,5 +33,5 @@ async-backend = epoll
 custom-shader = shaders/cursor_blaze.glsl
 
 # optional includes (? = ignore if missing)
-config-file = ?~/.config/ghostty/theme.conf
+config-file = ?~/.config/ghostty/catppuccin-mocha.conf
 config-file = ?~/.config/ghostty/keybinds
