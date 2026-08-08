@@ -12,7 +12,11 @@ Item {
     id: root
 
     // Content-driven size — shell binds width/height to these
-    readonly property int wsCount: Globals.workspaceNumber
+    // One bank per page (1–10, 11–20, …) driven by focused workspace
+    readonly property int wsCount: WorkspaceHub.bankSize
+    readonly property int bankStart: WorkspaceHub.bankStart
+    readonly property int bankEnd: WorkspaceHub.bankEnd
+    readonly property int bankIndex: WorkspaceHub.bankIndex
     readonly property int cols: Tokens.workspaceBoardCols
     readonly property int rows: Math.ceil(wsCount / Math.max(1, cols))
     readonly property int screenW: Math.max(1, WorkspaceHub.screenW)
@@ -84,7 +88,9 @@ Item {
                     ? ("drop · WS "
                        + (root.draggingTargetWorkspace > 0
                           ? String(root.draggingTargetWorkspace) : "—"))
-                    : (root.wsCount + " workspaces  ·  drag to move")
+                    : ("WS " + root.bankStart + "–" + root.bankEnd
+                       + "  ·  bank " + (root.bankIndex + 1)
+                       + "  ·  drag to move")
                 font.family: Theme.fontMono
                 font.pixelSize: Tokens.fontSizeTiny
                 color: Theme.textDim
@@ -151,12 +157,16 @@ Item {
             readonly property int hGap: root.gap
             readonly property int vGap: root.gap
 
+            // Layout slots are relative to the active bank (not absolute WS id)
+            function slotOf(wsId) {
+                return Math.max(0, (wsId || 1) - root.bankStart)
+            }
             function cellX(wsId) {
-                const i = wsId - 1
+                const i = slotOf(wsId)
                 return (i % root.cols) * (cellW + hGap)
             }
             function cellY(wsId) {
-                const i = wsId - 1
+                const i = slotOf(wsId)
                 return Math.floor(i / root.cols) * (cellH + vGap)
             }
             function miniX(wsId) { return cellX(wsId) }
@@ -170,13 +180,13 @@ Item {
                 id: grid
                 anchors.fill: parent
 
-                // --- Layer 1: workspace tiles + DropAreas ---
+                // --- Layer 1: workspace tiles + DropAreas (current bank only) ---
                 Repeater {
                     model: root.wsCount
 
                     Item {
                         id: desk
-                        property int wsId: index + 1
+                        property int wsId: root.bankStart + index
                         property bool isFocused: WorkspaceHub.focusedWorkspaceId === wsId
                         property bool dropHover: root.draggingTargetWorkspace === wsId
                             && root.isDragging
@@ -309,11 +319,13 @@ Item {
                     z: 10
 
                     property var allClients: {
+                        // Depend on bank so chips refresh when page flips 10→11
+                        const _bank = root.bankStart
                         const m = WorkspaceHub.clientsByWorkspace
                         const out = []
                         if (!m)
                             return out
-                        for (let w = 1; w <= root.wsCount; w++) {
+                        for (let w = root.bankStart; w <= root.bankEnd; w++) {
                             const list = m[String(w)]
                             if (!list)
                                 continue

@@ -3,8 +3,11 @@ import QtQuick 2.15
 import Quickshell
 
 QtObject {
-    // Visible workspace count (left bar + board); matches hypr workspaceGroupSize
-    readonly property int workspaceNumber: 10
+    // Workspace bank size — board + hub show one bank at a time (1–10, 11–20, …)
+    // Matches hypr workspaceGroupSize for Super+1..0; relative nav is infinite.
+    readonly property int workspaceBankSize: 10
+    // Back-compat alias (count of tiles per board page)
+    readonly property int workspaceNumber: workspaceBankSize
 
     property string activePanel    : ""
     property string lastPanel      : "cpu"

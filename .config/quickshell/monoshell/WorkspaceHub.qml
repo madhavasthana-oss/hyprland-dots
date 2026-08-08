@@ -26,11 +26,41 @@ Singleton {
     // Set while a board chip is mid-drag so poll won't rebuild the model
     property bool dragActive: false
 
-    property int maxWorkspace: Globals.workspaceNumber
+    // Highest workspace id seen with clients (or focused); grows with infinite nav
+    property int maxWorkspace: Globals.workspaceBankSize
+
+    // Active bank (page of N workspaces): 1–10, 11–20, 21–30, …
+    readonly property int bankSize: Math.max(1, Globals.workspaceBankSize)
+    readonly property int bankStart: bankStartFor(focusedWorkspaceId)
+    readonly property int bankEnd: bankStart + bankSize - 1
+    // 0-based bank index (0 → 1–10, 1 → 11–20, …)
+    readonly property int bankIndex: Math.max(0, Math.floor((Math.max(1, focusedWorkspaceId) - 1) / bankSize))
 
     // Hyprland 0.56 lua config — classic string dispatchers do not work.
     // Always use hl.dsp.* (verified working via hyprctl dispatch).
     readonly property bool useLuaDispatch: true
+
+    function bankStartFor(wsId) {
+        const n = root.bankSize
+        const id = Math.max(1, parseInt(wsId) || 1)
+        return Math.floor((id - 1) / n) * n + 1
+    }
+
+    function bankEndFor(wsId) {
+        return root.bankStartFor(wsId) + root.bankSize - 1
+    }
+
+    function bankIndexFor(wsId) {
+        const n = root.bankSize
+        const id = Math.max(1, parseInt(wsId) || 1)
+        return Math.floor((id - 1) / n)
+    }
+
+    // 0-based slot within the bank for layout (WS 12 → 1 when bank 11–20)
+    function bankSlot(wsId) {
+        const id = Math.max(1, parseInt(wsId) || 1)
+        return id - root.bankStartFor(id)
+    }
 
     function clientsOn(wsId) {
         const key = String(wsId)
@@ -132,7 +162,8 @@ Singleton {
         clientModel.clear()
         let focused = []
         const byWs = ({})
-        const maxWs = Globals.workspaceNumber
+        // Infinite workspaces: track highest seen id (at least current bank end / focused)
+        let highest = Math.max(root.bankEnd, root.focusedWorkspaceId, root.bankSize)
 
         try {
             const arr = JSON.parse(text.length ? text : "[]")
@@ -150,9 +181,11 @@ Singleton {
                     continue
                 const wsId = c.workspace && c.workspace.id !== undefined
                     ? parseInt(c.workspace.id) : 0
-                // Only regular workspaces in the configured range
-                if (isNaN(wsId) || wsId <= 0 || wsId > maxWs)
+                // Regular numeric workspaces only (skip special / invalid)
+                if (isNaN(wsId) || wsId <= 0)
                     continue
+                if (wsId > highest)
+                    highest = wsId
 
                 const at = c.at || [0, 0]
                 const sz = c.size || [0, 0]
@@ -191,7 +224,9 @@ Singleton {
                     focused.push(r)
             }
 
-            root.maxWorkspace = maxWs
+            // Round max up to full bank end so empty bank slots still exist in range
+            const bankCeil = root.bankEndFor(highest)
+            root.maxWorkspace = Math.max(highest, bankCeil, root.bankSize)
             root.focusedClients = focused
             root.clientsByWorkspace = byWs
         } catch (e) {

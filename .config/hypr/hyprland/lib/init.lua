@@ -20,33 +20,28 @@ function create_if_not_exists(path)
 end
 
 function workspace_in_group(i)
-	-- Primary bank is always 1..workspaceGroupSize (loop, not infinite groups)
+	-- Number-key bank stays 1..workspaceGroupSize (Super+1..0 / Super+Alt+1..0)
 	local n = workspaceGroupSize or 10
 	local idx = ((i - 1) % n) + 1
 	return idx
 end
 
--- Wrap workspace index into 1..workspaceGroupSize
-function workspace_wrap(id)
-	local n = workspaceGroupSize or 10
-	-- Lua modulo of negative: normalize into [0, n)
-	local z = (id - 1) % n
-	if z < 0 then
-		z = z + n
-	end
-	return z + 1
-end
-
--- Relative cycle: delta +1 / -1 loops 10→1 and 1→10
+-- Relative infinite: no wrap. +1 can open empty higher workspaces; -1 stops at 1.
 function cycle_workspace(delta)
 	local curr = hl.get_active_workspace().id
-	local nextWs = workspace_wrap(curr + delta)
+	local nextWs = curr + delta
+	if nextWs < 1 then
+		return
+	end
 	hl.dispatch(hl.dsp.focus({ workspace = nextWs }))
 end
 
--- Move active window to previous/next workspace (wrap) and follow focus with it
+-- Move active window to previous/next workspace (infinite, no wrap) and follow
 function cycle_move_window(delta)
 	local curr = hl.get_active_workspace().id
-	local nextWs = workspace_wrap(curr + delta)
+	local nextWs = curr + delta
+	if nextWs < 1 then
+		return
+	end
 	hl.dispatch(hl.dsp.window.move({ workspace = nextWs, follow = true }))
 end

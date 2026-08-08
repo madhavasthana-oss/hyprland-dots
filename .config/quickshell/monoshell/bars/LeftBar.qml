@@ -14,9 +14,9 @@ Item {
     height: Tokens.leftHeight
     clip: true
 
-    // Sliding window of 5 workspace numbers (full set remains on board)
+    // Sliding window of 5 workspace numbers — continuous/infinite, no bank jump
+    // (board still pages 1–10 / 11–20; left bar just slides past boundaries)
     readonly property int visibleCount: Tokens.workspaceBarVisible
-    readonly property int workspaceMax: Globals.workspaceNumber
     property int focusedId: Hyprland.focusedWorkspace?.id ?? 1
     property int windowStart: 1
 
@@ -33,14 +33,13 @@ Item {
     readonly property var activeClients: WorkspaceHub.focusedClients
 
     function syncWindowStart(id) {
-        const maxStart = Math.max(1, leftBar.workspaceMax - leftBar.visibleCount + 1)
+        // Keep focused visible; slide by 1 step at edges (no snap to bank start)
         if (id >= leftBar.windowStart + leftBar.visibleCount)
-            leftBar.windowStart = Math.min(id - leftBar.visibleCount + 1, maxStart)
+            leftBar.windowStart = id - leftBar.visibleCount + 1
         else if (id < leftBar.windowStart)
-            leftBar.windowStart = Math.max(1, id)
-        // Clamp if focused beyond max
-        if (leftBar.windowStart > maxStart)
-            leftBar.windowStart = maxStart
+            leftBar.windowStart = id
+        if (leftBar.windowStart < 1)
+            leftBar.windowStart = 1
     }
 
     Connections {

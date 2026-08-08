@@ -43,8 +43,8 @@ hl.config({
 		workspace_swipe_min_speed_to_force = 5,
 		workspace_swipe_direction_lock = true,
 		workspace_swipe_direction_lock_threshold = 10,
-		-- Do not spawn infinite workspaces on swipe — cycle within existing set
-		workspace_swipe_create_new = false,
+		-- Infinite workspaces on swipe past the last used one (no wrap)
+		workspace_swipe_create_new = true,
 	},
 	general = {
 		-- Gaps and border
