@@ -1,60 +1,60 @@
 -------------------------------------------------------------
- Ghostty keybinds  ·  Doomslayer  ·  prefix = Ctrl+B
+ Ghostty keybinds  ·  Doomslayer  ·  prefix = Ctrl+G
 
- HOW: press Ctrl+B, RELEASE it, then the action key.
+ HOW: press Ctrl+G, RELEASE it, then the action key.
       (Not a chord — same idea as tmux prefix.)
 
- Ctrl+B ?         command palette (search actions/binds)
- Ctrl+B Ctrl+H    this cheat sheet in less (shell prompt)
+ Ctrl+G ?         command palette (search actions/binds)
+ Ctrl+G Ctrl+H    this cheat sheet in less (shell prompt)
  Esc              cancel prefix mode
  CLI:             ghostty +list-keybinds
 -------------------------------------------------------------
 
   PREFIX
-    Ctrl+B            enter prefix mode (one shot)
+    Ctrl+G            enter prefix mode (one shot)
     Esc               cancel prefix mode
-    b  or  Ctrl+B     send real Ctrl+B to the app (after prefix)
+    g  or  Ctrl+G     send real Ctrl+G to the app (after prefix)
 
   TABS  (~ tmux windows)
-    Ctrl+B c          new tab
-    Ctrl+B n / p      next / previous tab
-    Ctrl+B l / 0      last tab
-    Ctrl+B 1 … 9      go to tab N
-    Ctrl+B ,          rename tab
-    Ctrl+B w          tab overview
-    Ctrl+B d          close whole tab (all splits in it)
+    Ctrl+G c          new tab
+    Ctrl+G n / p      next / previous tab
+    Ctrl+G l / 0      last tab
+    Ctrl+G 1 … 9      go to tab N
+    Ctrl+G ,          rename tab
+    Ctrl+G w          tab overview
+    Ctrl+G d          close whole tab (all splits in it)
 
   WINDOWS
-    Ctrl+B Shift+c    new window
-    Ctrl+B &          close window
+    Ctrl+G Shift+c    new window
+    Ctrl+G &          close window
 
   SPLITS  (~ tmux panes)
-    Ctrl+B h          horizontal split  (left | right)
-    Ctrl+B v          vertical split    (top / bottom)
-    Ctrl+B %          same as h
-    Ctrl+B "          same as v
-    Ctrl+B ←↓↑→       focus split
-    Ctrl+B R          resize MODE (then arrows/hjkl; Esc exits)
-    Ctrl+B Ctrl+←…→   one-shot resize
-    Ctrl+B Shift+hjkl focus split (vim)
-    Ctrl+B o / ;      next / previous split
-    Ctrl+B z          zoom / unzoom pane
-    Ctrl+B =          equalize splits
-    Ctrl+B Ctrl+←↓↑→  resize split
+    Ctrl+G h          horizontal split  (left | right)
+    Ctrl+G v          vertical split    (top / bottom)
+    Ctrl+G %          same as h
+    Ctrl+G "          same as v
+    Ctrl+G ←↓↑→       focus split
+    Ctrl+G R          resize MODE (then arrows/hjkl; Esc exits)
+    Ctrl+G Ctrl+←…→   one-shot resize
+    Ctrl+G Shift+hjkl focus split (vim)
+    Ctrl+G o / ;      next / previous split
+    Ctrl+G z          zoom / unzoom pane
+    Ctrl+G =          equalize splits
+    Ctrl+G Ctrl+←↓↑→  resize split
 
   SEARCH / SCROLL
-    Ctrl+B f  or  /   start search
-    Ctrl+B [ / ]      page up / page down
-    Ctrl+B g / G      scroll top / bottom
-    Ctrl+B a          select all
+    Ctrl+G f  or  /   start search
+    Ctrl+G [ / ]      page up / page down
+    Ctrl+G Home / G   scroll top / bottom
+    Ctrl+G a          select all
 
   MISC
-    Ctrl+B ?          VIEW KEYBINDS — command palette
-    Ctrl+B Ctrl+H     VIEW KEYBINDS — this cheat sheet (less)
+    Ctrl+G ?          VIEW KEYBINDS — command palette
+    Ctrl+G Ctrl+H     VIEW KEYBINDS — this cheat sheet (less)
 
-    Ctrl+B r          reload config
-    Ctrl+B Enter      toggle fullscreen
-    Ctrl+B i          terminal inspector
+    Ctrl+G r          reload config
+    Ctrl+G Enter      toggle fullscreen
+    Ctrl+G i          terminal inspector
 
   NOTES
     · Shell Ctrl+D already exits a pane (EOF) — no prefix needed.

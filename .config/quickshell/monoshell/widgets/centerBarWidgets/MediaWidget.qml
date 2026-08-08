@@ -19,10 +19,10 @@ Item {
     }
 
     function launchYtMusic() {
-        // ytmdesktop-git installs as youtube-music-desktop-app
+        // ytmdesktop-git installs as pear-desktop
         Quickshell.execDetached([
             "bash", "-c",
-            "command -v youtube-music-desktop-app >/dev/null && exec youtube-music-desktop-app; "
+            "command -v pear-desktop >/dev/null && exec pear-desktop; "
             + "command -v youtube-music >/dev/null && exec youtube-music; "
             + "command -v flatpak >/dev/null && flatpak run app.ytmdesktop.ytmdesktop 2>/dev/null; "
             + "xdg-open 'https://music.youtube.com'"
@@ -236,7 +236,7 @@ Item {
                         }
                         Text {
                             Layout.fillWidth: true
-                            text: "PRIMARY * youtube-music-desktop-app * Super+M"
+                            text: "PRIMARY * pear-desktop * Super+M"
                             font.family: Theme.fontMono
                             font.pixelSize: Tokens.fontSizeTiny
                             color: Theme.textDim

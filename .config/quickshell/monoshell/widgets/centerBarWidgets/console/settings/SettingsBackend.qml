@@ -145,57 +145,118 @@ Item {
         root.refreshPowerState()
     }
 
-    // --- Power inhibit (hyprcaffeine + hypridle) ---
+    // --- Power inhibit (hyprcaffeine + hypridle / auto-lock) ---
+    // Restart helper: Process ignores running=true if already true; always bounce.
+    function _restart(proc) {
+        if (!proc)
+            return
+        if (proc.running)
+            proc.running = false
+        proc.running = true
+    }
+
     function refreshPowerState() {
-        caffeineQuery.running = true
-        idleQuery.running = true
+        root._restart(caffeineQuery)
+        root._restart(idleQuery)
     }
 
     function toggleCaffeine() {
-        caffeineToggle.running = true
+        root.statusMsg = "TOGGLING CAFFEINE…"
+        root._restart(caffeineToggle)
     }
 
     function toggleIdleLock() {
-        idleToggle.running = true
+        root.statusMsg = "TOGGLING AUTO-LOCK…"
+        root._restart(idleToggle)
     }
 
+    // hyprcaffeine never emits class "hc-on" — active sleep inhibit is
+    // hc-infinite / hc-timer (and combos). Prefer state.json "status":"active".
     function _parseCaffeine(text) {
         const t = (text || "").trim()
-        return t.indexOf("hc-on") >= 0
-            || /caffeine:\s*active/i.test(t)
+        if (!t.length)
+            return false
+        // state.json or similar
+        if (/"status"\s*:\s*"active"/i.test(t))
+            return true
+        if (/"status"\s*:\s*"inactive"/i.test(t))
+            return false
+        // waybar JSON classes (real hyprcaffeine output)
+        if (/\bhc-(infinite|timer)/i.test(t))
+            return true
+        if (/\bhc-off\b/i.test(t))
+            return false
+        // legacy / human status
+        if (t.indexOf("hc-on") >= 0 || /caffeine:\s*active/i.test(t))
+            return true
+        if (/Idle:\s*on/i.test(t) || /Infinite mode/i.test(t) || /Timer:/i.test(t))
+            return true
+        return false
     }
 
     function _parseIdleDisabled(text) {
         return (text || "").toUpperCase().indexOf("DISABLED") >= 0
     }
 
+    function _applyCaffeineText(text, toast) {
+        root.caffeineActive = root._parseCaffeine(text)
+        if (!toast)
+            return
+        root.statusMsg = root.caffeineActive ? "CAFFEINE ON" : "CAFFEINE OFF"
+        Globals.toast(
+            "Caffeine",
+            root.caffeineActive ? "Sleep inhibited" : "Sleep allowed",
+            "Settings"
+        )
+    }
+
+    function _applyIdleText(text, toast) {
+        root.idleLockDisabled = root._parseIdleDisabled(text)
+        if (!toast)
+            return
+        root.statusMsg = root.idleLockDisabled ? "AUTO-LOCK OFF" : "AUTO-LOCK ON"
+        Globals.toast(
+            root.idleLockDisabled ? "Auto-lock off" : "Auto-lock on",
+            root.idleLockDisabled ? "hypridle disabled" : "hypridle enabled",
+            "Settings"
+        )
+    }
+
     Process {
         id: caffeineQuery
-        // waybar JSON: class "hc-on" | "hc-off"
-        command: ["hyprcaffeine", "waybar"]
+        // state.json is authoritative for sleep-inhibit (timer / infinite)
+        command: [
+            "bash", "-c",
+            "f=\"${XDG_CACHE_HOME:-$HOME/.cache}/hyprcaffeine/state.json\"; "
+                + "if [[ -f \"$f\" ]]; then cat \"$f\"; "
+                + "else hyprcaffeine waybar 2>/dev/null; fi"
+        ]
         stdout: StdioCollector {
-            onStreamFinished: {
-                root.caffeineActive = root._parseCaffeine(text)
-            }
+            waitForEnd: true
+            onStreamFinished: root._applyCaffeineText(text, false)
         }
     }
 
     Process {
         id: caffeineToggle
-        // toggle then print status so we can toast the new state
+        // toggle sleep inhibit, then report state.json (or waybar fallback)
         command: [
             "bash", "-c",
-            "hyprcaffeine toggle >/dev/null 2>&1; hyprcaffeine waybar 2>/dev/null"
+            "export PATH=\"/usr/local/bin:/usr/bin:$HOME/.local/bin:$PATH\"; "
+                + "hyprcaffeine toggle >/dev/null 2>&1; "
+                + "f=\"${XDG_CACHE_HOME:-$HOME/.cache}/hyprcaffeine/state.json\"; "
+                + "if [[ -f \"$f\" ]]; then cat \"$f\"; "
+                + "else hyprcaffeine waybar 2>/dev/null; fi"
         ]
         stdout: StdioCollector {
-            onStreamFinished: {
-                root.caffeineActive = root._parseCaffeine(text)
-                root.statusMsg = root.caffeineActive ? "CAFFEINE ON" : "CAFFEINE OFF"
-                Globals.toast(
-                    "Caffeine",
-                    root.caffeineActive ? "Sleep inhibited" : "Sleep allowed",
-                    "Settings"
-                )
+            waitForEnd: true
+            onStreamFinished: root._applyCaffeineText(text, true)
+        }
+        onExited: (code) => {
+            if (code !== 0) {
+                root.statusMsg = "CAFFEINE FAILED"
+                Globals.toast("Caffeine", "hyprcaffeine failed (is it installed?)", "Settings")
+                root._restart(caffeineQuery)
             }
         }
     }
@@ -204,29 +265,33 @@ Item {
         id: idleQuery
         command: ["bash", root.idleToggleScript, "--status"]
         stdout: StdioCollector {
-            onStreamFinished: {
-                root.idleLockDisabled = root._parseIdleDisabled(text)
-            }
+            waitForEnd: true
+            onStreamFinished: root._applyIdleText(text, false)
         }
     }
 
     Process {
         id: idleToggle
+        // Run toggle + status via one bash so PATH and script path are explicit
         command: [
             "bash", "-c",
-            "bash \"$1\" --toggle >/dev/null 2>&1; bash \"$1\" --status",
+            "export PATH=\"/usr/local/bin:/usr/bin:$HOME/.local/bin:$PATH\"; "
+                + "SCRIPT=\"$1\"; "
+                + "if [[ ! -x \"$SCRIPT\" ]]; then echo \"error: missing $SCRIPT\" >&2; exit 127; fi; "
+                + "bash \"$SCRIPT\" --toggle >/dev/null 2>&1; "
+                + "bash \"$SCRIPT\" --status",
             "idle-toggle",
             root.idleToggleScript
         ]
         stdout: StdioCollector {
-            onStreamFinished: {
-                root.idleLockDisabled = root._parseIdleDisabled(text)
-                root.statusMsg = root.idleLockDisabled ? "AUTO-LOCK OFF" : "AUTO-LOCK ON"
-                Globals.toast(
-                    root.idleLockDisabled ? "Auto-lock off" : "Auto-lock on",
-                    root.idleLockDisabled ? "hypridle disabled" : "hypridle enabled",
-                    "Settings"
-                )
+            waitForEnd: true
+            onStreamFinished: root._applyIdleText(text, true)
+        }
+        onExited: (code) => {
+            if (code !== 0) {
+                root.statusMsg = "AUTO-LOCK TOGGLE FAILED"
+                Globals.toast("Auto-lock", "idle-toggle.sh failed", "Settings")
+                root._restart(idleQuery)
             }
         }
     }

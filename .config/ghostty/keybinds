@@ -1,10 +1,10 @@
-# Ghostty keybinds — tmux-style prefix (Ctrl+B)
+# Ghostty keybinds — tmux-style prefix (Ctrl+G)
 # Included from config.ghostty via: config-file = ?~/.config/ghostty/keybinds
 #
 # HOW THIS WORKS (read this):
-#   1. Press Ctrl+B and RELEASE it   ← enters prefix mode (one-shot)
+#   1. Press Ctrl+G and RELEASE it   ← enters prefix mode (one-shot)
 #   2. Press the action key alone    ← e.g. h, v, c, ?
-#   Do NOT hold Ctrl+B and the action key together like a chord.
+#   Do NOT hold Ctrl+G and the action key together like a chord.
 #
 # Uses a key table (more reliable than key sequences on GTK).
 # Split naming matches tmux:
@@ -12,10 +12,10 @@
 #   v = vertical split   → top/bottom  (new_split:down)
 
 # ---------------------------------------------------------------------------
-# Prefix: Ctrl+B -> one-shot "tmux" key table
+# Prefix: Ctrl+G -> one-shot "tmux" key table
 # ---------------------------------------------------------------------------
 keybind = tmux/
-keybind = ctrl+b=activate_key_table_once:tmux
+keybind = ctrl+g=activate_key_table_once:tmux
 
 # Escape / cancel prefix mode without doing anything
 keybind = tmux/escape=deactivate_key_table
@@ -23,9 +23,10 @@ keybind = tmux/escape=deactivate_key_table
 # Ignore unknown keys while in prefix mode (don't leak to the shell)
 keybind = tmux/catch_all=ignore
 
-# Literal Ctrl+B to the running program (prefix then b, or prefix then Ctrl+B)
-keybind = tmux/b=text:\x02
-keybind = tmux/ctrl+b=text:\x02
+# Literal Ctrl+G to the running program (prefix then g, or prefix then Ctrl+G)
+# \x07 = ASCII BEL = Ctrl+G
+keybind = tmux/g=text:\x07
+keybind = tmux/ctrl+g=text:\x07
 
 # ---------------------------------------------------------------------------
 # View keybinds helper
@@ -121,7 +122,8 @@ keybind = tmux/f=start_search
 keybind = tmux/slash=start_search
 keybind = tmux/[=scroll_page_up
 keybind = tmux/]=scroll_page_down
-keybind = tmux/g=scroll_to_top
+# Note: plain g is used to send literal Ctrl+G (see prefix section above)
+keybind = tmux/home=scroll_to_top
 keybind = tmux/shift+g=scroll_to_bottom
 keybind = tmux/a=select_all
 

@@ -4,7 +4,6 @@ window_padding_width        15
 font_family Fira Code
 font_size 12
 # BEGIN_KITTY_THEME
-# Noctalia
-# include current-theme.conf
+# Catppuccin-Mocha
+include current-theme.conf
 # END_KITTY_THEME
-include theme.conf

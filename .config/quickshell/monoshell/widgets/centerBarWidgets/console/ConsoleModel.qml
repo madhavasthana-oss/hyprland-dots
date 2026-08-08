@@ -49,7 +49,7 @@ Item {
             classification: "Media"
             description: "YouTube Music desktop player."
             icon: "multimedia-audio-player"
-            execCmd: "youtube-music-desktop-app"
+            execCmd: "pear-desktop"
         }
 
         ListElement {

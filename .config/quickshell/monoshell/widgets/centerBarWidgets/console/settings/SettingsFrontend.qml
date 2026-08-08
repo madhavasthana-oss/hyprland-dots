@@ -266,7 +266,7 @@ Item {
                         { key: "shot",     label: "CAPTURE",  icon: Theme.iconScreenshot },
                         { key: "rec",      label: Globals.screenRecording ? "STOP" : "RECORD", icon: Theme.iconRecord },
                         { key: "mute",     label: backend.muted ? "UNMUTE" : "MUTE", icon: Theme.iconAudio },
-                        { key: "caffeine", label: "CAFFEINE", icon: Theme.iconCaffeine },
+                        { key: "caffeine", label: backend.caffeineActive ? "CAFFEINE ON" : "CAFFEINE", icon: Theme.iconCaffeine },
                         { key: "nolock",   label: backend.idleLockDisabled ? "NO LOCK" : "AUTOLOCK", icon: Theme.iconIdleLock },
                         { key: "wallust",  label: "WALLUST",  icon: Theme.iconThemeApp },
                         { key: "legacy",   label: "ASH",      icon: Theme.iconThemeApp }
