@@ -534,7 +534,7 @@ Item {
                         Layout.fillWidth: true
                         height:           Tokens.statBoxHeight
                         color:            Theme.bgElevated
-                        radius:           Tokens.radiusLg
+                        radius:           Tokens.radiusMd
                         border.color:     Theme.borderIdle
 
                         property int liveTemp: cpu.cores.count > 0
