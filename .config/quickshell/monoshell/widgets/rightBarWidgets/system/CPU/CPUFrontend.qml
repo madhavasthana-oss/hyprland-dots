@@ -386,7 +386,7 @@ Item {
                         Layout.fillWidth:  true
                         Layout.fillHeight: true
                         color:             Theme.bgElevated
-                        radius:            Tokens.radiusXl
+                        radius:            Tokens.radiusMd
                         clip:              true
                         border.color:      Theme.borderIdle
                         border.width:      Tokens.strokeWidth

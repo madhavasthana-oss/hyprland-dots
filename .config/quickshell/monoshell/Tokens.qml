@@ -47,10 +47,12 @@ QtObject {
     readonly property int barMarginTop: Math.round(8 * scale)
 
     // RADII
-    readonly property int radiusSm: Math.round(3  * scale)
-    readonly property int radiusMd: Math.round(5  * scale)
-    readonly property int radiusLg: Math.round(6  * scale)
-    readonly property int radiusXl: Math.round(10 * scale)
+    readonly property int radiusXss: Math.round(3  * scale)
+    readonly property int radiusXs: Math.round(5  * scale)
+    readonly property int radiusSm: Math.round(6  * scale)
+    readonly property int radiusMd: Math.round(10 * scale)
+    readonly property int radiusLg: Math.round(16 * scale)
+    readonly property int radiusXl: Math.round(24 * scale)
 
     // BAR GEOMETRY
     // Full widths are the longest trapezoid edge (screen-hugging parallel).

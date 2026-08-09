@@ -241,7 +241,7 @@ Item {
         anchors.fill: parent
         barWidth:     Tokens.centerSmallerWidth
         barHeight:    Tokens.centerHeight
-        radius:       Tokens.centerHeight / 2
+        radius:       Tokens.radiusLg
         alertActive:  centerBar.alertActive
         expanded:     Globals.activeCenterPanel !== ""
     }

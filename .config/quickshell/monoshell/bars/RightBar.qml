@@ -170,7 +170,7 @@ Item {
         anchors.fill: parent
         barWidth: Tokens.rightWidth
         barHeight: Tokens.rightHeight
-        radius: Tokens.rightHeight / 2
+        radius: Tokens.radiusMd
         alertActive: false
     }
 
