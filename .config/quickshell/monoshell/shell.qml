@@ -148,13 +148,30 @@ ShellRoot {
     PanelWindow {
         id: centerBarWindow
         anchors { top: true }
-        implicitWidth:  Tokens.centerSmallerWidth
+        // Collapsed: HUD width × same height as left/right bars.
+        // Expanded: centerSmallerWidth × centerHeight.
+        implicitWidth: Globals.activeCenterPanel !== ""
+            ? Tokens.centerExpandedWidth
+            : Tokens.centerCollapsedWidth
         implicitHeight: Tokens.centerHeight
         color: "transparent"
         margins.top: Tokens.topMargin
         exclusiveZone: Tokens.exclusiveZone
         WlrLayershell.layer:     WlrLayer.Top
         WlrLayershell.namespace: "monoshell-center"
+
+        Behavior on implicitWidth {
+            NumberAnimation {
+                duration: Tokens.animInstant
+                easing.type: Easing.OutQuart
+            }
+        }
+        Behavior on implicitHeight {
+            NumberAnimation {
+                duration: Tokens.animInstant
+                easing.type: Easing.OutQuart
+            }
+        }
 
         CenterBar { anchors.fill: parent }
     }
@@ -165,6 +182,12 @@ ShellRoot {
         implicitWidth:  centerPanel.implicitWidth
         implicitHeight: Globals.activeCenterPanel !== "" ? centerPanel.implicitHeight : 0
 
+        Behavior on implicitWidth {
+            NumberAnimation {
+                duration: Tokens.animInstant
+                easing.type: Easing.OutQuart
+            }
+        }
         Behavior on implicitHeight {
             NumberAnimation { duration: Tokens.animInstant; easing.type: Easing.OutQuart }
         }

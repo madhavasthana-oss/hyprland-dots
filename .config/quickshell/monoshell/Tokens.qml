@@ -76,10 +76,12 @@ QtObject {
     readonly property int exclusiveZone: Math.round(45 * scale)
 
     // CENTER EXPANSION GEOMETRY
-    // Keep a floor so shrinking this value cannot collapse media art / week forecast.
-    readonly property int centerCollapsedWidth:  Math.round(640 * scale)
-    readonly property int centerCollapsedHeight: Math.round(30  * scale)
-    readonly property int centerExpandedWidth:   Math.round(800 * scale)
+    // Collapsed: same height as left/right bars; width sized for HUD content.
+    // Expanded: centerSmallerWidth × centerHeight (taller for typed status).
+    // Keep a floor so shrinking panel height cannot collapse media art / week forecast.
+    readonly property int centerCollapsedWidth:  Math.round(480 * scale)
+    readonly property int centerCollapsedHeight: leftHeight
+    readonly property int centerExpandedWidth:   centerSmallerWidth
     // Fixed content footprint for center dropdown (tabs sit above this)
     readonly property int centerExpandedHeight:  Math.round(420 * scale)
 

@@ -7,7 +7,6 @@ import "."
 Item {
     id: root
     // Drive shell dropdown size from tokens (shell binds window to these)
-    // Match expanded center bar width so the panel sits flush under it
     implicitWidth:  Tokens.centerSmallerWidth
     implicitHeight: Tokens.listRowHeight + Tokens.strokeWidth + Tokens.centerExpandedHeight
                     + Tokens.paddingV
