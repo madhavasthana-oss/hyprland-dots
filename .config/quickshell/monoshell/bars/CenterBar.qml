@@ -6,6 +6,7 @@ import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
+import QtQuick.Shapes
 import "../utils"
 import ".."
 
@@ -38,14 +39,31 @@ Item {
     property bool overrideActive: false
     property bool alertActive: false
 
-    // --- Live HUD fields (clock / weather / wifi) ---
-    property string clockText: Qt.formatTime(new Date(), "hh:mm")
-    property string dateText:  Qt.formatDate(new Date(), "ddd d MMM")
+    // --- Live clock (monoshell-2 style: ring + day / date / time) ---
+    property int hours: 0
+    property int minutes: 0
+    property int seconds: 0
+    property string dayName: ""
+    property string dateLine: ""
+    property string timeLine: ""
+
+    // --- Live HUD fields (weather / wifi) ---
     property string weatherEmoji: ""
     property string weatherTemp:  ""
     property string wifiSsid:     ""
     property int    wifiSignal:   -1   // -1 = unknown / offline
     property bool   wifiLinked:   false
+
+    function tickClock() {
+        const now = new Date()
+        centerBar.hours = now.getHours()
+        centerBar.minutes = now.getMinutes()
+        centerBar.seconds = now.getSeconds()
+        centerBar.dayName = Qt.formatDate(now, "ddd").toUpperCase()
+        centerBar.dateLine = Qt.formatDate(now, "dd MMM")
+        centerBar.timeLine = Qt.formatTime(now, "hh:mm:ss")
+        centerBar.checkTimeOfDay()
+    }
 
     readonly property string wifiBars: {
         const s = wifiSignal
@@ -164,7 +182,7 @@ Item {
         pendingStatus = statusMessages[0]
         // No status typed while collapsed
         messageAnimator.displayedText = ""
-        centerBar.checkTimeOfDay()
+        centerBar.tickClock()
         centerBar.initBatteryState()
         weatherProc.running = true
         wifiProc.running = true
@@ -174,12 +192,7 @@ Item {
         interval: 1000
         running: true
         repeat: true
-        onTriggered: {
-            const now = new Date()
-            centerBar.clockText = Qt.formatTime(now, "hh:mm")
-            centerBar.dateText  = Qt.formatDate(now, "ddd d MMM")
-            centerBar.checkTimeOfDay()
-        }
+        onTriggered: centerBar.tickClock()
     }
 
     Timer {
@@ -453,35 +466,115 @@ Item {
         spacing: Tokens.spacingSm
         clip: true
 
-        // --- clock (content-sized) ---
-        ColumnLayout {
+        // --- clock ring + day / date / time (monoshell-2) ---
+        RowLayout {
             Layout.alignment: Qt.AlignVCenter
             Layout.fillWidth: false
-            Layout.preferredWidth: Math.max(clockCol.implicitWidth, dateCol.implicitWidth)
-            Layout.maximumWidth: parent.width * 0.22
-            spacing: 0
+            spacing: Tokens.spacingSm
 
-            Text {
-                id: clockCol
-                text: centerBar.clockText
-                font.family: Theme.fontMono
-                font.pixelSize: Tokens.fontSizeBase
-                font.weight: Font.DemiBold
-                color: Theme.textPrimary
-                Layout.alignment: Qt.AlignHCenter
-                elide: Text.ElideRight
-                Layout.maximumWidth: parent.Layout.maximumWidth
+            // Analog-ish ring clock
+            Item {
+                id: clockFace
+                // Stay within collapsed bar height so expand doesn't balloon the face
+                readonly property int faceSize: Math.round(
+                    Math.max(18, Tokens.leftHeight * 0.78)
+                )
+                Layout.preferredWidth: faceSize
+                Layout.preferredHeight: faceSize
+                Layout.alignment: Qt.AlignVCenter
+
+                readonly property real cx: width / 2
+                readonly property real cy: height / 2
+                readonly property real r: Math.min(width, height) / 2 - 1.5
+
+                // Soft fill
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: parent.width - 4
+                    height: width
+                    radius: width / 2
+                    color: Qt.rgba(Theme.bgElevated.r, Theme.bgElevated.g, Theme.bgElevated.b, 0.55)
+                }
+
+                // Second arc
+                Shape {
+                    anchors.fill: parent
+                    preferredRendererType: Shape.CurveRenderer
+                    ShapePath {
+                        strokeWidth: 1.5
+                        strokeColor: Theme.accent
+                        fillColor: "transparent"
+                        capStyle: ShapePath.RoundCap
+
+                        PathAngleArc {
+                            centerX: clockFace.cx
+                            centerY: clockFace.cy
+                            radiusX: clockFace.r
+                            radiusY: clockFace.r
+                            startAngle: -90
+                            sweepAngle: (centerBar.seconds / 60) * 360
+                        }
+                    }
+                }
+
+                // Hour hand
+                Rectangle {
+                    width: 1.5
+                    height: clockFace.r * 0.42
+                    radius: 1
+                    color: Theme.textPrimary
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.verticalCenter
+                    transformOrigin: Item.Bottom
+                    rotation: ((centerBar.hours % 12) + centerBar.minutes / 60) * 30
+                }
+
+                // Minute hand
+                Rectangle {
+                    width: 1.2
+                    height: clockFace.r * 0.62
+                    radius: 1
+                    color: Theme.accent
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.verticalCenter
+                    transformOrigin: Item.Bottom
+                    rotation: (centerBar.minutes + centerBar.seconds / 60) * 6
+                }
+
+                // Hub
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 3
+                    height: 3
+                    radius: 1.5
+                    color: Theme.accent
+                }
             }
-            Text {
-                id: dateCol
-                text: centerBar.dateText
-                font.family: Theme.fontMono
-                font.pixelSize: Tokens.fontSizeSmall
-                font.weight: Font.Medium
-                color: Theme.textSecondary
-                Layout.alignment: Qt.AlignHCenter
-                elide: Text.ElideRight
-                Layout.maximumWidth: parent.Layout.maximumWidth
+
+            // Day / date / time column
+            Column {
+                Layout.alignment: Qt.AlignVCenter
+                spacing: 0
+
+                Text {
+                    text: centerBar.dayName
+                    font.family: Theme.fontDisplay
+                    font.pixelSize: Tokens.fontSizeLabel
+                    font.letterSpacing: 1.2
+                    color: Theme.accent
+                }
+                Text {
+                    text: centerBar.dateLine
+                    font.family: Theme.fontMono
+                    font.pixelSize: Tokens.fontSizeTiny
+                    color: Theme.textSecondary
+                }
+                Text {
+                    text: centerBar.timeLine
+                    font.family: Theme.fontMono
+                    font.pixelSize: Tokens.fontSizeSmall
+                    color: Theme.textPrimary
+                }
             }
         }
 
