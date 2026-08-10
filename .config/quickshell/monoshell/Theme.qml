@@ -133,7 +133,7 @@ Singleton {
     readonly property string iconSettings:   iconThemeActions  + "configure-symbolic.svg"
     readonly property string iconNotif:      iconThemeActions  + "notifications-symbolic.svg"
     readonly property string iconDashboard:  iconThemeActions  + "dashboard-show-symbolic.svg"
-    readonly property string iconConsole:    "file:///usr/share/icons/breeze/apps/22/utilities-terminal-symbolic.svg"
+    readonly property string iconConsole:    iconThemeActions  + "dialog-scripts-symbolic.svg"
     readonly property string iconMedia:      iconThemeActions  + "media-playback-start-symbolic.svg"
     readonly property string iconRefresh:    iconThemeActions  + "view-refresh-symbolic.svg"
     readonly property string iconBrightness: iconThemeActions  + "brightness-high-symbolic.svg"

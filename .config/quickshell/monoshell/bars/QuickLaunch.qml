@@ -1,7 +1,6 @@
-// QuickLaunch.qml --- compact dashboard · console · media launch strip
+// QuickLaunch.qml --- dashboard · wifi · bluetooth · settings · notifs · media
 import QtQuick
 import QtQuick.Layouts 1.15
-import QtQuick.Controls 2.15
 import Qt5Compat.GraphicalEffects
 import ".."
 
@@ -17,9 +16,11 @@ Item {
         iconSide + Tokens.spacingXs,
         Math.min(Tokens.centerHeight - Tokens.spacingXss * 2, Tokens.listRowHeight + Tokens.spacingXs)
     )
+    readonly property int gap: Tokens.spacingXss
+    readonly property int btnCount: 6
 
     // Fixed footprint so RowLayout cannot push neighbors out of the bar
-    implicitWidth: hit * 3 + Tokens.spacingXs * 2
+    implicitWidth: hit * btnCount + gap * (btnCount - 1)
     implicitHeight: hit
     width: implicitWidth
     height: implicitHeight
@@ -28,10 +29,13 @@ Item {
         return Globals.activeCenterPanel === panel
     }
 
+    function isConsolePage(page) {
+        return Globals.activeCenterPanel === "console" && Globals.activeEdgePanel === page
+    }
+
     component LaunchBtn: Item {
         id: btn
         property string iconSource: ""
-        property string tip: ""
         property bool active: false
         property bool hovered: mouse.containsMouse
         signal activated()
@@ -95,31 +99,45 @@ Item {
                 btn.activated()
                 mouse.accepted = true
             }
-            ToolTip.visible: containsMouse && btn.tip.length > 0
-            ToolTip.delay: 280
-            ToolTip.text: btn.tip
         }
     }
 
     Row {
         anchors.centerIn: parent
-        spacing: Tokens.spacingXs
+        spacing: root.gap
 
+        // 1. Dashboard
         LaunchBtn {
             iconSource: Theme.iconDashboard
-            tip: "Dashboard"
             active: root.isCenter("dashboard")
             onActivated: Globals.toggleCenterPanel("dashboard")
         }
+
+        // 2–5. Console pages
         LaunchBtn {
-            iconSource: Theme.iconConsole
-            tip: "Console"
-            active: root.isCenter("console")
-            onActivated: Globals.toggleCenterPanel("console")
+            iconSource: Theme.iconWifi
+            active: root.isConsolePage("wifi")
+            onActivated: Globals.toggleEdgePanel("wifi")
         }
         LaunchBtn {
+            iconSource: Theme.iconBluetooth
+            active: root.isConsolePage("bluetooth")
+            onActivated: Globals.toggleEdgePanel("bluetooth")
+        }
+        LaunchBtn {
+            iconSource: Theme.iconSettings
+            active: root.isConsolePage("settings")
+            onActivated: Globals.toggleEdgePanel("settings")
+        }
+        LaunchBtn {
+            iconSource: Theme.iconNotif
+            active: root.isConsolePage("notifications")
+            onActivated: Globals.toggleEdgePanel("notifications")
+        }
+
+        // 6. Media
+        LaunchBtn {
             iconSource: Theme.iconMedia
-            tip: "Media"
             active: root.isCenter("media")
             onActivated: Globals.toggleCenterPanel("media")
         }

@@ -438,11 +438,9 @@ Item {
         expanded:     centerBar.expanded
     }
 
-    // Collapsed: clock · launch · weather/wifi
-    // Expanded:  clock | launch | typed status | weather/wifi
-    // All zones have max widths so content never overflows the bar.
-    // z above bar MouseArea so QuickLaunch hit targets receive clicks;
-    // non-interactive children still pass events through to the bar toggle.
+    // Content keeps natural width; equal fillWidth spacers share leftover space.
+    // Collapsed:  clock | fill | launch | fill | meta
+    // Expanded:   clock | fill | launch | fill | status | fill | meta
     RowLayout {
         id: hudRow
         anchors.fill: parent
@@ -454,16 +452,13 @@ Item {
         anchors.bottomMargin: Tokens.spacingXss
         spacing: Tokens.spacingSm
         clip: true
-        z: 2
 
-        // LEFT — clock + date (always)
+        // --- clock (content-sized) ---
         ColumnLayout {
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            Layout.preferredWidth: clockCol.implicitWidth
-            Layout.maximumWidth: centerBar.expanded
-                ? parent.width * 0.18
-                : parent.width * 0.30
+            Layout.alignment: Qt.AlignVCenter
             Layout.fillWidth: false
+            Layout.preferredWidth: Math.max(clockCol.implicitWidth, dateCol.implicitWidth)
+            Layout.maximumWidth: parent.width * 0.22
             spacing: 0
 
             Text {
@@ -478,6 +473,7 @@ Item {
                 Layout.maximumWidth: parent.Layout.maximumWidth
             }
             Text {
+                id: dateCol
                 text: centerBar.dateText
                 font.family: Theme.fontMono
                 font.pixelSize: Tokens.fontSizeSmall
@@ -489,50 +485,35 @@ Item {
             }
         }
 
-        // thin divider
-        Rectangle {
-            Layout.preferredWidth: Tokens.strokeWidth
-            Layout.preferredHeight: parent.height * 0.55
-            Layout.alignment: Qt.AlignVCenter
-            color: Theme.borderIdle
-            opacity: Theme.opacityMuted
-        }
+        // dynamic gap
+        Item { Layout.fillWidth: true; Layout.minimumWidth: Tokens.spacingXs }
 
-        // LAUNCH — dashboard · console · media (fixed footprint, never flex)
-        QuickLaunch {
-            id: quickLaunch
-            Layout.alignment: Qt.AlignVCenter
-            Layout.preferredWidth: implicitWidth
-            Layout.maximumWidth: implicitWidth
-            Layout.minimumWidth: implicitWidth
-            Layout.fillWidth: false
-            Layout.fillHeight: false
-        }
-
-        // thin divider (expanded — frames the typed status)
-        Rectangle {
-            visible: centerBar.expanded
-            Layout.preferredWidth: Tokens.strokeWidth
-            Layout.preferredHeight: parent.height * 0.55
-            Layout.alignment: Qt.AlignVCenter
-            color: Theme.borderIdle
-            opacity: Theme.opacityMuted
-        }
-
-        // CENTER — status typed out only when expanded; spacer when collapsed
+        // --- launch icons (fixed footprint) ---
         Item {
-            Layout.fillWidth: true
+            id: launchSlot
+            Layout.alignment: Qt.AlignVCenter
+            Layout.fillWidth: false
+            Layout.preferredWidth: quickLaunch.implicitWidth
+            Layout.maximumWidth: quickLaunch.implicitWidth
+            Layout.minimumWidth: quickLaunch.implicitWidth
+            Layout.preferredHeight: quickLaunch.implicitHeight
+        }
+
+        // dynamic gap
+        Item { Layout.fillWidth: true; Layout.minimumWidth: Tokens.spacingXs }
+
+        // --- status (content-sized only when expanded; does not eat free space) ---
+        Item {
+            id: statusSlot
+            visible: centerBar.expanded
+            Layout.alignment: Qt.AlignVCenter
+            Layout.fillWidth: false
             Layout.fillHeight: true
-            Layout.minimumWidth: centerBar.expanded ? Tokens.spacingLg : Tokens.spacingXs
-            Layout.maximumWidth: centerBar.expanded
-                ? parent.width * 0.42
-                : parent.width  // collapsed flex gap only
+            // Full string width — no elide; spacers absorb leftover room
+            Layout.preferredWidth: statusText.implicitWidth
+            Layout.minimumWidth: 0
             clip: true
-            // Collapsed: invisible flex spacer for visual balance
-            // Expanded: typed status (dimmed until first char)
-            opacity: !centerBar.expanded
-                ? 0
-                : (messageAnimator.displayedText.length > 0 ? 1 : 0.35)
+            opacity: messageAnimator.displayedText.length > 0 ? 1 : 0.35
 
             Behavior on opacity {
                 NumberAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
@@ -540,14 +521,12 @@ Item {
 
             Text {
                 id: statusText
-                anchors.centerIn: parent
-                width: parent.width
-                visible: centerBar.expanded
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
                 text: messageAnimator.displayedText.length
                     ? ("<< " + messageAnimator.displayedText + " >>")
                     : ""
                 horizontalAlignment: Text.AlignHCenter
-                elide: Text.ElideMiddle
                 maximumLineCount: 1
                 font.family: Theme.fontDisplay
                 font.pixelSize: Tokens.fontSizeMedium
@@ -555,23 +534,20 @@ Item {
             }
         }
 
-        // thin divider
-        Rectangle {
-            Layout.preferredWidth: Tokens.strokeWidth
-            Layout.preferredHeight: parent.height * 0.55
-            Layout.alignment: Qt.AlignVCenter
-            color: Theme.borderIdle
-            opacity: Theme.opacityMuted
+        // dynamic gap (only when status is present so collapsed stays balanced)
+        Item {
+            visible: centerBar.expanded
+            Layout.fillWidth: true
+            Layout.minimumWidth: Tokens.spacingXs
         }
 
-        // RIGHT — weather · wifi (battery dropped for launch-strip room)
+        // --- weather · wifi (content-sized) ---
         ColumnLayout {
             id: metaCol
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-            Layout.maximumWidth: centerBar.expanded
-                ? parent.width * 0.22
-                : parent.width * 0.32
+            Layout.alignment: Qt.AlignVCenter
             Layout.fillWidth: false
+            Layout.preferredWidth: Math.max(metaTop.implicitWidth, metaSsid.implicitWidth)
+            Layout.maximumWidth: parent.width * 0.26
             spacing: 0
 
             Text {
@@ -586,6 +562,7 @@ Item {
             }
 
             Text {
+                id: metaSsid
                 Layout.alignment: Qt.AlignHCenter
                 Layout.maximumWidth: metaCol.Layout.maximumWidth
                 font.family: Theme.fontMono
@@ -599,6 +576,14 @@ Item {
         }
     }
 
+    // Launch strip overlaid on the layout slot so it stacks above the bar toggle
+    QuickLaunch {
+        id: quickLaunch
+        z: 3
+        x: hudRow.x + launchSlot.x
+        y: hudRow.y + launchSlot.y + Math.round((launchSlot.height - height) / 2)
+    }
+
     // Notification badge --- trailing edge of center bar; opens console notifications
     Item {
         id: notifBadge
@@ -607,7 +592,7 @@ Item {
         anchors.rightMargin: Tokens.paddingH
         width: badgeChrome.width
         height: badgeChrome.height
-        z: 2
+        z: 3
         visible: Globals.notifCount > 0 || Globals.notifDnd || Globals.notifSilent
 
         Rectangle {
@@ -658,11 +643,17 @@ Item {
         cursorShape: Qt.PointingHandCursor
         // Leave room for badge hit target on the right
         anchors.rightMargin: notifBadge.visible ? notifBadge.width + Tokens.paddingH : 0
-        // Behind hudRow (z:2) / badge (z:2) — launch buttons eat their own clicks;
-        // empty HUD areas pass through to this toggle
-        z: 0
+        // Below launch (z:3) and badge (z:3); HUD chrome still toggles last panel
+        z: 1
 
         onClicked: {
+            // Ignore clicks on the launch strip (also covered by QuickLaunch z:3)
+            const lx = quickLaunch.x
+            const ly = quickLaunch.y
+            if (mouseX >= lx && mouseX <= lx + quickLaunch.width
+                && mouseY >= ly && mouseY <= ly + quickLaunch.height)
+                return
+
             if (Globals.activeCenterPanel !== "") {
                 Globals.lastCenterPanel = Globals.activeCenterPanel
                 Globals.activeCenterPanel = ""
