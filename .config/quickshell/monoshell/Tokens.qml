@@ -65,7 +65,7 @@ QtObject {
     readonly property int leftWidth:    rightWidth
     readonly property int leftHeight:   rightHeight
     readonly property int workspaceBarVisible: 5
-    readonly property int centerWidth:  Math.round(800 * scale)
+    readonly property int centerWidth:  Math.round(840 * scale)
     readonly property int centerHeight: Math.round(45  * scale)
 
     readonly property int centerSmallerWidth: centerWidth - 2 * centerHeight
