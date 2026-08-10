@@ -164,8 +164,9 @@ apply_live() {
     disown 2>/dev/null || true
 }
 
-# Theme monoshell from whatever awww is currently showing (no hardcoded path).
+# Theme monoshell + hypr borders from whatever awww is currently showing.
 # Falls back to the just-applied path if awww has no image (e.g. mpvpaper video).
+# load-wallust-colors.sh also rewrites hyprland/colors.lua and applies live borders.
 theme_monoshell_from_awww() {
     local fallback="${1:-}"
     local theme_script="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/monoshell/utils/scripts/load-wallust-colors.sh"
@@ -179,18 +180,18 @@ theme_monoshell_from_awww() {
     sleep 0.15
 
     if "$theme_script" --from-awww; then
-        notify "Monoshell theme" "wallust ← awww wallpaper"
+        notify "Theme" "wallust ← awww (monoshell + hypr)"
         return 0
     fi
 
     if [[ -n "$fallback" && -f "$fallback" ]] && ! is_video "$fallback"; then
         if "$theme_script" "$fallback"; then
-            notify "Monoshell theme" "wallust ← $(basename "$fallback")"
+            notify "Theme" "wallust ← $(basename "$fallback") (monoshell + hypr)"
             return 0
         fi
     fi
 
-    echo "warning: monoshell wallust theme failed (wallpaper still applied)" >&2
+    echo "warning: wallust theme failed (wallpaper still applied)" >&2
     return 0
 }
 

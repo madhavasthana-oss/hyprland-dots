@@ -407,7 +407,7 @@ hl.bind(
 	{ description = "Clipboard: wipe history" }
 )
 
--- Wallpaper cycler (also recolors monoshell via wallust from live awww image)
+-- Wallpaper cycler (also recolors monoshell + hypr borders via wallust from live awww image)
 hl.bind(
 	"SUPER + W",
 	hl.dsp.exec_cmd(
@@ -415,16 +415,16 @@ hl.bind(
 			"%s/wallpaper.sh --next", hyprScripts
 		)
 	),
-	{ description = "Wallpaper: next + monoshell wallust theme (from awww)" }
+	{ description = "Wallpaper: next + wallust theme (monoshell + hypr borders)" }
 )
 
--- Restore constant Ash palette for monoshell (no wallpaper recolor)
+-- Restore constant Ash palette for monoshell + hypr borders (no wallpaper recolor)
 hl.bind(
 	"SUPER + SHIFT + W",
 	hl.dsp.exec_cmd(
-		"$HOME/.config/quickshell/monoshell/utils/scripts/load-legacy-colors.sh --activate && notify-send -a Monoshell 'Theme' 'Ash colors restored'"
+		"$HOME/.config/quickshell/monoshell/utils/scripts/load-legacy-colors.sh --activate && notify-send -a Monoshell 'Theme' 'Ash colors restored (monoshell + hypr)'"
 	),
-	{ description = "Theme: restore monoshell Ash colors" }
+	{ description = "Theme: restore Ash colors (monoshell + hypr)" }
 )
 
 

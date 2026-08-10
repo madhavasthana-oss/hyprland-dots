@@ -41,11 +41,11 @@ Soft charcoal surfaces, silver accents, low-glare text. Functional over flashy.
 - One palette across Hypr, monoshell, terminals, mako, fuzzel, nvim
 
 **Wallust (optional)**  
-Tints monoshell **text + icon accents** from the wallpaper. Surfaces stay Ash. Activate from console → configuration, or:
+Tints monoshell **text + icon accents** and Hyprland **active window borders** from the wallpaper. Surfaces stay Ash. Activate from console → configuration, `SUPER+W`, or:
 
 ```bash
 ~/.config/quickshell/monoshell/utils/scripts/load-wallust-colors.sh --from-awww
-# restore full Ash shell:
+# restore Ash (monoshell + hypr borders): SUPER+SHIFT+W, or:
 ~/.config/quickshell/monoshell/utils/scripts/load-legacy-colors.sh --activate
 ```
 

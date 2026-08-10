@@ -9,6 +9,7 @@
 #   load-wallust-colors.sh --status
 #
 # Theme.qml watches: <monoshell>/colors/active-colors.json
+# Hyprland: also rewrites ~/.config/hypr/hyprland/colors.lua + live hyprctl keywords
 #
 # Ash monochrome BASE is always kept for surfaces/chrome:
 #   bgPrimary, bgSurface, bgElevated, bgConsole, borderIdle, borderConsole,
@@ -18,6 +19,12 @@
 #   accent, accentWarm, accentSoft  (icons, highlights)
 #   textPrimary, textSecondary, textMuted, textDim
 #   borderActive, glowConsole       (follow accent)
+#
+# Hyprland mapping (same idea — chrome stays Ash, accents from wallpaper):
+#   general.col.active_border   ← accent / borderActive
+#   general.col.inactive_border ← borderIdle (Ash)
+#   misc.background_color       ← bgPrimary (Ash)
+#   pin window_rule border      ← accent + alpha
 
 set -euo pipefail
 
@@ -227,6 +234,87 @@ print(f"  surfaces=Ash fixed  accent={accent}  text={text_primary}/{text_seconda
 PY
 }
 
+# Write hyprland/colors.lua + apply live borders from a monoshell role JSON.
+# Same philosophy as Theme: only active/pin borders take wallpaper accent.
+apply_hyprland_colors_from_json() {
+    local json="$1"
+    local out="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/hyprland/colors.lua"
+    local triple
+
+    if [[ ! -f "$json" ]]; then
+        echo "warning: skip hyprland colors — missing $json" >&2
+        return 0
+    fi
+
+    if ! triple="$(python3 - "$json" "$out" <<'PY'
+import json, sys
+from pathlib import Path
+
+src, out = Path(sys.argv[1]), Path(sys.argv[2])
+data = json.loads(src.read_text())
+
+def hex6(*keys, fallback="C8C8C8"):
+    for key in keys:
+        v = str(data.get(key) or "").strip()
+        if not v:
+            continue
+        v = v[1:] if v.startswith("#") else v
+        v = v.upper()
+        if len(v) == 6 and all(c in "0123456789ABCDEF" for c in v):
+            return v.lower()
+    return fallback.lower()
+
+active = hex6("borderActive", "accent", fallback="C8C8C8")
+idle = hex6("borderIdle", fallback="333333")
+bg = hex6("bgPrimary", fallback="121212")
+
+out.parent.mkdir(parents=True, exist_ok=True)
+text = f"""hl.config({{
+    general = {{
+        col = {{
+            active_border   = "rgb({active})",
+            inactive_border = "rgb({idle})",
+        }},
+    }},
+    misc = {{
+        background_color = "rgb({bg})",
+    }},
+}})
+
+hl.window_rule({{
+    match        = {{ pin = 1 }},
+    border_color = "rgba({active}AA) rgba({active}77)",
+}})
+"""
+tmp = out.with_suffix(".lua.tmp")
+tmp.write_text(text)
+tmp.replace(out)
+# stdout: bare hex triple for shell/hyprctl
+print(f"{active} {idle} {bg}")
+PY
+)"; then
+        echo "warning: failed to write hyprland colors.lua" >&2
+        return 0
+    fi
+
+    local active idle bg
+    read -r active idle bg <<< "$triple"
+    echo "hyprland: wrote $out"
+    echo "  active_border=rgb(${active})  inactive=rgb(${idle})  bg=rgb(${bg})"
+
+    # Live apply without full config reload (pin window_rule needs reload/login)
+    if command -v hyprctl >/dev/null 2>&1 && hyprctl -j monitors &>/dev/null; then
+        hyprctl --batch "\
+keyword general:col.active_border rgb(${active}) ;\
+keyword general:col.inactive_border rgb(${idle}) ;\
+keyword misc:background_color rgb(${bg})" >/dev/null 2>&1 \
+            && echo "hyprland: live borders applied (hyprctl)" \
+            || echo "warning: hyprctl keyword apply failed" >&2
+    else
+        echo "hyprland: not running — colors.lua only (apply on next reload)"
+    fi
+}
+
 activate_wallust() {
     mkdir -p "$COLORS_DIR"
     if [[ ! -f "$WALLUST_JSON" ]]; then
@@ -254,6 +342,7 @@ PY
     mv -f "${ACTIVE_JSON}.tmp" "$ACTIVE_JSON"
     printf 'wallust\n' > "$SOURCE_FILE"
     echo "activated: wallust → $ACTIVE_JSON"
+    apply_hyprland_colors_from_json "$ACTIVE_JSON"
 }
 
 run_wallust_on() {
