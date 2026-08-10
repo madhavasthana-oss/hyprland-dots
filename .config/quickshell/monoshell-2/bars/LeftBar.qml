@@ -189,16 +189,6 @@ Item {
             }
         }
 
-        // Separator
-        Rectangle {
-            Layout.preferredWidth:  Math.max(1, Math.round(Tokens.stroke.base))
-            Layout.preferredHeight: parent.height * 0.45
-            Layout.alignment:       Qt.AlignVCenter
-            Layout.leftMargin:      Tokens.spacing.xs
-            Layout.rightMargin:     Tokens.spacing.xs
-            color:                  Theme.borderIdle
-        }
-
         // Active window title
         Text {
             Layout.fillWidth: true
@@ -229,8 +219,7 @@ Item {
             radius: Tokens.radius.sm
             color: boardBtn.containsMouse || Globals.workspaceBoardOpen
                 ? Theme.bgElevated : "transparent"
-            border.color: Globals.workspaceBoardOpen ? Theme.borderActive : Theme.borderIdle
-            border.width: Tokens.stroke.base
+            border.width: 0
 
             Text {
                 anchors.centerIn: parent

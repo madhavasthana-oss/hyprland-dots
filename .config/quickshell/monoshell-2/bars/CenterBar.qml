@@ -273,8 +273,7 @@ Item {
                     anchors.fill: parent
                     radius: width / 2
                     color: "transparent"
-                    border.color: Theme.borderIdle
-                    border.width: Math.max(1, Math.round(Tokens.stroke.base))
+                    border.width: 0
                 }
 
                 // Soft fill
@@ -368,15 +367,6 @@ Item {
             }
         }
 
-        // Vertical rule
-        Rectangle {
-            Layout.preferredWidth: Math.max(1, Math.round(Tokens.stroke.base))
-            Layout.preferredHeight: parent.height * 0.55
-            Layout.alignment: Qt.AlignVCenter
-            color: Theme.borderIdle
-            opacity: 0.5
-        }
-
         // --- weather cluster ---
         RowLayout {
             Layout.fillHeight: true
@@ -443,10 +433,7 @@ Item {
                 height: Math.max(Tokens.listRowHeight * 0.85, Tokens.type.small + 4)
                 radius: Tokens.radius.sm
                 color: badgeMouse.containsMouse ? Theme.bgElevated : "transparent"
-                border.color: Globals.notifDnd
-                    ? Theme.stateCritical
-                    : (Globals.notifCount > 0 ? Theme.borderActive : Theme.borderIdle)
-                border.width: Tokens.stroke.base
+                border.width: 0
 
                 Text {
                     id: badgeLabel
@@ -492,8 +479,7 @@ Item {
         visible: centerBar.overrideActive
         z: 5
         color: Qt.rgba(Theme.bgElevated.r, Theme.bgElevated.g, Theme.bgElevated.b, 0.92)
-        border.color: centerBar.alertActive ? Theme.stateCritical : Theme.accent
-        border.width: Tokens.stroke.base
+        border.width: 0
 
         Text {
             anchors.centerIn: parent

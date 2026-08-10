@@ -106,4 +106,26 @@ QtObject {
         }
         openEdgePanel(target)
     }
+
+    // Toggle a center tab (dashboard / console / media). Same tab again closes.
+    function toggleCenterPanel(panel) {
+        const target = (panel !== undefined && panel !== null && String(panel).length)
+            ? String(panel)
+            : lastCenterPanel
+        if (activeCenterPanel === target) {
+            lastCenterPanel = target
+            activeCenterPanel = ""
+            return
+        }
+        lastCenterPanel = target
+        activeCenterPanel = target
+    }
+
+    function openCenterPanel(panel) {
+        const target = (panel !== undefined && panel !== null && String(panel).length)
+            ? String(panel)
+            : lastCenterPanel
+        lastCenterPanel = target
+        activeCenterPanel = target
+    }
 }

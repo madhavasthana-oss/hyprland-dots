@@ -63,12 +63,9 @@ ShellRoot {
         readonly property bool sysOpen: Globals.activePanel !== ""
         readonly property bool anyDrop: centerOpen || sysOpen
 
-        readonly property color hugColor: Qt.rgba(
-            Theme.bgSurface.r, Theme.bgSurface.g, Theme.bgSurface.b, Theme.opacityBar
-        )
-        readonly property color panelFill: Qt.rgba(
-            Theme.bgConsole.r, Theme.bgConsole.g, Theme.bgConsole.b, Theme.opacityConsole
-        )
+        // Opaque bar / corner color (matches solid strip)
+        readonly property color hugColor: Theme.bgSurface
+        readonly property color panelFill: Theme.bgConsole
 
         // Measured drop content heights (0 when closed)
         readonly property int centerDropH: centerOpen
@@ -79,9 +76,10 @@ ShellRoot {
             : 0
         readonly property int dropH: Math.max(centerDropH, sysDropH)
 
-        // Strip + (screen corners when idle | panel stack when open)
+        // Always reserve corner band; grow further when panels open
+        // (corners stay painted under the strip even while dropdowns are up)
         implicitHeight: Tokens.bar.height
-            + (anyDrop ? dropH : Tokens.rounding.screen)
+            + Math.max(Tokens.rounding.screen, anyDrop ? dropH : 0)
 
         Behavior on implicitHeight {
             NumberAnimation {
@@ -114,7 +112,7 @@ ShellRoot {
                 z: 10
             }
 
-            // ---- screen hug corners (only when no dropdown open) ----
+            // ---- screen hug corners — ALWAYS on (do not vanish when panels open) ----
             Item {
                 id: screenCorners
                 anchors {
@@ -123,8 +121,7 @@ ShellRoot {
                     top: mainBar.bottom
                 }
                 height: Tokens.rounding.screen
-                visible: !barWindow.anyDrop
-                z: 1
+                z: 2
 
                 RoundCorner {
                     anchors {
@@ -169,7 +166,7 @@ ShellRoot {
                     height: centerPanel.implicitHeight
                     visible: barWindow.centerOpen
 
-                    // Left flank — bar color curves into free space
+                    // Left flank — opaque bar color curves into free space
                     RoundCorner {
                         anchors {
                             left: parent.left
@@ -195,22 +192,8 @@ ShellRoot {
                         bottomLeftRadius: Tokens.radius.xl
                         bottomRightRadius: Tokens.radius.xl
                         color: barWindow.panelFill
-                        border.color: Theme.borderConsole
-                        border.width: Tokens.stroke.base
+                        border.width: 0
                         clip: true
-
-                        // Accent seam — continues bar glow into panel
-                        Rectangle {
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                                top: parent.top
-                            }
-                            height: Math.max(1, Math.round(Tokens.stroke.active))
-                            color: Theme.accent
-                            opacity: 0.75
-                            z: 2
-                        }
 
                         CenterPanel {
                             id: centerPanel
@@ -270,21 +253,8 @@ ShellRoot {
                         bottomLeftRadius: Tokens.radius.xl
                         bottomRightRadius: Tokens.radius.xl
                         color: barWindow.panelFill
-                        border.color: Theme.borderConsole
-                        border.width: Tokens.stroke.base
+                        border.width: 0
                         clip: true
-
-                        Rectangle {
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                                top: parent.top
-                            }
-                            height: Math.max(1, Math.round(Tokens.stroke.active))
-                            color: Theme.accent
-                            opacity: 0.75
-                            z: 2
-                        }
 
                         SystemPanel {
                             id: sysPanel

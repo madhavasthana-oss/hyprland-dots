@@ -10,7 +10,8 @@ Item {
     id: root
 
     readonly property color barColor: Theme.bgSurface
-    readonly property real barOpacity: Theme.opacityBar
+    // Fully opaque strip
+    readonly property real barOpacity: 1.0
     readonly property int barHeight: Tokens.bar.height
     readonly property bool alertActive: centerZone.alertActive
 
@@ -22,12 +23,8 @@ Item {
     Rectangle {
         id: barBg
         anchors.fill: parent
-        color: Qt.rgba(
-            root.barColor.r,
-            root.barColor.g,
-            root.barColor.b,
-            root.barOpacity
-        )
+        color: root.barColor
+        border.width: 0
 
         SequentialAnimation {
             running: root.alertActive
@@ -55,62 +52,7 @@ Item {
         }
     }
 
-    // Accent hairline
-    Rectangle {
-        anchors {
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-        }
-        height: Math.max(1, Math.round(Tokens.stroke.active))
-        z: 3
-        color: root.alertActive ? Theme.stateCritical : Theme.accent
-        opacity: root.alertActive ? 1.0 : 0.85
-
-        Behavior on color {
-            ColorAnimation { duration: Tokens.anim.fast; easing.type: Easing.OutCubic }
-        }
-    }
-
-    // Soft multi-layer glow under the strip (paints into parent below us)
-    Item {
-        id: glowStack
-        anchors {
-            left: parent.left
-            right: parent.right
-            top: parent.bottom
-        }
-        height: Tokens.bar.glowHeight
-        z: 1
-        clip: false
-
-        Repeater {
-            model: 4
-            Rectangle {
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    top: parent.top
-                }
-                height: Tokens.bar.glowHeight * (1.0 - index * 0.18)
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0.0
-                        color: Qt.rgba(
-                            Theme.accent.r, Theme.accent.g, Theme.accent.b,
-                            Tokens.bar.glowOpacity * (0.45 - index * 0.1)
-                        )
-                    }
-                    GradientStop {
-                        position: 1.0
-                        color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0)
-                    }
-                }
-            }
-        }
-    }
-
-    // Three-zone content
+    // Three-zone content — no zone dividers, no edge stroke / glow
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin:  Tokens.bar.padH
@@ -127,14 +69,6 @@ Item {
             Layout.horizontalStretchFactor: 3
         }
 
-        Rectangle {
-            Layout.preferredWidth: Math.max(1, Math.round(Tokens.stroke.base))
-            Layout.preferredHeight: parent.height * 0.5
-            Layout.alignment: Qt.AlignVCenter
-            color: Theme.borderIdle
-            opacity: 0.45
-        }
-
         CenterBar {
             id: centerZone
             Layout.fillHeight: true
@@ -144,12 +78,25 @@ Item {
             Layout.horizontalStretchFactor: 2
         }
 
-        Rectangle {
-            Layout.preferredWidth: Math.max(1, Math.round(Tokens.stroke.base))
-            Layout.preferredHeight: parent.height * 0.5
+        // Quick actions sit in the gap between weather and telemetry
+        QuickLaunch {
+            id: quickLaunch
+            Layout.fillHeight: true
             Layout.alignment: Qt.AlignVCenter
-            color: Theme.borderIdle
-            opacity: 0.45
+            Layout.preferredWidth: implicitWidth > 0
+                ? implicitWidth
+                : Math.round(Tokens.icon.medium * 8 + Tokens.spacing.md * 3)
+            Layout.minimumWidth: Math.round(Tokens.icon.medium * 6)
+            Layout.fillWidth: false
+            // Natural width from icon row
+            implicitWidth: {
+                const hit = Math.max(
+                    Tokens.icon.medium + Tokens.spacing.xs,
+                    Tokens.bar.height - 4
+                )
+                // dashboard + 3 console + media + spacings
+                return hit * 5 + Tokens.spacing.sm * 2 + Tokens.spacing.xss * 2
+            }
         }
 
         RightBar {

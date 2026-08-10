@@ -6,6 +6,8 @@ set FASTFETCH "$HOME/.config/fastfetch"
     # fastfetch
 # end
 
-if test -r "$OH_MY_POSH"
-    oh-my-posh init fish --config "$OH_MY_POSH/smoothie.omp.json" | source
-end
+# if test -r "$OH_MY_POSH"
+#     oh-my-posh init fish --config "$OH_MY_POSH/smoothie.omp.json" | source
+# end
+
+starship init fish | source
