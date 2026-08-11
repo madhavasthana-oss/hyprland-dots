@@ -10,9 +10,8 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MOD_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
-WALL_DIR="${MOD_ROOT}/Pictures/Wallpapers"
+# Prefer the user's collection; override with WALLPAPER_DIR if needed.
+WALL_DIR="${WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/doomslayer"
 STATE_FILE="$STATE_DIR/wallpaper.state"
 LIVE=false
@@ -55,29 +54,36 @@ notify() {
     fi
 }
 
-# Collect wallpaper paths (one per line, sorted)
+# Collect wallpaper paths (one per line, sorted).
+# Note: do NOT use ${arr[@]:-} — when arr is empty that expands to one blank
+# entry, so --next after the last wallpaper tries to apply "" and fails.
 collect_walls() {
     local prefer_live="$1"
-    local -a statics lives
+    local -a statics=() lives=() all=()
     local f
 
     while IFS= read -r -d '' f; do
-        statics+=("$f")
+        [[ -n "$f" ]] && statics+=("$f")
     done < <(find "$WALL_DIR" -maxdepth 1 -type f \
         \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.gif' \) \
         -print0 2>/dev/null | sort -z)
 
     while IFS= read -r -d '' f; do
-        lives+=("$f")
+        [[ -n "$f" ]] && lives+=("$f")
     done < <(find "$WALL_DIR" -mindepth 2 -type f \
         \( -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' -o -iname '*.gif' \) \
         -print0 2>/dev/null | sort -z)
 
     if [[ "$prefer_live" == "true" ]]; then
-        printf '%s\n' "${lives[@]:-}" "${statics[@]:-}"
+        all=("${lives[@]}" "${statics[@]}")
     else
-        printf '%s\n' "${statics[@]:-}" "${lives[@]:-}"
+        all=("${statics[@]}" "${lives[@]}")
     fi
+
+    if [[ ${#all[@]} -eq 0 ]]; then
+        return 0
+    fi
+    printf '%s\n' "${all[@]}"
 }
 
 is_video() {
@@ -196,10 +202,14 @@ theme_astral_vagabond_from_awww() {
 }
 
 apply_wall() {
-    local path="$1"
-    path="$(readlink -f "$path")"
-    if [[ ! -f "$path" ]]; then
-        echo "error: not a file: $path" >&2
+    local path="${1:-}"
+    if [[ -z "$path" ]]; then
+        echo "error: empty wallpaper path" >&2
+        exit 1
+    fi
+    path="$(readlink -f "$path" 2>/dev/null || true)"
+    if [[ -z "$path" || ! -f "$path" ]]; then
+        echo "error: not a file: ${1:-}" >&2
         exit 1
     fi
 
@@ -264,14 +274,26 @@ resolve_set_arg() {
     return 1
 }
 
+# Load wall list into the named array, dropping any blank lines.
+load_walls() {
+    local prefer_live="$1"
+    local -n _out="$2"
+    local path
+    _out=()
+    while IFS= read -r path; do
+        [[ -n "$path" && -f "$path" ]] && _out+=("$path")
+    done < <(collect_walls "$prefer_live")
+}
+
 next_wall() {
     local prefer_live="false"
     $LIVE && prefer_live="true"
-    mapfile -t walls < <(collect_walls "$prefer_live")
+    local -a walls=()
+    load_walls "$prefer_live" walls
     [[ ${#walls[@]} -gt 0 ]] || { echo "error: no wallpapers found in $WALL_DIR" >&2; exit 1; }
 
     local current="" idx=0
-    [[ -f "$STATE_FILE" ]] && current="$(cat "$STATE_FILE")"
+    [[ -f "$STATE_FILE" ]] && current="$(cat "$STATE_FILE" 2>/dev/null || true)"
 
     if [[ -n "$current" ]]; then
         local i
@@ -288,7 +310,8 @@ next_wall() {
 random_wall() {
     local prefer_live="false"
     $LIVE && prefer_live="true"
-    mapfile -t walls < <(collect_walls "$prefer_live")
+    local -a walls=()
+    load_walls "$prefer_live" walls
     [[ ${#walls[@]} -gt 0 ]] || { echo "error: no wallpapers found in $WALL_DIR" >&2; exit 1; }
     local n=$((RANDOM % ${#walls[@]}))
     apply_wall "${walls[$n]}"
