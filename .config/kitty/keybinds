@@ -1,0 +1,142 @@
+# Kitty keybinds — tmux-style prefix (Ctrl+K)
+# Included from kitty.conf via: include keybinds
+#
+# HOW THIS WORKS (read this):
+#   1. Press Ctrl+K and RELEASE it   ← enters prefix mode (one-shot)
+#   2. Press the action key alone    ← e.g. h, v, c, ?
+#   Do NOT hold Ctrl+K and the action key together like a chord.
+#
+# Mirrors ~/.config/ghostty/keybinds (Ghostty uses Ctrl+G).
+# Split naming matches tmux / Ghostty:
+#   h = horizontal split → left/right  (vsplit)
+#   v = vertical split   → top/bottom  (hsplit)
+
+# ---------------------------------------------------------------------------
+# Prefix: Ctrl+K -> one-shot "tmux" key mode
+# ---------------------------------------------------------------------------
+# --on-action end  → leave mode after any action (one-shot, like Ghostty)
+# --on-unknown ignore → swallow unknown keys while in prefix mode
+map --new-mode tmux --on-action end --on-unknown ignore ctrl+k
+
+# Escape / cancel prefix mode without doing anything
+map --mode tmux escape pop_keyboard_mode
+map --mode tmux esc pop_keyboard_mode
+
+# Literal Ctrl+K to the running program (prefix then k, or prefix then Ctrl+K)
+map --mode tmux k send_key ctrl+k
+map --mode tmux ctrl+k send_key ctrl+k
+
+# ---------------------------------------------------------------------------
+# View keybinds helper
+# ---------------------------------------------------------------------------
+# Command palette — searchable actions + binds
+map --mode tmux ? command_palette
+map --mode tmux shift+slash command_palette
+
+# Doomslayer cheat sheet in a pager overlay
+map --mode tmux ctrl+h launch --type=overlay less ~/.config/kitty/keybinds-help
+
+# ---------------------------------------------------------------------------
+# Tabs (~ tmux windows)
+# ---------------------------------------------------------------------------
+map --mode tmux c new_tab
+map --mode tmux n next_tab
+map --mode tmux p previous_tab
+# 0 / l → previously active tab (kitty: goto_tab 0)
+map --mode tmux l goto_tab 0
+map --mode tmux 0 goto_tab 0
+map --mode tmux , set_tab_title
+# Interactive tab picker (closest to Ghostty tab overview)
+map --mode tmux w select_tab
+
+map --mode tmux 1 goto_tab 1
+map --mode tmux 2 goto_tab 2
+map --mode tmux 3 goto_tab 3
+map --mode tmux 4 goto_tab 4
+map --mode tmux 5 goto_tab 5
+map --mode tmux 6 goto_tab 6
+map --mode tmux 7 goto_tab 7
+map --mode tmux 8 goto_tab 8
+map --mode tmux 9 goto_tab 9
+
+# Close whole tab (shell Ctrl+D still exits a single pane)
+map --mode tmux d close_tab
+
+# ---------------------------------------------------------------------------
+# Windows (OS-level Kitty windows)
+# ---------------------------------------------------------------------------
+map --mode tmux shift+c new_os_window
+map --mode tmux & close_os_window
+
+# ---------------------------------------------------------------------------
+# Splits (~ tmux panes)
+# ---------------------------------------------------------------------------
+# Kitty: vsplit = side-by-side, hsplit = stacked
+map --mode tmux h launch --cwd=current --location=vsplit
+map --mode tmux v launch --cwd=current --location=hsplit
+map --mode tmux % launch --cwd=current --location=vsplit
+map --mode tmux shift+apostrophe launch --cwd=current --location=hsplit
+
+# Focus splits
+map --mode tmux left neighboring_window left
+map --mode tmux down neighboring_window down
+map --mode tmux up neighboring_window up
+map --mode tmux right neighboring_window right
+map --mode tmux shift+h neighboring_window left
+map --mode tmux shift+j neighboring_window down
+map --mode tmux shift+k neighboring_window up
+map --mode tmux shift+l neighboring_window right
+map --mode tmux o next_window
+map --mode tmux ; previous_window
+
+# Zoom / balance
+# toggle_layout stack ≈ zoom pane (stack shows only the active window)
+map --mode tmux z toggle_layout stack
+map --mode tmux equal resize_window reset
+
+# One-shot resize (still available without entering resize mode)
+map --mode tmux ctrl+left resize_window narrower 3
+map --mode tmux ctrl+down resize_window shorter 3
+map --mode tmux ctrl+up resize_window taller 3
+map --mode tmux ctrl+right resize_window wider 3
+
+# Resize mode — prefix then Shift+R (capital R; lowercase r = reload)
+# Stays active so you can mash arrows / hjkl freely. Esc or Enter to exit.
+# (push runs first; tmux mode then ends, leaving resize on the stack)
+# f13 is only used to register the mode (kitty requires an entry key for --new-mode)
+map --new-mode resize --on-unknown ignore f13
+map --mode tmux shift+r push_keyboard_mode resize
+map --mode resize escape pop_keyboard_mode
+map --mode resize esc pop_keyboard_mode
+map --mode resize enter pop_keyboard_mode
+map --mode resize left resize_window narrower 1
+map --mode resize down resize_window shorter 1
+map --mode resize up resize_window taller 1
+map --mode resize right resize_window wider 1
+map --mode resize h resize_window narrower 1
+map --mode resize j resize_window shorter 1
+map --mode resize k resize_window taller 1
+map --mode resize l resize_window wider 1
+map --mode resize equal resize_window reset
+
+# ---------------------------------------------------------------------------
+# Search / scroll / clipboard
+# ---------------------------------------------------------------------------
+# show_scrollback opens the scrollback pager (search with / inside the pager)
+map --mode tmux f show_scrollback
+map --mode tmux slash show_scrollback
+map --mode tmux [ scroll_page_up
+map --mode tmux ] scroll_page_down
+# Note: plain k is used to send literal Ctrl+K (see prefix section above)
+map --mode tmux home scroll_home
+map --mode tmux shift+g scroll_end
+# No exact select_all in kitty; copy whole screen as a practical stand-in
+map --mode tmux a launch --stdin-source=@screen --type=clipboard
+
+# ---------------------------------------------------------------------------
+# Misc
+# ---------------------------------------------------------------------------
+map --mode tmux r load_config_file
+map --mode tmux enter toggle_fullscreen
+# Ghostty has a terminal inspector; closest built-in is debug_config
+map --mode tmux i debug_config

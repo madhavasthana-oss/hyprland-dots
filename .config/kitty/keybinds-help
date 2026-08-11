@@ -1,0 +1,61 @@
+-------------------------------------------------------------
+ Kitty keybinds  ·  Doomslayer  ·  prefix = Ctrl+K
+
+ HOW: press Ctrl+K, RELEASE it, then the action key.
+      (Not a chord — same idea as tmux prefix / Ghostty Ctrl+G.)
+
+ Ctrl+K ?         command palette (search actions/binds)
+ Ctrl+K Ctrl+H    this cheat sheet in less (overlay)
+ Esc              cancel prefix mode
+-------------------------------------------------------------
+
+  PREFIX
+    Ctrl+K            enter prefix mode (one shot)
+    Esc               cancel prefix mode
+    k  or  Ctrl+K     send real Ctrl+K to the app (after prefix)
+
+  TABS  (~ tmux windows)
+    Ctrl+K c          new tab
+    Ctrl+K n / p      next / previous tab
+    Ctrl+K l / 0      last tab (previously active)
+    Ctrl+K 1 … 9      go to tab N
+    Ctrl+K ,          rename tab
+    Ctrl+K w          select tab (interactive)
+    Ctrl+K d          close whole tab (all splits in it)
+
+  WINDOWS
+    Ctrl+K Shift+c    new OS window
+    Ctrl+K &          close OS window
+
+  SPLITS  (~ tmux panes)
+    Ctrl+K h          horizontal split  (left | right)
+    Ctrl+K v          vertical split    (top / bottom)
+    Ctrl+K %          same as h
+    Ctrl+K "          same as v
+    Ctrl+K ←↓↑→       focus split
+    Ctrl+K R          resize MODE (then arrows/hjkl; Esc exits)
+    Ctrl+K Ctrl+←…→   one-shot resize
+    Ctrl+K Shift+hjkl focus split (vim)
+    Ctrl+K o / ;      next / previous split
+    Ctrl+K z          zoom / unzoom pane (stack layout)
+    Ctrl+K =          equalize splits
+
+  SEARCH / SCROLL
+    Ctrl+K f  or  /   scrollback pager (search with / inside)
+    Ctrl+K [ / ]      page up / page down
+    Ctrl+K Home / G   scroll top / bottom
+    Ctrl+K a          copy whole screen to clipboard
+
+  MISC
+    Ctrl+K ?          VIEW KEYBINDS — command palette
+    Ctrl+K Ctrl+H     VIEW KEYBINDS — this cheat sheet (less)
+
+    Ctrl+K r          reload config
+    Ctrl+K Enter      toggle fullscreen
+    Ctrl+K i          debug config dump
+
+  NOTES
+    · Shell Ctrl+D already exits a pane (EOF) — no prefix needed.
+    · Prefix+d closes the tab; prefix+& closes the OS window.
+    · h/v use tmux naming: h = side-by-side, v = stacked.
+    · Ghostty twin uses Ctrl+G with the same layout of binds.

@@ -1,10 +1,13 @@
 // WorkspaceBoard.qml --- content-sized mini-desktops + drag-drop
 // Layout: board hugs a 5×2 grid of 16:9 tiles (no giant empty panel).
 // DnD: DropArea on tiles + flat windowSpace chips (quickshell-overview pattern).
+// Window chips show live ScreencopyView mini-displays (icon fallback).
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell
+import Quickshell.Wayland
+import Quickshell.Hyprland
 import "../.."
 import "../../utils"
 
@@ -349,6 +352,22 @@ Item {
                             property real homeX: 0
                             property real homeY: 0
 
+                            // Live mini-display via hyprland-toplevel-export-v1.
+                            // Only attach capture while the board is open (saves GPU/RAM).
+                            readonly property var captureToplevel: {
+                                const open = Globals.workspaceBoardOpen
+                                // Re-resolve when clients / wayland toplevels change
+                                const _clients = WorkspaceHub.clientsByWorkspace
+                                const _tops = Hyprland.toplevels
+                                    ? Hyprland.toplevels.values : null
+                                const _tm = ToplevelManager.toplevels
+                                    ? ToplevelManager.toplevels.values : null
+                                if (!open || !winChip.address.length)
+                                    return null
+                                return WorkspaceHub.waylandToplevelFor(winChip.address)
+                            }
+                            readonly property bool hasPreview: preview.hasContent
+
                             readonly property real pad: Tokens.workspaceMiniPad
                             readonly property real innerW: Math.max(1, gridHost.miniWidth() - 2 * pad)
                             readonly property real innerH: Math.max(1, gridHost.miniHeight() - 2 * pad)
@@ -377,7 +396,9 @@ Item {
                             Drag.hotSpot.y: height / 2
                             Drag.supportedActions: Qt.MoveAction
 
+                            // Chrome + fallback fill under the screencopy feed
                             Rectangle {
+                                id: chipChrome
                                 anchors.fill: parent
                                 radius: Tokens.radiusSm
                                 color: dragArea.containsMouse || winChip.dragInProgress
@@ -387,31 +408,81 @@ Item {
                                     : (dragArea.containsMouse
                                        ? Theme.borderActive : Theme.borderIdle)
                                 border.width: Tokens.strokeWidth
-                            }
+                                clip: true
 
-                            Image {
-                                id: chipIcon
-                                anchors.centerIn: parent
-                                width:  Math.min(root.iconSz, parent.width - 6)
-                                height: Math.min(root.iconSz, parent.height - 6)
-                                source: winChip.iconSource
-                                sourceSize: Qt.size(Math.max(1, width * 2), Math.max(1, height * 2))
-                                fillMode: Image.PreserveAspectFit
-                                asynchronous: true
-                                smooth: true
-                                visible: status === Image.Ready
-                            }
-
-                            Text {
-                                anchors.centerIn: parent
-                                visible: chipIcon.status !== Image.Ready
-                                text: {
-                                    const t = winChip.className || winChip.title || "?"
-                                    return String(t).charAt(0).toUpperCase()
+                                // Mini live display of the real window surface
+                                ScreencopyView {
+                                    id: preview
+                                    anchors.fill: parent
+                                    anchors.margins: Math.max(1, Tokens.strokeWidth)
+                                    captureSource: winChip.captureToplevel
+                                    live: Globals.workspaceBoardOpen
+                                        && winChip.captureToplevel !== null
+                                    paintCursor: false
+                                    visible: hasContent
+                                    // Soften low-res thumbnails
+                                    layer.enabled: hasContent
+                                    layer.smooth: true
                                 }
-                                font.family: Theme.fontDisplay
-                                font.pixelSize: Tokens.fontSizeSmall
-                                color: Theme.accent
+
+                                // Icon fallback while capture warms up / fails
+                                Image {
+                                    id: chipIcon
+                                    anchors.centerIn: parent
+                                    width:  Math.min(root.iconSz, parent.width - 6)
+                                    height: Math.min(root.iconSz, parent.height - 6)
+                                    source: winChip.iconSource
+                                    sourceSize: Qt.size(Math.max(1, width * 2), Math.max(1, height * 2))
+                                    fillMode: Image.PreserveAspectFit
+                                    asynchronous: true
+                                    smooth: true
+                                    visible: !preview.hasContent && status === Image.Ready
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    visible: !preview.hasContent
+                                        && chipIcon.status !== Image.Ready
+                                    text: {
+                                        const t = winChip.className || winChip.title || "?"
+                                        return String(t).charAt(0).toUpperCase()
+                                    }
+                                    font.family: Theme.fontDisplay
+                                    font.pixelSize: Tokens.fontSizeSmall
+                                    color: Theme.accent
+                                }
+
+                                // Small app glyph in the corner once preview is live
+                                // (helps identify similar-looking windows)
+                                Image {
+                                    id: cornerIcon
+                                    visible: preview.hasContent
+                                        && winChip.iconSource.length > 0
+                                        && parent.width >= root.iconSz + 10
+                                        && parent.height >= root.iconSz + 10
+                                    anchors.right: parent.right
+                                    anchors.bottom: parent.bottom
+                                    anchors.margins: 3
+                                    width:  Math.min(root.iconSz - 2,
+                                        Math.round(Math.min(parent.width, parent.height) * 0.28))
+                                    height: width
+                                    source: winChip.iconSource
+                                    sourceSize: Qt.size(Math.max(1, width * 2), Math.max(1, height * 2))
+                                    fillMode: Image.PreserveAspectFit
+                                    asynchronous: true
+                                    smooth: true
+                                    opacity: 0.92
+                                }
+
+                                // Light hover tint so chrome reads over busy previews
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: parent.radius
+                                    color: dragArea.containsMouse || winChip.dragInProgress
+                                        ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.10)
+                                        : "transparent"
+                                    border.color: "transparent"
+                                }
                             }
 
                             MouseArea {
@@ -428,6 +499,10 @@ Item {
                                 drag.threshold: 4
 
                                 property bool moved: false
+
+                                ToolTip.visible: containsMouse && !drag.active
+                                ToolTip.delay: 400
+                                ToolTip.text: winChip.title || winChip.className || ""
 
                                 onPressed: (mouse) => {
                                     moved = false

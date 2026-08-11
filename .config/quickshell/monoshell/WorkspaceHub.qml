@@ -7,6 +7,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
+import Quickshell.Wayland
 
 Singleton {
     id: root
@@ -106,6 +107,56 @@ Singleton {
         return (p && p.length) ? p : ""
     }
 
+    // Bare hex address (no 0x) for matching HyprlandToplevel.address ↔ hyprctl
+    function bareAddress(addr) {
+        return normalizeAddress(addr).replace(/^0x/i, "").toLowerCase()
+    }
+
+    // Resolve a Wayland Toplevel for ScreencopyView (hyprland-toplevel-export-v1).
+    // Prefer Hyprland.toplevels[].wayland; fall back to ToplevelManager + attached
+    // HyprlandToplevel (quickshell-overview pattern).
+    function waylandToplevelFor(addr) {
+        const bare = bareAddress(addr)
+        if (!bare.length)
+            return null
+
+        try {
+            const list = Hyprland.toplevels ? Hyprland.toplevels.values : null
+            if (list) {
+                for (let i = 0; i < list.length; i++) {
+                    const ht = list[i]
+                    if (!ht)
+                        continue
+                    const a = String(ht.address || "").replace(/^0x/i, "").toLowerCase()
+                    if (a === bare)
+                        return ht.wayland || null
+                }
+            }
+        } catch (e) {
+            // Hyprland.toplevels may be unavailable on older qs builds
+        }
+
+        try {
+            const tops = ToplevelManager.toplevels.values
+            if (tops) {
+                for (let i = 0; i < tops.length; i++) {
+                    const top = tops[i]
+                    if (!top)
+                        continue
+                    const ht = top.HyprlandToplevel
+                    if (!ht)
+                        continue
+                    const a = String(ht.address || "").replace(/^0x/i, "").toLowerCase()
+                    if (a === bare)
+                        return top
+                }
+            }
+        } catch (e) {
+            // ToplevelManager optional
+        }
+        return null
+    }
+
     // --- Hyprland dispatches (Lua-only path for 0.56) ---
 
     function dispatch(request) {
@@ -155,6 +206,8 @@ Singleton {
         if (refreshing || dragActive)
             return
         refreshing = true
+        // Keep HyprlandToplevel address ↔ wayland handles fresh for previews
+        try { Hyprland.refreshToplevels() } catch (e) {}
         clientsProc.running = true
     }
 
