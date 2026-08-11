@@ -594,7 +594,7 @@ Item {
                 "bash", "-c",
                 "mkdir -p \"$HOME/Videos\" && "
                 + "f=\"$HOME/Videos/slayer-$(date +%Y%m%d-%H%M%S).mp4\" && "
-                + "wf-recorder -g \"$(slurp)\" -f \"$f\"; "
+                + "wf-recorder -a -g \"$(slurp)\" -f \"$f\"; "
                 + "notify-send -a Settings 'Recording saved' \"$f\""
             ])
         }

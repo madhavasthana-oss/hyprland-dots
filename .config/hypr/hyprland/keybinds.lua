@@ -468,7 +468,7 @@ hl.bind(
 	hl.dsp.exec_cmd(
 		"mkdir -p "
 			.. record_dir
-			.. " && notify-send -a Hyprland 'Recording' 'Full screen started' && wf-recorder -f \""
+			.. " && notify-send -a Hyprland 'Recording' 'Full screen started' && wf-recorder -a -f \""
 			.. record_dir
 			.. '/rec-$(date +%Y%m%d-%H%M%S).mp4"'
 	),
@@ -479,7 +479,7 @@ hl.bind(
 	hl.dsp.exec_cmd(
 		"mkdir -p "
 			.. record_dir
-			.. " && notify-send -a Hyprland 'Recording' 'Region started' && wf-recorder -g \"$(slurp)\" -f \""
+			.. " && notify-send -a Hyprland 'Recording' 'Region started' && wf-recorder -a -g \"$(slurp)\" -f \""
 			.. record_dir
 			.. '/rec-$(date +%Y%m%d-%H%M%S).mp4"'
 	),

@@ -445,7 +445,6 @@ Item {
         anchors.fill: parent
         barWidth:     centerBar.width
         barHeight:    centerBar.height
-        // Match side-bar chrome radius when collapsed
         radius:       Tokens.radiusLg
         alertActive:  centerBar.alertActive
         expanded:     centerBar.expanded
