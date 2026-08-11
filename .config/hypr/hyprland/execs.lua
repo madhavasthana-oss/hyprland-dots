@@ -3,7 +3,7 @@ hl.on("hyprland.start", function()
 	-- local variables
 	local home = os.getenv("HOME")
 	local wallpaper_script_path = string.format("%s/.config/hypr/hyprland/scripts/wallpaper.sh", home)
-	local quickshell_cfg_main = string.format("monoshell")
+	local quickshell_cfg_main = string.format("astral-vagabond")
 	-- Bar, wallpaper
 	hl.exec_cmd("$HOME/.config/hypr/hyprland/scripts/start_geoclue_agent.sh")
 	hl.exec_cmd("$HOME/.config/hypr/custom/scripts/__restore_video_wallpaper.sh")

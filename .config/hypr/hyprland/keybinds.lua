@@ -407,7 +407,7 @@ hl.bind(
 	{ description = "Clipboard: wipe history" }
 )
 
--- Wallpaper cycler (also recolors monoshell + hypr borders via wallust from live awww image)
+-- Wallpaper cycler (also recolors astral-vagabond + hypr borders via wallust from live awww image)
 hl.bind(
 	"SUPER + W",
 	hl.dsp.exec_cmd(
@@ -415,16 +415,16 @@ hl.bind(
 			"%s/wallpaper.sh --next", hyprScripts
 		)
 	),
-	{ description = "Wallpaper: next + wallust theme (monoshell + hypr borders)" }
+	{ description = "Wallpaper: next + wallust theme (astral-vagabond + hypr borders)" }
 )
 
--- Restore constant Ash palette for monoshell + hypr borders (no wallpaper recolor)
+-- Restore constant Ash palette for astral-vagabond + hypr borders (no wallpaper recolor)
 hl.bind(
 	"SUPER + SHIFT + W",
 	hl.dsp.exec_cmd(
-		"$HOME/.config/quickshell/monoshell/utils/scripts/load-legacy-colors.sh --activate && notify-send -a Monoshell 'Theme' 'Ash colors restored (monoshell + hypr)'"
+		"$HOME/.config/quickshell/astral-vagabond/utils/scripts/load-legacy-colors.sh --activate && notify-send -a Astral-Vagabond 'Theme' 'Ash colors restored (astral-vagabond + hypr)'"
 	),
-	{ description = "Theme: restore Ash colors (monoshell + hypr)" }
+	{ description = "Theme: restore Ash colors (astral-vagabond + hypr)" }
 )
 
 

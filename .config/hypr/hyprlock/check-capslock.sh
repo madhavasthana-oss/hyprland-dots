@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Caps lock indicator — Monoshell hyprlock
+# Caps lock indicator — Astral-Vagabond hyprlock
 
 MAIN_KB_CAPS=$(hyprctl devices 2>/dev/null \
     | grep -B 6 "main: yes" \

@@ -1,6 +1,6 @@
 # hyprland-dots
 
-Minimal, utility-first Hyprland rice built around **monoshell** (Quickshell) and the **Ash** monochrome palette.
+Minimal, utility-first Hyprland rice built around **astral-vagabond** (Quickshell) and the **Ash** monochrome palette.
 
 Soft charcoal surfaces, silver accents, low-glare text. Functional over flashy.
 
@@ -10,7 +10,7 @@ Soft charcoal surfaces, silver accents, low-glare text. Functional over flashy.
 
 | Path | Role |
 |------|------|
-| [`.config/quickshell/monoshell/`](./.config/quickshell/monoshell/) | Bar, center console, system panels |
+| [`.config/quickshell/astral-vagabond/`](./.config/quickshell/astral-vagabond/) | Bar, center console, system panels |
 | [`.config/hypr/`](./.config/hypr/) | Hyprland (Lua), hyprlock, hypridle |
 | [`.config/mako/`](./.config/mako/) | Notifications |
 | [`.config/fuzzel/`](./.config/fuzzel/) | App launcher |
@@ -38,22 +38,22 @@ Soft charcoal surfaces, silver accents, low-glare text. Functional over flashy.
 - No pure black / pure white (easier on the eyes)
 - Hierarchy via luminance, not neon hues
 - Utility labels over lore
-- One palette across Hypr, monoshell, terminals, mako, fuzzel, nvim
+- One palette across Hypr, astral-vagabond, terminals, mako, fuzzel, nvim
 
 **Wallust (optional)**  
-Tints monoshell **text + icon accents** and Hyprland **active window borders** from the wallpaper. Surfaces stay Ash. Activate from console → configuration, `SUPER+W`, or:
+Tints astral-vagabond **text + icon accents** and Hyprland **active window borders** from the wallpaper. Surfaces stay Ash. Activate from console → configuration, `SUPER+W`, or:
 
 ```bash
-~/.config/quickshell/monoshell/utils/scripts/load-wallust-colors.sh --from-awww
-# restore Ash (monoshell + hypr borders): SUPER+SHIFT+W, or:
-~/.config/quickshell/monoshell/utils/scripts/load-legacy-colors.sh --activate
+~/.config/quickshell/astral-vagabond/utils/scripts/load-wallust-colors.sh --from-awww
+# restore Ash (astral-vagabond + hypr borders): SUPER+SHIFT+W, or:
+~/.config/quickshell/astral-vagabond/utils/scripts/load-legacy-colors.sh --activate
 ```
 
 ---
 
-## Monoshell
+## Astral-Vagabond
 
-Quickshell config name: `monoshell` (`quickshell -c monoshell`).
+Quickshell config name: `astral-vagabond` (`quickshell -c astral-vagabond`).
 
 | Area | Contents |
 |------|----------|
@@ -85,7 +85,7 @@ Configs rsync into `~/.config` with `--delete` for listed trees — back up firs
 Log out / reboot for SDDM and a clean Hypr session. Shell:
 
 ```bash
-quickshell -c monoshell
+quickshell -c astral-vagabond
 ```
 
 (Already started on login if hypr `execs.lua` is applied.)
@@ -95,8 +95,8 @@ quickshell -c monoshell
 ## Useful paths
 
 ```text
-.config/quickshell/monoshell/Theme.qml          # color roles (live JSON overlay)
-.config/quickshell/monoshell/colors/            # active / legacy / wallust
+.config/quickshell/astral-vagabond/Theme.qml          # color roles (live JSON overlay)
+.config/quickshell/astral-vagabond/colors/            # active / legacy / wallust
 .config/hypr/hyprland/colors.lua                # window borders
 .config/kitty/theme.conf · ghostty/theme.conf   # terminals
 scripts/bash/                                   # helpers (fuzzel, wallpaper, etc.)
@@ -107,7 +107,7 @@ scripts/bash/                                   # helpers (fuzzel, wallpaper, et
 ## Notes
 
 - Work only from this repo until you run `./install` or sync deliberately.
-- Legacy script names under `scripts/bash/` may still mention older themes; the live stack is **monoshell + Ash**.
+- Legacy script names under `scripts/bash/` may still mention older themes; the live stack is **astral-vagabond + Ash**.
 - Changelog: [CHANGELOG.md](./CHANGELOG.md)
 
 ---

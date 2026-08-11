@@ -1,6 +1,6 @@
 # ─────────────────────────────────────────────────────────────
-#  Monoshell · mako (Ash monochrome)
-#  Mirrors quickshell/monoshell Theme.qml
+#  Astral-Vagabond · mako (Ash monochrome)
+#  Mirrors quickshell/astral-vagabond Theme.qml
 #
 #  bgPrimary #121212 | bgSurface #1A1A1A | bgElevated #242424
 #  bgConsole #161616 @ ~0.95 opacity
@@ -88,7 +88,7 @@ format=<span foreground="#E8E8E8"><b>⚠ %s</b></span>\n<span foreground="#A3A3A
 progress-color=over #E8E8E8FF
 
 # ── app polish ──────────────────────────────────────────────
-[app-name="Monoshell"]
+[app-name="Astral-Vagabond"]
 border-color=#C8C8C8FF
 format=<span foreground="#E5E5E5"><b>◆ %s</b></span>\n<span foreground="#A3A3A3">%b</span>
 

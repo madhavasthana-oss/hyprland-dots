@@ -164,15 +164,15 @@ apply_live() {
     disown 2>/dev/null || true
 }
 
-# Theme monoshell + hypr borders from whatever awww is currently showing.
+# Theme astral-vagabond + hypr borders from whatever awww is currently showing.
 # Falls back to the just-applied path if awww has no image (e.g. mpvpaper video).
 # load-wallust-colors.sh also rewrites hyprland/colors.lua and applies live borders.
-theme_monoshell_from_awww() {
+theme_astral_vagabond_from_awww() {
     local fallback="${1:-}"
-    local theme_script="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/monoshell/utils/scripts/load-wallust-colors.sh"
+    local theme_script="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/astral-vagabond/utils/scripts/load-wallust-colors.sh"
 
     if [[ ! -x "$theme_script" ]]; then
-        echo "warning: monoshell theme script missing: $theme_script" >&2
+        echo "warning: astral-vagabond theme script missing: $theme_script" >&2
         return 0
     fi
 
@@ -180,13 +180,13 @@ theme_monoshell_from_awww() {
     sleep 0.15
 
     if "$theme_script" --from-awww; then
-        notify "Theme" "wallust ← awww (monoshell + hypr)"
+        notify "Theme" "wallust ← awww (astral-vagabond + hypr)"
         return 0
     fi
 
     if [[ -n "$fallback" && -f "$fallback" ]] && ! is_video "$fallback"; then
         if "$theme_script" "$fallback"; then
-            notify "Theme" "wallust ← $(basename "$fallback") (monoshell + hypr)"
+            notify "Theme" "wallust ← $(basename "$fallback") (astral-vagabond + hypr)"
             return 0
         fi
     fi
@@ -219,7 +219,7 @@ apply_wall() {
     notify "Wallpaper" "$(basename "$path")"
 
     # SUPER+W path: recolor quickshell from the live awww image
-    theme_monoshell_from_awww "$path"
+    theme_astral_vagabond_from_awww "$path"
 }
 
 list_walls() {

@@ -1,4 +1,4 @@
--- WezTerm config (Monoshell / Ash monochrome)
+-- WezTerm config (Astral-Vagabond / Ash monochrome)
 -- Hyprland: native Wayland is broken on wezterm 20240203 → force XWayland.
 
 local wezterm = require("wezterm")

@@ -1,5 +1,5 @@
-# KDE/Qt shared settings for Monoshell
-# ColorScheme: Ash (monoshell Theme.qml monochrome)
+# KDE/Qt shared settings for Astral-Vagabond
+# ColorScheme: Ash (astral-vagabond Theme.qml monochrome)
 # Colors are also inlined so apps work even if the .colors file
 # has not been installed to ~/.local/share/color-schemes yet.
 

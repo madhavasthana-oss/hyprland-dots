@@ -1,11 +1,11 @@
 # Changelog
 
-History of **hyprland-dots** — monoshell + Ash monochrome.  
+History of **hyprland-dots** — astral-vagabond + Ash monochrome.  
 Newest entries first.
 
 ---
 
-## 2026-08 — Monoshell rework (current)
+## 2026-08 — Astral-Vagabond rework (current)
 
 ### Console layout (directory)
 - Moved Wi‑Fi / Bluetooth / settings / notifications from dead `edges/rightEdge/` into `widgets/centerBarWidgets/console/`
@@ -17,13 +17,13 @@ Newest entries first.
 - Active state highlighted on both tiles; polls status while settings stay open
 
 ### Shell & identity
-- Renamed Quickshell stack **doomshell → monoshell**
+- Renamed Quickshell stack **doomshell → astral-vagabond**
 - Install entrypoint **`doom.sh` → `install`** (no theme lore in CLI)
 - Dropped edge slide-out panel; Wi‑Fi / Bluetooth / settings / notifications live in **center Console**
 
 ### Ash monochrome palette
 - Soft charcoal surfaces (`#121212` / `#1A1A1A` / `#242424`), silver accents, low-glare text
-- Applied across monoshell Theme, hypr borders, hyprlock, mako, fuzzel, rofi, KDE colors, nvim, oh-my-posh, kitty, ghostty, wezterm, fish
+- Applied across astral-vagabond Theme, hypr borders, hyprlock, mako, fuzzel, rofi, KDE colors, nvim, oh-my-posh, kitty, ghostty, wezterm, fish
 - Right-bar labels (BAT / VOL / CPU / GPU / RAM) contrast fixed for readability
 - Scrollbars use Controls.Basic so system “red accent” no longer paints the thumb
 
@@ -52,14 +52,14 @@ Newest entries first.
 
 ---
 
-## Earlier (pre-monoshell)
+## Earlier (pre-astral-vagabond)
 
 Forked from a HyDE / Bad Blood–era quickshell rice with a heavy theme overlay (doomshell, red/orange palette, themed launcher copy). That direction is retired; see git history if you need old assets.
 
 Notable past experiments (superseded):
 
 - Fastfetch / OMP / wallpapers oriented around that theme
-- Waybar / AGS paths later replaced by Quickshell monoshell
+- Waybar / AGS paths later replaced by Quickshell astral-vagabond
 - SDDM astronaut conf under a themed filename (still installable as greeter config)
 
 ---

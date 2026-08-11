@@ -167,14 +167,14 @@ hl.layer_rule({ match = { namespace = "quickshell:wTaskView" }, no_anim = true})
 -- Launchers need to be FAST
 hl.layer_rule({ match = { namespace = "gtk4-layer-shell" }, no_anim = true})
 
--- Monoshell cava desktop overlay (kitty --class monoshell-cava)
+-- Astral-Vagabond cava desktop overlay (kitty --class astral-vagabond-cava)
 -- border_size = 0 only (no no_border / no_focus — those throw).
-hl.window_rule({ match = { class = "^(monoshell-cava)$" }, float = true })
-hl.window_rule({ match = { class = "^(monoshell-cava)$" }, pin = true })
-hl.window_rule({ match = { class = "^(monoshell-cava)$" }, no_shadow = true })
-hl.window_rule({ match = { class = "^(monoshell-cava)$" }, border_size = 0 })
-hl.window_rule({ match = { class = "^(monoshell-cava)$" }, no_initial_focus = true })
-hl.window_rule({ match = { class = "^(monoshell-cava)$" }, size = { "100%", "22%" } })
-hl.window_rule({ match = { class = "^(monoshell-cava)$" }, move = { "0", "78%" } })
+hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, float = true })
+hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, pin = true })
+hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, no_shadow = true })
+hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, border_size = 0 })
+hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, no_initial_focus = true })
+hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, size = { "100%", "22%" } })
+hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, move = { "0", "78%" } })
 
 

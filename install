@@ -6,7 +6,7 @@
 #   ./install                 # packages (full) + configs + sddm
 #   ./install --core          # skip OPTIONAL packages from requirements.txt
 #   ./install --packages      # packages only
-#   ./install --configs       # configs only (hypr, fuzzel, monoshell, …)
+#   ./install --configs       # configs only (hypr, fuzzel, astral-vagabond, …)
 #   ./install --sddm          # SDDM greeter theme only
 #   ./install --no-sddm       # skip SDDM step
 #   ./install --no-configs    # skip config sync
@@ -366,7 +366,7 @@ install_configs() {
 
   # Ensure wallust / color loaders are executable
   if [[ "$DRY_RUN" -eq 0 ]]; then
-    chmod +x "${LIVE_CONFIG}/quickshell/monoshell/utils/scripts/"*.sh 2>/dev/null || true
+    chmod +x "${LIVE_CONFIG}/quickshell/astral-vagabond/utils/scripts/"*.sh 2>/dev/null || true
   fi
 
   if [[ "$DRY_RUN" -eq 0 ]] && command -v hyprctl >/dev/null 2>&1; then
@@ -430,8 +430,8 @@ install_sddm() {
     need_root sed -i "s|^ConfigFile=.*|ConfigFile=Themes/${base}|" "${theme_dir}/metadata.desktop"
   fi
 
-  # Font used by greeter (from monoshell assets if present)
-  local font_src="${CONFIG_SRC}/quickshell/monoshell/assets/fonts/KogniGear.ttf"
+  # Font used by greeter (from astral-vagabond assets if present)
+  local font_src="${CONFIG_SRC}/quickshell/astral-vagabond/assets/fonts/KogniGear.ttf"
   if [[ -f "$font_src" ]]; then
     need_root install -d -m 755 "${theme_dir}/Fonts"
     need_root install -m 644 "$font_src" "${theme_dir}/Fonts/KogniGear.ttf" 2>/dev/null || true
@@ -464,7 +464,7 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
   warn "dry-run only — nothing was installed"
 else
   ok "install finished"
-  dim "Hypr: Super+A launcher · shell: quickshell -c monoshell"
+  dim "Hypr: Super+A launcher · shell: quickshell -c astral-vagabond"
   dim "SDDM: log out or reboot for greeter"
 fi
 echo
