@@ -40,6 +40,12 @@
     Ctrl+K z          zoom / unzoom pane (stack layout)
     Ctrl+K =          equalize splits
 
+  FONT ZOOM  (no prefix — same as wezterm)
+    Ctrl+=  or  Ctrl++   zoom in
+    Ctrl+-               zoom out
+    Ctrl+0               reset font size
+    Ctrl+wheel           zoom in / out
+
   SEARCH / SCROLL
     Ctrl+K f  or  /   scrollback pager (search with / inside)
     Ctrl+K [ / ]      page up / page down
