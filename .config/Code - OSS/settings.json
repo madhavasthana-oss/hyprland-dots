@@ -1,0 +1,86 @@
+{
+    "workbench.colorTheme": "Default High Contrast",
+    "workbench.editorAssociations": {
+        "{git,gitlens,chat-editing-snapshot-text-model,copilot,git-graph,git-graph-3}:/**/*.qrc": "default",
+        "*.qrc": "qt-core.qrcEditor"
+    },
+    "qt-core.additionalQtPaths": [
+        {
+            "name": "Qt-5.15.19-linux-g++-x86_64_from_PATH",
+            "path": "/usr/bin/qmake"
+        }
+    ],
+    "editor.fontFamily": "Fira Code",
+    "editor.fontLigatures": true,
+    "terminal.integrated.fontFamily": "Fira Code",
+    "terminal.integrated.fontLigatures.enabled": true,
+
+// -------------------------------------------------------------
+    
+    "python.languageServer": "Jedi",
+    "editor.quickSuggestions": {
+        "other": true,
+        "comments": false,
+        "strings": false
+    },
+    "editor.suggestOnTriggerCharacters": true,
+    "editor.parameterHints.enabled": true,
+    "qt-qml.qmlls.customExePath": "/usr/bin/qmlls6",
+    "qt-qml.doNotAskForQmllsDownload": true,
+
+    // ----------------------------------------------------------
+
+  "latex-workshop.latex.tools": [
+    {
+      "name": "xelatex",
+      "command": "xelatex",
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "%DOC%"
+      ],
+      "env": {}
+    },
+    {
+      "name": "biber",
+      "command": "biber",
+      "args": ["%DOCFILE%"],
+      "env": {}
+    }
+  ],
+
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "xelatex × 3",
+      "tools": ["xelatex", "xelatex", "xelatex"]
+    },
+    {
+      "name": "xelatex → biber → xelatex × 2",
+      "tools": ["xelatex", "biber", "xelatex", "xelatex"]
+    }
+  ],
+
+  "latex-workshop.latex.recipe.default": "xelatex × 3",
+
+  "latex-workshop.latex.autoBuild.run": "onFileChange",
+
+  "latex-workshop.latex.outDir": "%DIR%",
+
+  "latex-workshop.latex.clean.fileTypes": [
+    "*.aux", "*.bbl", "*.blg", "*.idx", "*.ind",
+    "*.lof", "*.lot", "*.out", "*.toc", "*.acn",
+    "*.acr", "*.alg", "*.glg", "*.glo", "*.gls",
+    "*.fls", "*.log", "*.fdb_latexmk", "*.snm",
+    "*.nav", "*.vrb", "*.synctex.gz", "*.xdv"
+  ],
+
+  "latex-workshop.latex.autoClean.run": "onFailed",
+
+  "latex-workshop.view.pdf.viewer": "tab",
+
+  "latex-workshop.synctex.afterBuild.enabled": true,
+
+  "latex-workshop.intellisense.package.enabled": true,
+  "latex-workshop.intellisense.unimathsymbols.enabled": true
+}
