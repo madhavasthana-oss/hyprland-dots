@@ -6,6 +6,7 @@ import Quickshell.DBusMenu
 import QtQuick
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
+import Qt5Compat.GraphicalEffects
 import "../utils"
 import ".."
 import "../widgets/rightBarWidgets/power"
@@ -517,20 +518,97 @@ Item {
             }
         }
 
+        // Spacer matching the sibling power button so RAM sits next to it
         Item {
-            Layout.fillWidth: true
+            Layout.preferredWidth: powerBtn.width
+            Layout.preferredHeight: 1
         }
     }
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
 
-            onClicked: {
-                if (Globals.activePanel !== "") {
-                    Globals.lastPanel = Globals.activePanel;
-                    Globals.activePanel = "";
-                } else
-                    Globals.activePanel = Globals.lastPanel;
+    Item {
+        id: powerBtn
+        z: 3
+        anchors.right: parent.right
+        anchors.rightMargin: Tokens.paddingH + Tokens.spacingXs
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: Tokens.workspaceBarIconSize + Tokens.spacingSm
+
+        readonly property bool active: Globals.powerMenuOpen
+        readonly property bool hovered: powerMouse.containsMouse
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: Tokens.workspaceBarIconSize + (powerBtn.hovered || powerBtn.active ? Tokens.spacingXs : 0)
+            height: width
+            radius: Tokens.radiusSm
+            color: powerBtn.active
+                ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.16)
+                : (powerBtn.hovered ? Theme.bgElevated : "transparent")
+            border.width: powerBtn.active ? Tokens.strokeWidth : 0
+            border.color: powerBtn.active
+                ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.45)
+                : "transparent"
+
+            Behavior on color {
+                ColorAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
+            }
+            Behavior on width {
+                NumberAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
             }
         }
+
+        Image {
+            id: powerGlyph
+            anchors.centerIn: parent
+            width: Tokens.iconSizeLarge + Tokens.spacingXs
+            height: Tokens.iconSizeLarge + Tokens.spacingXs
+            source: Theme.iconPoweroff
+            sourceSize: Qt.size(width * 2, height * 2)
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+            visible: false
+            asynchronous: true
+        }
+
+        ColorOverlay {
+            anchors.fill: powerGlyph
+            source: powerGlyph
+            color: powerBtn.active
+                ? Theme.accent
+                : (powerBtn.hovered ? Theme.textPrimary : Theme.textMuted)
+
+            Behavior on color {
+                ColorAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
+            }
+        }
+
+        MouseArea {
+            id: powerMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: (mouse) => {
+                Globals.togglePowerMenu()
+                mouse.accepted = true
+            }
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        anchors.rightMargin: powerBtn.width + Tokens.paddingH + Tokens.spacingXs
+        z: 1
+
+        onClicked: {
+            if (Globals.powerMenuOpen)
+                return
+            if (Globals.activePanel !== "") {
+                Globals.lastPanel = Globals.activePanel;
+                Globals.activePanel = "";
+            } else
+                Globals.activePanel = Globals.lastPanel;
+        }
+    }
 }

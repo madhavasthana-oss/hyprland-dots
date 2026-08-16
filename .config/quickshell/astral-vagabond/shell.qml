@@ -219,39 +219,109 @@ ShellRoot {
         }
     }
 
+    // Power menu --- full-screen dim + bottom actions. Opened from the
+    // shutdown icon next to RAM. A hole over the right bar lets that
+    // icon stay visible and receive the close click.
     PanelWindow {
-        id: bottomBarWindow
+        id: powerMenuWindow
         anchors {
+            top:    true
             left:   true
             right:  true
             bottom: true
         }
-        margins.left:  Tokens.bottomBarOriginX
-        margins.right: Tokens.bottomBarOriginX
-
-        implicitWidth: Tokens.bottomBarWidth
-        implicitHeight: bottomPanel.revealed
-            ? Tokens.bottomBarHeight
-            : Tokens.bottomHoverZoneHeight
-
         color:         "transparent"
         exclusiveZone: 0
-        WlrLayershell.layer:     WlrLayer.Top
-        WlrLayershell.namespace: "astral-vagabond-bottom"
+        visible:       Globals.powerMenuOpen
+        focusable:     Globals.powerMenuOpen
+        WlrLayershell.layer:     WlrLayer.Overlay
+        WlrLayershell.namespace: "astral-vagabond-power"
+
+        readonly property int barBandH: Tokens.topMargin + Tokens.rightHeight
+        readonly property int rightHoleW: Tokens.sideMargin + Tokens.rightWidth
+        readonly property color dimColor: Qt.rgba(0, 0, 0, 0.45)
+
+        // Clickable surface is the dim + the power strip. The right-bar
+        // hole is omitted so the shutdown icon underneath still receives
+        // the second click that closes this menu.
+        mask: Region {
+            item: dimBelow
+            Region {
+                item: dimTopLeft
+                intersection: Intersection.Combine
+            }
+            Region {
+                item: bottomPanel
+                intersection: Intersection.Combine
+            }
+        }
+
+        Keys.onEscapePressed: Globals.closePowerMenu()
+
+        Rectangle {
+            id: dimBelow
+            anchors.left:   parent.left
+            anchors.right:  parent.right
+            anchors.bottom: parent.bottom
+            height: parent.height - powerMenuWindow.barBandH
+            color:  powerMenuWindow.dimColor
+            opacity: Globals.powerMenuOpen ? 1 : 0
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Tokens.animFast
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {}
+            }
+        }
+
+        Rectangle {
+            id: dimTopLeft
+            anchors.left: parent.left
+            anchors.top:  parent.top
+            width:  parent.width - powerMenuWindow.rightHoleW
+            height: powerMenuWindow.barBandH
+            color:  powerMenuWindow.dimColor
+            opacity: Globals.powerMenuOpen ? 1 : 0
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Tokens.animFast
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {}
+            }
+        }
 
         BottomPanel {
             id: bottomPanel
             anchors.bottom: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottomMargin: Globals.powerMenuOpen
+                ? Tokens.sideMargin
+                : -Tokens.bottomBarHeight
             width:  Tokens.bottomBarWidth
             height: Tokens.bottomBarHeight
-            opacity: bottomPanel.revealed
-                ? Theme.opacityVisible
-                : Theme.opacityHidden
+            opacity: Globals.powerMenuOpen ? 1 : 0
 
             Behavior on opacity {
                 NumberAnimation {
                     duration: Tokens.animFast
+                    easing.type: Easing.OutCubic
+                }
+            }
+            Behavior on anchors.bottomMargin {
+                NumberAnimation {
+                    duration: Tokens.animMedium
                     easing.type: Easing.OutCubic
                 }
             }

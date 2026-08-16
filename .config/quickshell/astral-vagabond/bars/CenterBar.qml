@@ -317,6 +317,25 @@ Item {
         centerBar.batteryInitialized = true
     }
 
+    function batteryPct() {
+        const pct = Math.round((UPower.displayDevice.percentage || 0) * 100)
+        return isNaN(pct) ? 0 : Math.max(0, Math.min(100, pct))
+    }
+
+    // Bar status + mako toast. Same event, two surfaces.
+    function notifyBattery(summary, opts) {
+        opts = opts || {}
+        const holdMs = opts.holdMs || 4000
+        centerBar.pushStatus(summary, { holdMs: holdMs, alert: !!opts.alert })
+        Globals.toast(
+            summary,
+            opts.body || "",
+            "Battery",
+            opts.urgency || "normal",
+            holdMs
+        )
+    }
+
     // Plug / unplug — system AC line, not device charge state
     Connections {
         target: UPower
@@ -331,12 +350,19 @@ Item {
             if (nowOnAC === centerBar.wasOnAC)
                 return
 
+            const pct = centerBar.batteryPct()
             if (nowOnAC) {
-                centerBar.pushStatus("AC CONNECTED · CHARGING", { holdMs: 4000 })
+                centerBar.notifyBattery("AC CONNECTED · CHARGING", {
+                    holdMs: 4000,
+                    body: "Charging — " + pct + "%"
+                })
                 centerBar.lowBatteryWarned = false
                 centerBar.criticalBatteryWarned = false
             } else {
-                centerBar.pushStatus("ON BATTERY", { holdMs: 4000 })
+                centerBar.notifyBattery("ON BATTERY", {
+                    holdMs: 4000,
+                    body: "Discharging — " + pct + "%"
+                })
             }
 
             centerBar.wasOnAC = nowOnAC
@@ -371,7 +397,10 @@ Item {
             // Charging→PendingCharge blips on plug-in were false positives.
             if (state === UPowerDeviceState.FullyCharged
                 && prev === UPowerDeviceState.Charging) {
-                centerBar.pushStatus("BATTERY FULL", { holdMs: 4000 })
+                centerBar.notifyBattery("BATTERY FULL", {
+                    holdMs: 4000,
+                    body: "Charge complete"
+                })
             }
 
             if (state === UPowerDeviceState.Charging
@@ -392,12 +421,23 @@ Item {
             const discharging = UPower.onBattery
                 || UPower.displayDevice.state === UPowerDeviceState.Discharging
 
+            const shown = Math.round(pct)
             if (discharging && pct <= 5 && !centerBar.criticalBatteryWarned) {
                 centerBar.criticalBatteryWarned = true
-                centerBar.pushStatus("CRITICAL BATTERY", { holdMs: 6000, alert: true })
+                centerBar.notifyBattery("CRITICAL BATTERY", {
+                    holdMs: 6000,
+                    alert: true,
+                    urgency: "critical",
+                    body: shown + "% remaining — plug in"
+                })
             } else if (discharging && pct <= 15 && !centerBar.lowBatteryWarned) {
                 centerBar.lowBatteryWarned = true
-                centerBar.pushStatus("LOW BATTERY", { holdMs: 5000, alert: true })
+                centerBar.notifyBattery("LOW BATTERY", {
+                    holdMs: 5000,
+                    alert: true,
+                    urgency: "critical",
+                    body: shown + "% remaining"
+                })
             }
 
             if (!discharging || pct > 20) {

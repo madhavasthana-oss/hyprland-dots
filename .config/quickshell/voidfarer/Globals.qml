@@ -36,9 +36,6 @@ QtObject {
     // Workspace board (drag windows between workspaces)
     property bool workspaceBoardOpen : false
 
-    // Bottom power menu --- click the bar icon to open/close (not hover)
-    property bool powerMenuOpen : false
-
     // Last toast summary (debug breadcrumb; not an event bus)
     property string lastAction : ""
 
@@ -54,30 +51,9 @@ QtObject {
         workspaceBoardOpen = false
     }
 
-    function togglePowerMenu() {
-        if (powerMenuOpen)
-            closePowerMenu()
-        else
-            openPowerMenu()
-    }
-
-    function openPowerMenu() {
-        // Drop the system dropdown so it cannot open under the dim overlay
-        if (activePanel !== "") {
-            lastPanel = activePanel
-            activePanel = ""
-        }
-        powerMenuOpen = true
-    }
-
-    function closePowerMenu() {
-        powerMenuOpen = false
-    }
-
     // Fire a mako toast via notify-send. Empty summary = no-op.
     // appName becomes notify-send -a (mako criteria), not "mako".
-    // urgency: "low" | "normal" | "critical" (default low, matches existing callers)
-    function toast(summary, body, appName, urgency, timeoutMs) {
+    function toast(summary, body, appName) {
         if (summary === undefined || summary === null)
             return
         const sum = String(summary).trim()
@@ -88,18 +64,12 @@ QtObject {
             ? String(appName)
             : "Quickshell"
         const bod = (body !== undefined && body !== null) ? String(body) : ""
-        const urg = (urgency !== undefined && urgency !== null && String(urgency).length)
-            ? String(urgency)
-            : "low"
-        const timeout = (timeoutMs !== undefined && timeoutMs !== null && timeoutMs !== "")
-            ? String(timeoutMs)
-            : "4000"
 
         const args = [
             "notify-send",
             "-a", app,
-            "-u", urg,
-            "-t", timeout,
+            "-u", "low",
+            "-t", "4000",
             sum
         ]
         if (bod.length)

@@ -10,9 +10,33 @@ Item {
     implicitWidth:  Tokens.bottomBarWidth
     implicitHeight: Tokens.bottomBarHeight
 
-    // Driven by the RAM-bar power icon (Globals.togglePowerMenu)
-    readonly property bool open: Globals.powerMenuOpen
+    // Sticky open state --- raw hover alone causes thrash when the
+    // PanelWindow height animates under the cursor at the screen edge.
+    property bool open: false
     readonly property bool revealed: open
+
+    HoverHandler {
+        id: hoverHandler
+        onHoveredChanged: {
+            if (hovered) {
+                hideTimer.stop()
+                root.open = true
+            } else {
+                hideTimer.restart()
+            }
+        }
+    }
+
+    Timer {
+        id: hideTimer
+        interval: Tokens.bottomHideDelay
+        repeat: false
+        onTriggered: {
+            // Re-check: pointer may have re-entered during the grace period
+            if (!hoverHandler.hovered)
+                root.open = false
+        }
+    }
 
     // --- Shape ---
     Rectangle {
@@ -84,7 +108,6 @@ Item {
     }
 
     function runAction(key) {
-        Globals.closePowerMenu()
         switch (key) {
         case "poweroff":
             Quickshell.execDetached(["systemctl", "poweroff"])

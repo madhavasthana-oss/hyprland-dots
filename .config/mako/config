@@ -113,6 +113,11 @@ default-timeout=4000
 border-color=#C8C8C8FF
 default-timeout=3000
 
+[app-name="Battery"]
+border-color=#C8C8C8FF
+default-timeout=4000
+format=<span foreground="#E5E5E5"><b>◆ %s</b></span>\n<span foreground="#A3A3A3">%b</span>
+
 [app-name="Hyprland"]
 border-color=#C8C8C8FF
 default-timeout=4000

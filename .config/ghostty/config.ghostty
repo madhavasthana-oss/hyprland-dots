@@ -5,7 +5,7 @@
 #   ~/.config/kitty/kitty.conf      (dynamic_background_opacity)
 # Hyprland blur is compositor-level; kitty uses window opacity 0.80 in windowrules.conf
 
-font-family = Fira Code
+font-family = "Fira Code"
 font-feature = +calt
 font-feature = +liga
 font-feature = +dlig
