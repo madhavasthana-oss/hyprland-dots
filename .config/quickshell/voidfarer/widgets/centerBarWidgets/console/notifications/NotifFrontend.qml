@@ -37,8 +37,14 @@ Item {
     }
 
     Component.onCompleted: {
+        backend.refresh()
         if (Globals.activeEdgePanel === "notifications")
             grabListFocus()
+    }
+
+    onVisibleChanged: {
+        if (visible)
+            backend.refresh()
     }
 
     Connections {

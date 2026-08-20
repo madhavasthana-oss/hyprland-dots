@@ -1,4 +1,4 @@
-// NotifBackend.qml --- mako list / dismiss / silent / dnd
+// NotifBackend.qml --- mako inbox (live + history) until the user clears
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -20,14 +20,38 @@ Item {
     }
 
     function refresh() {
-        listProc.running = true
+        if (snapshotProc.running)
+            snapshotProc.running = false
+        snapshotProc.running = true
+    }
+
+    function removeIdFromModel(id) {
+        const key = String(id)
+        for (let i = notifModel.count - 1; i >= 0; i--) {
+            if (String(notifModel.get(i).notifId) === key)
+                notifModel.remove(i)
+        }
+        syncCount()
+    }
+
+    function syncCount() {
+        Globals.notifCount = notifModel.count
+        root.statusMsg = notifModel.count === 0
+            ? "INBOX EMPTY"
+            : (notifModel.count + " IN INBOX")
     }
 
     function dismissAll() {
+        for (let i = 0; i < notifModel.count; i++)
+            Globals.notifClearId(notifModel.get(i).notifId)
+        notifModel.clear()
+        syncCount()
         dismissAllProc.running = true
     }
 
     function dismissId(id) {
+        Globals.notifClearId(id)
+        removeIdFromModel(id)
         dismissOne.idArg = String(id)
         dismissOne.running = true
     }
@@ -67,34 +91,79 @@ Item {
     function toggleSilent() { setSilent(!root.silent) }
     function toggleDnd()    { setDnd(!root.dnd) }
 
-    function parseList(text) {
-        notifModel.clear()
-        try {
-            const arr = JSON.parse(text)
-            if (!Array.isArray(arr))
-                return
-            for (let i = 0; i < arr.length; i++) {
-                const n = arr[i]
-                notifModel.append({
-                    notifId: n.id,
-                    appName: n.app_name || "unknown",
-                    summary: n.summary || "",
-                    body:    n.body || "",
-                    urgency: n.urgency || "normal"
-                })
-            }
-            root.statusMsg = notifModel.count + " ACTIVE"
-            Globals.notifCount = notifModel.count
-        } catch (e) {
-            root.statusMsg = "PARSE ERROR"
+    function toRow(n) {
+        return {
+            notifId: n.id,
+            appName: n.app_name || "unknown",
+            summary: n.summary || "",
+            body:    n.body || "",
+            urgency: n.urgency || "normal"
         }
     }
 
+    function ingestSnapshot(text) {
+        let data
+        try {
+            data = JSON.parse(text.length ? text : "{}")
+        } catch (e) {
+            root.statusMsg = "PARSE ERROR"
+            return
+        }
+
+        const active = Array.isArray(data.active) ? data.active : []
+        const history = Array.isArray(data.history) ? data.history : []
+        const incoming = active.concat(history)
+        const rows = []
+        const seen = ({})
+        for (let i = 0; i < incoming.length; i++) {
+            const n = incoming[i]
+            if (!n || n.id === undefined || n.id === null)
+                continue
+            const key = String(n.id)
+            if (seen[key] || Globals.notifIsCleared(n.id))
+                continue
+            seen[key] = true
+            rows.push(root.toRow(n))
+        }
+
+        if (rows.length === notifModel.count) {
+            let same = true
+            for (let i = 0; i < rows.length; i++) {
+                const a = notifModel.get(i)
+                const b = rows[i]
+                if (a.notifId !== b.notifId || a.summary !== b.summary
+                        || a.body !== b.body || a.appName !== b.appName) {
+                    same = false
+                    break
+                }
+            }
+            if (same) {
+                syncCount()
+                return
+            }
+        }
+
+        notifModel.clear()
+        for (let i = 0; i < rows.length; i++)
+            notifModel.append(rows[i])
+        syncCount()
+    }
+
     Process {
-        id: listProc
-        command: ["makoctl", "list", "-j"]
+        id: snapshotProc
+        command: [
+            "python3", "-c",
+            "import json, subprocess as s\n"
+            + "def load(cmd):\n"
+            + "    try:\n"
+            + "        d = json.loads(s.check_output(cmd, stderr=s.DEVNULL) or b'[]')\n"
+            + "        return d if isinstance(d, list) else []\n"
+            + "    except Exception:\n"
+            + "        return []\n"
+            + "print(json.dumps({'active': load(['makoctl', 'list', '-j']), 'history': load(['makoctl', 'history', '-j'])}))\n"
+        ]
         stdout: StdioCollector {
-            onStreamFinished: root.parseList(text.length ? text : "[]")
+            onStreamFinished: root.ingestSnapshot(text)
         }
         stderr: StdioCollector {
             onStreamFinished: {
@@ -106,14 +175,14 @@ Item {
 
     Process {
         id: dismissAllProc
-        command: ["makoctl", "dismiss", "--all"]
+        command: ["makoctl", "dismiss", "--all", "--no-history"]
         onExited: root.refresh()
     }
 
     Process {
         id: dismissOne
         property string idArg: "0"
-        command: ["makoctl", "dismiss", "-n", idArg]
+        command: ["makoctl", "dismiss", "-n", idArg, "--no-history"]
         onExited: root.refresh()
     }
 
@@ -146,9 +215,25 @@ Item {
     }
 
     Timer {
-        interval: 3000
-        running: root.visible
+        interval: (Globals.activeCenterPanel === "console"
+                   && Globals.activeEdgePanel === "notifications")
+                  ? 1000 : 2000
+        running: true
         repeat: true
+        triggeredOnStart: true
         onTriggered: root.refresh()
+    }
+
+    Connections {
+        target: Globals
+        function onActiveEdgePanelChanged() {
+            if (Globals.activeEdgePanel === "notifications")
+                root.refresh()
+        }
+        function onActiveCenterPanelChanged() {
+            if (Globals.activeCenterPanel === "console"
+                    && Globals.activeEdgePanel === "notifications")
+                root.refresh()
+        }
     }
 }

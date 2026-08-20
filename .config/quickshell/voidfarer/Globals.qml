@@ -26,6 +26,24 @@ QtObject {
     property bool notifSilent : false
     property bool notifDnd    : false
     property int  notifCount  : 0
+    // Session-local: mako history cannot be deleted, so the console inbox
+    // filters these ids until quickshell restarts.
+    property var notifClearedIds: ({})
+
+    function notifIsCleared(id) {
+        return !!notifClearedIds[String(id)]
+    }
+
+    function notifClearId(id) {
+        if (id === undefined || id === null)
+            return
+        const key = String(id)
+        if (notifClearedIds[key])
+            return
+        const next = Object.assign({}, notifClearedIds)
+        next[key] = true
+        notifClearedIds = next
+    }
 
     // Screen capture --- edge panel closes itself before launching tools
     property bool screenRecording : false
@@ -35,6 +53,9 @@ QtObject {
 
     // Workspace board (drag windows between workspaces)
     property bool workspaceBoardOpen : false
+
+    // Bottom power menu --- click the bar icon to open/close (not hover)
+    property bool powerMenuOpen : false
 
     // Last toast summary (debug breadcrumb; not an event bus)
     property string lastAction : ""
@@ -51,9 +72,29 @@ QtObject {
         workspaceBoardOpen = false
     }
 
+    function togglePowerMenu() {
+        if (powerMenuOpen)
+            closePowerMenu()
+        else
+            openPowerMenu()
+    }
+
+    function openPowerMenu() {
+        if (activePanel !== "") {
+            lastPanel = activePanel
+            activePanel = ""
+        }
+        powerMenuOpen = true
+    }
+
+    function closePowerMenu() {
+        powerMenuOpen = false
+    }
+
     // Fire a mako toast via notify-send. Empty summary = no-op.
     // appName becomes notify-send -a (mako criteria), not "mako".
-    function toast(summary, body, appName) {
+    // urgency: "low" | "normal" | "critical" (default low, matches existing callers)
+    function toast(summary, body, appName, urgency, timeoutMs) {
         if (summary === undefined || summary === null)
             return
         const sum = String(summary).trim()
@@ -64,12 +105,18 @@ QtObject {
             ? String(appName)
             : "Quickshell"
         const bod = (body !== undefined && body !== null) ? String(body) : ""
+        const urg = (urgency !== undefined && urgency !== null && String(urgency).length)
+            ? String(urgency)
+            : "low"
+        const timeout = (timeoutMs !== undefined && timeoutMs !== null && timeoutMs !== "")
+            ? String(timeoutMs)
+            : "4000"
 
         const args = [
             "notify-send",
             "-a", app,
-            "-u", "low",
-            "-t", "4000",
+            "-u", urg,
+            "-t", timeout,
             sum
         ]
         if (bod.length)

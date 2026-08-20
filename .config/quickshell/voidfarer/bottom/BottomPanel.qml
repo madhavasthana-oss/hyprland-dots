@@ -10,33 +10,9 @@ Item {
     implicitWidth:  Tokens.bottomBarWidth
     implicitHeight: Tokens.bottomBarHeight
 
-    // Sticky open state --- raw hover alone causes thrash when the
-    // PanelWindow height animates under the cursor at the screen edge.
-    property bool open: false
+    // Driven by the top-bar power icon (Globals.togglePowerMenu)
+    readonly property bool open: Globals.powerMenuOpen
     readonly property bool revealed: open
-
-    HoverHandler {
-        id: hoverHandler
-        onHoveredChanged: {
-            if (hovered) {
-                hideTimer.stop()
-                root.open = true
-            } else {
-                hideTimer.restart()
-            }
-        }
-    }
-
-    Timer {
-        id: hideTimer
-        interval: Tokens.bottomHideDelay
-        repeat: false
-        onTriggered: {
-            // Re-check: pointer may have re-entered during the grace period
-            if (!hoverHandler.hovered)
-                root.open = false
-        }
-    }
 
     // --- Shape ---
     Rectangle {

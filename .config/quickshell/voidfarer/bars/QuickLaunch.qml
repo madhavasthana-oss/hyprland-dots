@@ -10,11 +10,11 @@ Item {
 
     readonly property int iconSide: Math.max(
         Tokens.iconSizeLarge,
-        Math.round(Tokens.centerHeight * 0.42)
+        Math.round(Tokens.topBarHeight * 0.42)
     )
     readonly property int hit: Math.max(
         iconSide + Tokens.spacingXs,
-        Math.min(Tokens.centerHeight - Tokens.spacingXss * 2, Tokens.listRowHeight + Tokens.spacingXs)
+        Math.min(Tokens.topBarHeight - Tokens.spacingXss * 2, Tokens.listRowHeight + Tokens.spacingXs)
     )
     readonly property int gap: Tokens.spacingXss
     readonly property int btnCount: 6

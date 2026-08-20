@@ -1,0 +1,8 @@
+Workspaces 1.0 Workspaces.qml
+WindowTitle 1.0 WindowTitle.qml
+ClockHud 1.0 ClockHud.qml
+MetaHud 1.0 MetaHud.qml
+Telemetry 1.0 Telemetry.qml
+NotifBadge 1.0 NotifBadge.qml
+PowerButton 1.0 PowerButton.qml
+BatteryWatch 1.0 BatteryWatch.qml

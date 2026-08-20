@@ -304,17 +304,38 @@ Item {
     // so state-based AC detection never flips and status messages never fire.
     property var battery: UPower.displayDevice
     property bool batteryInitialized: false
+    property bool batteryEventsArmed: false
     property bool wasOnAC: false
     property int lastBatteryState: UPowerDeviceState.Unknown
     property bool lowBatteryWarned: false
     property bool criticalBatteryWarned: false
 
+    function batteryDataReady() {
+        const dev = UPower.displayDevice
+        if (!dev || !dev.ready)
+            return false
+        const state = dev.state
+        if (state === undefined || state === null || state === UPowerDeviceState.Unknown)
+            return false
+        const raw = dev.percentage
+        if (raw === undefined || raw === null || isNaN(raw) || raw <= 0)
+            return false
+        return true
+    }
+
+    // Snapshot current AC/charge state without toasting. Returns false until
+    // both percent and a real charging/discharging/full state are known —
+    // UPower reports 0% + Unknown at session start.
     function initBatteryState() {
-        // onBattery is valid even before displayDevice.ready
+        if (centerBar.batteryInitialized)
+            return true
+        if (!centerBar.batteryDataReady())
+            return false
         centerBar.wasOnAC = !UPower.onBattery
-        if (centerBar.battery && centerBar.battery.ready)
-            centerBar.lastBatteryState = centerBar.battery.state
+        centerBar.lastBatteryState = UPower.displayDevice.state
         centerBar.batteryInitialized = true
+        armBatteryTimer.restart()
+        return true
     }
 
     function batteryPct() {
@@ -324,6 +345,8 @@ Item {
 
     // Bar status + mako toast. Same event, two surfaces.
     function notifyBattery(summary, opts) {
+        if (!centerBar.batteryInitialized)
+            return
         opts = opts || {}
         const holdMs = opts.holdMs || 4000
         centerBar.pushStatus(summary, { holdMs: holdMs, alert: !!opts.alert })
@@ -334,6 +357,57 @@ Item {
             opts.urgency || "normal",
             holdMs
         )
+    }
+
+    function evaluateLowBattery() {
+        if (!centerBar.batteryInitialized)
+            return
+
+        const pct = UPower.displayDevice.percentage * 100
+        const discharging = UPower.onBattery
+            || UPower.displayDevice.state === UPowerDeviceState.Discharging
+
+        const shown = Math.round(pct)
+        if (discharging && pct <= 5 && !centerBar.criticalBatteryWarned) {
+            centerBar.criticalBatteryWarned = true
+            centerBar.notifyBattery("CRITICAL BATTERY", {
+                holdMs: 6000,
+                alert: true,
+                urgency: "critical",
+                body: shown + "% remaining — plug in"
+            })
+        } else if (discharging && pct <= 15 && !centerBar.lowBatteryWarned) {
+            centerBar.lowBatteryWarned = true
+            centerBar.notifyBattery("LOW BATTERY", {
+                holdMs: 5000,
+                alert: true,
+                urgency: "critical",
+                body: shown + "% remaining"
+            })
+        }
+
+        if (!discharging || pct > 20) {
+            centerBar.lowBatteryWarned = false
+            centerBar.criticalBatteryWarned = false
+        }
+    }
+
+    Timer {
+        id: armBatteryTimer
+        interval: 2000
+        repeat: false
+        onTriggered: centerBar.batteryEventsArmed = true
+    }
+
+    Timer {
+        interval: 500
+        repeat: true
+        running: !centerBar.batteryInitialized
+        onTriggered: {
+            centerBar.initBatteryState()
+            if (centerBar.batteryInitialized)
+                centerBar.evaluateLowBattery()
+        }
     }
 
     // Plug / unplug — system AC line, not device charge state
@@ -347,6 +421,10 @@ Item {
             }
 
             const nowOnAC = !UPower.onBattery
+            if (!centerBar.batteryEventsArmed) {
+                centerBar.wasOnAC = nowOnAC
+                return
+            }
             if (nowOnAC === centerBar.wasOnAC)
                 return
 
@@ -373,16 +451,13 @@ Item {
         target: UPower.displayDevice
 
         function onReadyChanged() {
-            if (UPower.displayDevice.ready && !centerBar.batteryInitialized)
+            if (!centerBar.batteryInitialized)
                 centerBar.initBatteryState()
             else if (UPower.displayDevice.ready)
                 centerBar.lastBatteryState = UPower.displayDevice.state
         }
 
         function onStateChanged() {
-            if (!UPower.displayDevice.ready)
-                return
-
             if (!centerBar.batteryInitialized) {
                 centerBar.initBatteryState()
                 return
@@ -390,6 +465,11 @@ Item {
 
             const state = UPower.displayDevice.state
             const prev = centerBar.lastBatteryState
+
+            if (!centerBar.batteryEventsArmed) {
+                centerBar.lastBatteryState = state
+                return
+            }
 
             // Only a completed charge cycle: Charging → FullyCharged.
             // Do NOT treat PendingCharge as full — with charge thresholds that
@@ -414,36 +494,12 @@ Item {
         }
 
         function onPercentageChanged() {
-            if (!UPower.displayDevice.ready)
-                return
-
-            const pct = UPower.displayDevice.percentage * 100
-            const discharging = UPower.onBattery
-                || UPower.displayDevice.state === UPowerDeviceState.Discharging
-
-            const shown = Math.round(pct)
-            if (discharging && pct <= 5 && !centerBar.criticalBatteryWarned) {
-                centerBar.criticalBatteryWarned = true
-                centerBar.notifyBattery("CRITICAL BATTERY", {
-                    holdMs: 6000,
-                    alert: true,
-                    urgency: "critical",
-                    body: shown + "% remaining — plug in"
-                })
-            } else if (discharging && pct <= 15 && !centerBar.lowBatteryWarned) {
-                centerBar.lowBatteryWarned = true
-                centerBar.notifyBattery("LOW BATTERY", {
-                    holdMs: 5000,
-                    alert: true,
-                    urgency: "critical",
-                    body: shown + "% remaining"
-                })
+            if (!centerBar.batteryInitialized) {
+                centerBar.initBatteryState()
+                if (!centerBar.batteryInitialized)
+                    return
             }
-
-            if (!discharging || pct > 20) {
-                centerBar.lowBatteryWarned = false
-                centerBar.criticalBatteryWarned = false
-            }
+            centerBar.evaluateLowBattery()
         }
     }
 

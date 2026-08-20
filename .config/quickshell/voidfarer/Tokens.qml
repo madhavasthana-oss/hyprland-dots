@@ -78,7 +78,8 @@ QtObject {
     // Single top bar (voidfarer): full screen width, flush to the top edge.
     // Height is the solid strip; corner size is the inverted quarter-circle
     // hanging off each bottom corner (caelestia / end-4 cutout).
-    readonly property int topBarHeight: centerHeight
+    // Taller than the old center HUD so workspaces + clock + rings can sit in one row.
+    readonly property int topBarHeight: Math.round(34 * scale)
     readonly property int topBarCorner: radiusXl
     readonly property int topBarWidth:  screenWidth
 

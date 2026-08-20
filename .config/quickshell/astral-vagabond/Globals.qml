@@ -26,6 +26,24 @@ QtObject {
     property bool notifSilent : false
     property bool notifDnd    : false
     property int  notifCount  : 0
+    // Session-local: mako history cannot be deleted, so the console inbox
+    // filters these ids until quickshell restarts.
+    property var notifClearedIds: ({})
+
+    function notifIsCleared(id) {
+        return !!notifClearedIds[String(id)]
+    }
+
+    function notifClearId(id) {
+        if (id === undefined || id === null)
+            return
+        const key = String(id)
+        if (notifClearedIds[key])
+            return
+        const next = Object.assign({}, notifClearedIds)
+        next[key] = true
+        notifClearedIds = next
+    }
 
     // Screen capture --- edge panel closes itself before launching tools
     property bool screenRecording : false

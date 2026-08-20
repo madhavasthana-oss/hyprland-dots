@@ -23,15 +23,39 @@ ShellRoot {
         Process {
             id: notifCountProc
             command: [
-                "bash", "-c",
-                "makoctl list -j 2>/dev/null | python3 -c "
-                    + "'import sys,json; d=json.load(sys.stdin); print(len(d) if isinstance(d,list) else 0)' "
-                    + "2>/dev/null || echo 0"
+                "python3", "-c",
+                "import json, subprocess as s\n"
+                + "def load(cmd):\n"
+                + "    try:\n"
+                + "        d = json.loads(s.check_output(cmd, stderr=s.DEVNULL) or b'[]')\n"
+                + "        return d if isinstance(d, list) else []\n"
+                + "    except Exception:\n"
+                + "        return []\n"
+                + "print(json.dumps({'active': load(['makoctl', 'list', '-j']), 'history': load(['makoctl', 'history', '-j'])}))\n"
             ]
             stdout: StdioCollector {
                 onStreamFinished: {
-                    const n = parseInt(text.trim())
-                    Globals.notifCount = isNaN(n) ? 0 : Math.max(0, n)
+                    try {
+                        const data = JSON.parse(text.length ? text : "{}")
+                        const active = Array.isArray(data.active) ? data.active : []
+                        const history = Array.isArray(data.history) ? data.history : []
+                        const seen = ({})
+                        let n = 0
+                        const all = active.concat(history)
+                        for (let i = 0; i < all.length; i++) {
+                            const id = all[i] && all[i].id
+                            if (id === undefined || id === null)
+                                continue
+                            const key = String(id)
+                            if (seen[key] || Globals.notifIsCleared(id))
+                                continue
+                            seen[key] = true
+                            n++
+                        }
+                        Globals.notifCount = n
+                    } catch (e) {
+                        Globals.notifCount = 0
+                    }
                 }
             }
         }
