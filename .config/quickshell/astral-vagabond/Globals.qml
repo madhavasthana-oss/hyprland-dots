@@ -106,7 +106,6 @@ QtObject {
     }
 
     function openPowerMenu() {
-        // Drop the system dropdown so it cannot open under the dim overlay
         if (activePanel !== "") {
             lastPanel = activePanel
             activePanel = ""
