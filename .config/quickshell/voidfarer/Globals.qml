@@ -29,6 +29,9 @@ QtObject {
     // Session-local: mako history cannot be deleted, so the console inbox
     // filters these ids until quickshell restarts.
     property var notifClearedIds: ({})
+    property var notifKnownIds: ({})
+    property var notifDndDroppedIds: ({})
+    property bool notifBaselineReady: false
 
     function notifIsCleared(id) {
         return !!notifClearedIds[String(id)]
@@ -43,6 +46,29 @@ QtObject {
         const next = Object.assign({}, notifClearedIds)
         next[key] = true
         notifClearedIds = next
+    }
+
+    // First snapshot of the session is the baseline (history already received).
+    // After that, brand-new ids while DND is on never enter the inbox.
+    // Silent still accepts them — mako [mode=silent] invisible=1 hides the toast.
+    function notifAcceptIncoming(id) {
+        if (id === undefined || id === null)
+            return false
+        const key = String(id)
+        if (notifClearedIds[key] || notifDndDroppedIds[key])
+            return false
+        const firstSeen = !notifKnownIds[key]
+        if (firstSeen)
+            notifKnownIds[key] = true
+        if (firstSeen && notifBaselineReady && notifDnd) {
+            notifDndDroppedIds[key] = true
+            return false
+        }
+        return true
+    }
+
+    function notifCloseIncomingBatch() {
+        notifBaselineReady = true
     }
 
     // Screen capture --- edge panel closes itself before launching tools

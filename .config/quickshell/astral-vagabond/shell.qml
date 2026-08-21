@@ -47,11 +47,14 @@ ShellRoot {
                             if (id === undefined || id === null)
                                 continue
                             const key = String(id)
-                            if (seen[key] || Globals.notifIsCleared(id))
+                            if (seen[key])
                                 continue
                             seen[key] = true
+                            if (!Globals.notifAcceptIncoming(id))
+                                continue
                             n++
                         }
+                        Globals.notifCloseIncomingBatch()
                         Globals.notifCount = n
                     } catch (e) {
                         Globals.notifCount = 0

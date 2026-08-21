@@ -300,7 +300,8 @@ Item {
             Text {
                 anchors.centerIn: parent
                 visible: list.count === 0
-                text: backend.dnd ? "DND ACTIVE" : "NO TRANSMISSIONS"
+                text: backend.dnd ? "DND ACTIVE"
+                    : (backend.silent ? "SILENT · NO TRANSMISSIONS" : "NO TRANSMISSIONS")
                 font.family: Theme.fontDisplay
                 font.pixelSize: Tokens.fontSizeLabel
                 color: Theme.textDim

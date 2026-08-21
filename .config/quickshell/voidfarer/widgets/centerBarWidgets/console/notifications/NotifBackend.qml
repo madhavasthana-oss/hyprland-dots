@@ -36,9 +36,13 @@ Item {
 
     function syncCount() {
         Globals.notifCount = notifModel.count
-        root.statusMsg = notifModel.count === 0
-            ? "INBOX EMPTY"
-            : (notifModel.count + " IN INBOX")
+        const n = notifModel.count
+        let msg = n === 0 ? "INBOX EMPTY" : (n + " IN INBOX")
+        if (root.dnd)
+            msg = "DND · " + msg
+        else if (root.silent)
+            msg = "SILENT · " + msg
+        root.statusMsg = msg
     }
 
     function dismissAll() {
@@ -62,14 +66,14 @@ Item {
         if (on) {
             modeAdd.mode = "silent"
             modeAdd.running = true
-            root.statusMsg = "SILENT MODE"
             Globals.toast("Silent mode", "Notifications muted", "Notifications")
         } else {
             modeRemove.mode = "silent"
             modeRemove.running = true
-            root.statusMsg = "AUDIBLE"
             Globals.toast("Audible", "Silent mode off", "Notifications")
         }
+        root.syncCount()
+        root.refresh()
     }
 
     function setDnd(on) {
@@ -78,14 +82,14 @@ Item {
         if (on) {
             modeAdd.mode = "dnd"
             modeAdd.running = true
-            root.statusMsg = "DO NOT DISTURB"
-            Globals.toast("Do not disturb", "Notifications hidden", "Notifications")
+            Globals.toast("Do not disturb", "Toasts and inbox muted", "Notifications")
         } else {
             modeRemove.mode = "dnd"
             modeRemove.running = true
-            root.statusMsg = "DND OFF"
             Globals.toast("DND off", "Notifications visible", "Notifications")
         }
+        root.syncCount()
+        root.refresh()
     }
 
     function toggleSilent() { setSilent(!root.silent) }
@@ -120,11 +124,14 @@ Item {
             if (!n || n.id === undefined || n.id === null)
                 continue
             const key = String(n.id)
-            if (seen[key] || Globals.notifIsCleared(n.id))
+            if (seen[key])
                 continue
             seen[key] = true
+            if (!Globals.notifAcceptIncoming(n.id))
+                continue
             rows.push(root.toRow(n))
         }
+        Globals.notifCloseIncomingBatch()
 
         if (rows.length === notifModel.count) {
             let same = true

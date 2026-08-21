@@ -133,6 +133,8 @@ format=<span foreground="#E5E5E5"><b>%s</b></span>
 default-timeout=1500
 
 # ── modes ───────────────────────────────────────────────────
+# silent: no on-screen toast; console inbox still records the notification
+# dnd:    no toast and console inbox ignores new notifications
 [mode=do-not-disturb]
 invisible=1
 
