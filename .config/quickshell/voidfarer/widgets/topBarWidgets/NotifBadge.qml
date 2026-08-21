@@ -44,7 +44,7 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: Globals.toggleEdgePanel("notifications")
+            onClicked: Globals.toggleWidget("notifications", root)
         }
     }
 }

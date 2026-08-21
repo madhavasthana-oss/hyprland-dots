@@ -167,7 +167,8 @@ Item {
 
     function toggleIdleLock() {
         root.statusMsg = "TOGGLING AUTO-LOCK…"
-        root._restart(idleToggle)
+        powerPoll.running = false
+        idleToggle.exec(["bash", root.idleToggleScript, "--toggle"])
     }
 
     // hyprcaffeine never emits class "hc-on" — active sleep inhibit is
@@ -195,7 +196,19 @@ Item {
     }
 
     function _parseIdleDisabled(text) {
-        return (text || "").toUpperCase().indexOf("DISABLED") >= 0
+        const t = text || ""
+        if (/STATE=disabled/i.test(t))
+            return true
+        if (/STATE=enabled/i.test(t))
+            return false
+        return t.toUpperCase().indexOf("DISABLED") >= 0
+    }
+
+    function _parseIdleRunning(text) {
+        const m = (text || "").match(/RUNNING=([01])/)
+        if (!m)
+            return null
+        return m[1] === "1"
     }
 
     function _applyCaffeineText(text, toast) {
@@ -212,14 +225,24 @@ Item {
 
     function _applyIdleText(text, toast) {
         root.idleLockDisabled = root._parseIdleDisabled(text)
+        const running = root._parseIdleRunning(text)
         if (!toast)
             return
-        root.statusMsg = root.idleLockDisabled ? "AUTO-LOCK OFF" : "AUTO-LOCK ON"
-        Globals.toast(
-            root.idleLockDisabled ? "Auto-lock off" : "Auto-lock on",
-            root.idleLockDisabled ? "hypridle disabled" : "hypridle enabled",
-            "Settings"
-        )
+        if (root.idleLockDisabled) {
+            root.statusMsg = running === true ? "AUTO-LOCK OFF (STILL RUNNING)" : "AUTO-LOCK OFF"
+            Globals.toast(
+                "Auto-lock off",
+                running === true ? "hypridle still running" : "hypridle stopped",
+                "Settings"
+            )
+        } else {
+            root.statusMsg = running === false ? "AUTO-LOCK ON (NOT RUNNING)" : "AUTO-LOCK ON"
+            Globals.toast(
+                "Auto-lock on",
+                running === false ? "hypridle did not start" : "hypridle running",
+                "Settings"
+            )
+        }
     }
 
     Process {
@@ -272,23 +295,22 @@ Item {
 
     Process {
         id: idleToggle
-        // Run toggle + status via one bash so PATH and script path are explicit
-        command: [
-            "bash", "-c",
-            "export PATH=\"/usr/local/bin:/usr/bin:$HOME/.local/bin:$PATH\"; "
-                + "SCRIPT=\"$1\"; "
-                + "if [[ ! -x \"$SCRIPT\" ]]; then echo \"error: missing $SCRIPT\" >&2; exit 127; fi; "
-                + "bash \"$SCRIPT\" --toggle >/dev/null 2>&1; "
-                + "bash \"$SCRIPT\" --status",
-            "idle-toggle",
-            root.idleToggleScript
-        ]
+        command: ["bash", root.idleToggleScript, "--toggle"]
         stdout: StdioCollector {
+            id: idleToggleOut
             waitForEnd: true
             onStreamFinished: root._applyIdleText(text, true)
         }
+        stderr: StdioCollector {
+            waitForEnd: true
+            onStreamFinished: {
+                if (text && text.trim().length)
+                    console.warn("idle-toggle:", text.trim())
+            }
+        }
         onExited: (code) => {
-            if (code !== 0) {
+            powerPoll.running = true
+            if (code !== 0 && (idleToggleOut.text || "").indexOf("STATE=") < 0) {
                 root.statusMsg = "AUTO-LOCK TOGGLE FAILED"
                 Globals.toast("Auto-lock", "idle-toggle.sh failed", "Settings")
                 root._restart(idleQuery)

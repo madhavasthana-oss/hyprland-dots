@@ -158,6 +158,6 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: Globals.toggleEdgePanel("wifi")
+        onClicked: Globals.toggleWidget("wifi", root)
     }
 }

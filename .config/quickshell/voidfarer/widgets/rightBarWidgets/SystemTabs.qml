@@ -58,36 +58,4 @@ Item {
         }
     }
 
-    Rectangle {
-        id: underline
-        height: Tokens.strokeWidth
-        color: Theme.accent
-        opacity: 1
-        radius: Tokens.radiusSm
-        y: parent.height - height
-
-        Behavior on x {
-            NumberAnimation {
-                duration: Tokens.animFast
-                easing.type: Easing.OutCubic
-            }
-        }
-        Behavior on width {
-            NumberAnimation {
-                duration: Tokens.animFast
-                easing.type: Easing.OutCubic
-            }
-        }
-
-        property Item activeTab: {
-            for (let i = 0; i < tabRow.children.length; i++) {
-                if (tabRow.children[i].panelId === root.active)
-                    return tabRow.children[i];
-            }
-            return null;
-        }
-
-        x: activeTab ? activeTab.x : 0
-        width: activeTab ? activeTab.width : 0
-    }
 }

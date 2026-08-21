@@ -16,11 +16,18 @@ QtObject {
     property string activeCenterPanel : ""
     property string lastCenterPanel   : "dashboard"
 
-    // Console control pane --- which stack page is active (wifi/bt/settings/notifs)
+    // Console control pane --- last wifi/bt/settings/notifs page (legacy + backends)
     property string activeEdgePanel : "wifi"   // "wifi" | "bluetooth" | "settings" | "notifications"
     property string lastEdgePanel   : "wifi"
     // Legacy force-pin flag (right-edge panel removed; kept for API stability)
     property bool edgeForced : false
+
+    // One popup at a time, anchored under the button that opened it.
+    // dashboard | wifi | bluetooth | settings | notifications | media | cpu | gpu | ram | ""
+    property string activeWidget : ""
+    property string lastWidget   : "dashboard"
+    property real widgetAnchorX  : 0
+    property real widgetAnchorW  : 0
 
     // Notification modes (mako) + live count for bar badge
     property bool notifSilent : false
@@ -106,10 +113,7 @@ QtObject {
     }
 
     function openPowerMenu() {
-        if (activePanel !== "") {
-            lastPanel = activePanel
-            activePanel = ""
-        }
+        closeWidget()
         powerMenuOpen = true
     }
 
@@ -152,53 +156,104 @@ QtObject {
         Quickshell.execDetached(args)
     }
 
-    // open/toggle open the center CONSOLE tab on the requested page (wifi/bt/settings/notifs).
-    function openEdgePanel(panel) {
-        if (panel !== undefined && panel !== null && String(panel).length) {
-            activeEdgePanel = String(panel)
-            lastEdgePanel = String(panel)
+    function isEdgeWidget(id) {
+        return id === "wifi" || id === "bluetooth"
+            || id === "settings" || id === "notifications"
+    }
+
+    function isCenterWidget(id) {
+        return id === "dashboard" || id === "media"
+    }
+
+    function isSysWidget(id) {
+        return id === "cpu" || id === "gpu" || id === "ram"
+    }
+
+    // Scene-root coords of the launcher (bar window is full-width → screen x).
+    function captureAnchor(item) {
+        if (!item)
+            return
+        widgetAnchorW = Math.max(0, item.width)
+        try {
+            const p = item.mapToItem(null, 0, 0)
+            widgetAnchorX = p.x
+        } catch (e) {
+            widgetAnchorX = item.x
         }
+    }
+
+    function closeWidget() {
+        if (activeWidget !== "")
+            lastWidget = activeWidget
+        if (activeCenterPanel !== "")
+            lastCenterPanel = activeCenterPanel
+        if (activePanel !== "")
+            lastPanel = activePanel
+        if (activeEdgePanel !== "")
+            lastEdgePanel = activeEdgePanel
+        activeWidget = ""
+        activeCenterPanel = ""
+        activePanel = ""
+    }
+
+    function openWidget(id, item) {
+        const target = (id !== undefined && id !== null && String(id).length)
+            ? String(id)
+            : lastWidget
+        if (item)
+            captureAnchor(item)
         edgeForced = false
-        lastCenterPanel = "console"
-        activeCenterPanel = "console"
+        if (powerMenuOpen)
+            powerMenuOpen = false
+
+        lastWidget = target
+        activeWidget = target
+
+        if (isEdgeWidget(target)) {
+            activeEdgePanel = target
+            lastEdgePanel = target
+            activeCenterPanel = ""
+            activePanel = ""
+        } else if (isCenterWidget(target)) {
+            activeCenterPanel = target
+            lastCenterPanel = target
+            activePanel = ""
+        } else if (isSysWidget(target)) {
+            activePanel = target
+            lastPanel = target
+            activeCenterPanel = ""
+        }
+    }
+
+    function toggleWidget(id, item) {
+        const target = (id !== undefined && id !== null && String(id).length)
+            ? String(id)
+            : lastWidget
+        if (activeWidget === target) {
+            closeWidget()
+            return
+        }
+        openWidget(target, item)
+    }
+
+    // Compat wrappers — prefer toggleWidget(id, item) so the popup sits under the button.
+    function openEdgePanel(panel, item) {
+        openWidget(panel, item)
     }
 
     function releaseEdgePanel() {
         edgeForced = false
     }
 
-    function toggleEdgePanel(panel) {
-        const target = (panel !== undefined && panel !== null && String(panel).length)
-            ? String(panel)
-            : activeEdgePanel
-        // Already on console + same page → close center panel
-        if (activeCenterPanel === "console" && activeEdgePanel === target) {
-            lastCenterPanel = "console"
-            activeCenterPanel = ""
-            return
-        }
-        openEdgePanel(target)
+    function toggleEdgePanel(panel, item) {
+        toggleWidget(panel, item)
     }
 
-    // Toggle a center tab (dashboard / console / media). Same tab again closes.
-    function toggleCenterPanel(panel) {
-        const target = (panel !== undefined && panel !== null && String(panel).length)
-            ? String(panel)
-            : lastCenterPanel
-        if (activeCenterPanel === target) {
-            lastCenterPanel = target
-            activeCenterPanel = ""
-            return
-        }
-        lastCenterPanel = target
-        activeCenterPanel = target
+    function toggleCenterPanel(panel, item) {
+        toggleWidget(panel, item)
     }
 
-    function openCenterPanel(panel) {
-        const target = (panel !== undefined && panel !== null && String(panel).length)
-            ? String(panel)
-            : lastCenterPanel
-        lastCenterPanel = target
-        activeCenterPanel = target
+    function openCenterPanel(panel, item) {
+        openWidget(panel, item)
     }
 }

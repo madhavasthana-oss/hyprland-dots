@@ -25,18 +25,15 @@ Item {
     width: implicitWidth
     height: implicitHeight
 
-    function isCenter(panel) {
-        return Globals.activeCenterPanel === panel
-    }
-
-    function isConsolePage(page) {
-        return Globals.activeCenterPanel === "console" && Globals.activeEdgePanel === page
+    function isOpen(id) {
+        return Globals.activeWidget === id
     }
 
     component LaunchBtn: Item {
         id: btn
         property string iconSource: ""
-        property bool active: false
+        property string widgetId: ""
+        property bool active: root.isOpen(widgetId)
         property bool hovered: mouse.containsMouse
         signal activated()
 
@@ -96,6 +93,8 @@ Item {
             cursorShape: Qt.PointingHandCursor
             // Consume so the bar-wide toggle does not also fire
             onClicked: (mouse) => {
+                if (btn.widgetId.length)
+                    Globals.toggleWidget(btn.widgetId, btn)
                 btn.activated()
                 mouse.accepted = true
             }
@@ -106,40 +105,29 @@ Item {
         anchors.centerIn: parent
         spacing: root.gap
 
-        // 1. Dashboard
         LaunchBtn {
             iconSource: Theme.iconDashboard
-            active: root.isCenter("dashboard")
-            onActivated: Globals.toggleCenterPanel("dashboard")
+            widgetId: "dashboard"
         }
-
-        // 2–5. Console pages
         LaunchBtn {
             iconSource: Theme.iconWifi
-            active: root.isConsolePage("wifi")
-            onActivated: Globals.toggleEdgePanel("wifi")
+            widgetId: "wifi"
         }
         LaunchBtn {
             iconSource: Theme.iconBluetooth
-            active: root.isConsolePage("bluetooth")
-            onActivated: Globals.toggleEdgePanel("bluetooth")
+            widgetId: "bluetooth"
         }
         LaunchBtn {
             iconSource: Theme.iconSettings
-            active: root.isConsolePage("settings")
-            onActivated: Globals.toggleEdgePanel("settings")
+            widgetId: "settings"
         }
         LaunchBtn {
             iconSource: Theme.iconNotif
-            active: root.isConsolePage("notifications")
-            onActivated: Globals.toggleEdgePanel("notifications")
+            widgetId: "notifications"
         }
-
-        // 6. Media
         LaunchBtn {
             iconSource: Theme.iconMedia
-            active: root.isCenter("media")
-            onActivated: Globals.toggleCenterPanel("media")
+            widgetId: "media"
         }
     }
 }

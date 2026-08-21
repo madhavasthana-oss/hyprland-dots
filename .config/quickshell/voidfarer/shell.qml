@@ -3,8 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import "bars"
-import "widgets/rightBarWidgets"
-import "widgets/centerBarWidgets"
+import "widgets"
 import "widgets/leftBarWidgets"
 import "bottom"
 
@@ -93,49 +92,12 @@ ShellRoot {
         }
     }
 
-    // CPU / GPU / RAM dropdown --- hangs off the right of the top bar
+    // Per-button widgets --- hangs under the launcher that opened them
     PanelWindow {
-        id: dropdownWindow
-        anchors { top: true; right: true }
-        implicitWidth:  sysPanel.implicitWidth
-        implicitHeight: Globals.activePanel !== "" ? sysPanel.implicitHeight : 0
-
-        Behavior on implicitHeight {
-            NumberAnimation { duration: Tokens.animInstant; easing.type: Easing.OutQuart }
-        }
-
-        color:         "transparent"
-        exclusionMode: ExclusionMode.Normal
-        exclusiveZone: 0
-        focusable: Globals.activePanel !== ""
-        WlrLayershell.layer:         WlrLayer.Top
-        WlrLayershell.namespace:     "voidfarer-dropdown"
-        // From the bar exclusive zone — not the screen edge.
-        margins.top:   Tokens.spacingXs
-        margins.right: Tokens.spacingXs
-        visible: Globals.activePanel !== ""
-
-        Rectangle {
-            id: panelBg
-            anchors.fill: parent
-            radius:       Tokens.radiusXl
-            color:        Theme.bgConsole
-            opacity:      Theme.opacityConsole
-            border.color: Theme.borderConsole
-            border.width: Tokens.strokeWidth
-        }
-
-        SystemPanel {
-            id: sysPanel
-        }
-    }
-
-    // Dashboard / console / media --- centered under the bar
-    PanelWindow {
-        id: centerDropdownWindow
-        anchors { top: true }
-        implicitWidth:  centerPanel.implicitWidth
-        implicitHeight: Globals.activeCenterPanel !== "" ? centerPanel.implicitHeight : 0
+        id: widgetWindow
+        anchors { top: true; left: true }
+        implicitWidth:  widgetHost.implicitWidth
+        implicitHeight: Globals.activeWidget !== "" ? widgetHost.implicitHeight : 0
 
         Behavior on implicitWidth {
             NumberAnimation {
@@ -147,28 +109,44 @@ ShellRoot {
             NumberAnimation { duration: Tokens.animInstant; easing.type: Easing.OutQuart }
         }
 
+        readonly property int widgetLeft: {
+            const screenW = Tokens.screenWidth
+            const w = widgetHost.implicitWidth
+            const pad = Tokens.sideMargin
+            const cx = Globals.widgetAnchorX + Globals.widgetAnchorW / 2
+            let x = Math.round(cx - w / 2)
+            const minX = pad
+            const maxX = Math.max(minX, screenW - w - pad)
+            if (x < minX)
+                x = minX
+            if (x > maxX)
+                x = maxX
+            return x
+        }
+
         color:         "transparent"
         exclusionMode: ExclusionMode.Normal
         exclusiveZone: 0
-        focusable: Globals.activeCenterPanel !== ""
+        focusable: Globals.activeWidget !== ""
         WlrLayershell.layer:         WlrLayer.Top
-        WlrLayershell.namespace:     "voidfarer-center-dropdown"
+        WlrLayershell.namespace:     "voidfarer-widget"
         // From the bar exclusive zone — not the screen edge.
-        margins.top:   Tokens.spacingXs
-        visible: Globals.activeCenterPanel !== ""
+        margins.top:  Tokens.spacingXs
+        margins.left: widgetLeft
+        visible: Globals.activeWidget !== ""
 
         Rectangle {
-            id: centerPanelBg
+            id: widgetBg
             anchors.fill: parent
             radius:       Tokens.radiusXl
             color:        Theme.bgConsole
             opacity:      Theme.opacityConsole
-            border.color: Theme.borderConsole
-            border.width: Tokens.strokeWidth
+            // Static card fill only — no running tab underline / chasing border.
+            border.width: 0
         }
 
-        CenterPanel {
-            id: centerPanel
+        WidgetHost {
+            id: widgetHost
             anchors.fill: parent
             anchors.margins: Tokens.borderXss
         }

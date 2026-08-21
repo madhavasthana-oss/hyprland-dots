@@ -39,14 +39,8 @@ Item {
         return root.blend(Theme.stateSafe, Theme.stateCritical, Math.max(0, pct) / 100)
     }
 
-    function togglePanel(panel) {
-        if (Globals.activePanel === panel) {
-            Globals.lastPanel = panel
-            Globals.activePanel = ""
-            return
-        }
-        Globals.lastPanel = panel
-        Globals.activePanel = panel
+    function togglePanel(panel, item) {
+        Globals.toggleWidget(panel, item)
     }
 
     CPUBackend {
@@ -161,7 +155,7 @@ Item {
         radius: Tokens.radiusSm
         color: Qt.rgba(Theme.bgElevated.r, Theme.bgElevated.g, Theme.bgElevated.b, 0.45)
         border.width: Tokens.strokeWidth
-        border.color: (Globals.activePanel === "cpu" || Globals.activePanel === "gpu")
+        border.color: (Globals.activeWidget === "cpu" || Globals.activeWidget === "gpu")
             ? Theme.borderActive
             : Theme.borderIdle
 
@@ -171,13 +165,14 @@ Item {
             spacing: Tokens.spacingSm
 
             UsageRing {
+                id: cpuRing
                 glyph: "C"
                 value: cpuStat.averageUsage
                 ink: root.usageColor(cpuStat.averageUsage)
                 tip: cpuStat.averageUsage >= 0
                     ? ("CPU  " + cpuStat.averageUsage + "%")
                     : "CPU  —"
-                onActivated: root.togglePanel("cpu")
+                onActivated: root.togglePanel("cpu", cpuRing)
             }
 
             Text {
@@ -189,13 +184,14 @@ Item {
             }
 
             UsageRing {
+                id: gpuRing
                 glyph: "G"
                 value: gpuStat.gpuUsage
                 ink: root.usageColor(gpuStat.gpuUsage)
                 tip: gpuStat.gpuUsage >= 0
                     ? ("GPU  " + gpuStat.gpuUsage + "%")
                     : "GPU  —"
-                onActivated: root.togglePanel("gpu")
+                onActivated: root.togglePanel("gpu", gpuRing)
             }
 
             Text {

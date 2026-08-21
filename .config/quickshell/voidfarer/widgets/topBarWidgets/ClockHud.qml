@@ -176,6 +176,6 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: Globals.toggleCenterPanel("dashboard")
+        onClicked: Globals.toggleWidget("dashboard", root)
     }
 }

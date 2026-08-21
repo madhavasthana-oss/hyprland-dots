@@ -1,7 +1,7 @@
 // TopBar.qml --- full-width cutout bar
 // Three fillWidth zones; Item { Layout.fillWidth } spacers share leftover room.
 //
-//   [ workspaces ]  title…     [ clock · greeting ]     [ console · rings · notif · power ]
+//   [ workspaces ]  title…     [ clock · greeting ]     [ launch · rings · notif · power ]
 //
 import QtQuick
 import QtQuick.Layouts 1.15
