@@ -380,6 +380,35 @@ install_configs() {
   ok "configs applied"
 }
 
+# Pre-warm Ghostty at graphical login so `ghostty +new-window` is instant.
+enable_ghostty_user_service() {
+  local unit="app-com.mitchellh.ghostty.service"
+  local unit_file="/usr/lib/systemd/user/${unit}"
+
+  if ! command -v ghostty >/dev/null 2>&1; then
+    dim "ghostty not installed — skip systemd user unit"
+    return 0
+  fi
+  if [[ ! -f "$unit_file" ]]; then
+    warn "ghostty systemd user unit missing (${unit_file}) — skip"
+    return 0
+  fi
+
+  log "Enabling Ghostty systemd user unit (${unit})"
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    echo "systemctl --user enable ${unit}"
+    echo "systemctl --user start ${unit}"
+    return 0
+  fi
+
+  systemctl --user enable "$unit"
+  if systemctl --user start "$unit"; then
+    ok "ghostty systemd user unit enabled and started"
+  else
+    warn "unit enabled; start skipped (Ghostty may already be running). Next login will use systemd."
+  fi
+}
+
 # SDDM: install greeter theme from dots (astronaut theme config)
 install_sddm() {
   local conf_src="${CONFIG_SRC}/sddm"
@@ -451,6 +480,11 @@ fi
 
 if [[ "$DO_CONFIGS" -eq 1 ]]; then
   install_configs
+  echo
+fi
+
+if [[ "$DO_PACKAGES" -eq 1 || "$DO_CONFIGS" -eq 1 ]]; then
+  enable_ghostty_user_service
   echo
 fi
 

@@ -16,9 +16,8 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("dbus-update-activation-environment --all")
 	hl.exec_cmd("sleep 1 && dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP") -- Some fix idk
 
-	-- GhosTTY initializer
-	-- If GhosTTY lags behind, uncomment to make it faster, this will keep a window open in the background
-	hl.exec_cmd("ghostty --gtk-single-instance=true --quit-after-last-window-closed=false --initial-window=false")
+	-- Ghostty via systemd user unit (D-Bus activation, instant new windows)
+	hl.exec_cmd("systemctl --user start app-com.mitchellh.ghostty.service")
 
 	-- notification daemon initializer
 	hl.exec_cmd("mako")

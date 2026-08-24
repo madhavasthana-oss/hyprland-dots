@@ -3,7 +3,7 @@
 terminalPrimary =
 "~/.config/hypr/hyprland/scripts/launch_first_available.sh 'kitty -1' 'alacritty' 'wezterm' 'konsole' 'kgx' 'uxterm' 'xterm'"
 terminalSecondary =
-"~/.config/hypr/hyprland/scripts/launch_first_available.sh 'ghostty --gtk-single-instance=true' 'kitty -1' 'alacritty' 'wezterm' 'konsole' 'kgx' 'uxterm' 'xterm'"
+"~/.config/hypr/hyprland/scripts/launch_first_available.sh 'ghostty +new-window' 'kitty -1' 'alacritty' 'wezterm' 'konsole' 'kgx' 'uxterm' 'xterm'"
 terminalTertiary =
 	"~/.config/hypr/hyprland/scripts/launch_first_available.sh 'wezterm' 'konsole' 'kgx' 'uxterm' 'xterm'"
 fileManager =
