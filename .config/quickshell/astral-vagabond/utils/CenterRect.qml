@@ -109,6 +109,7 @@ Item {
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
+        acceptedButtons: Qt.NoButton
         onEntered: root.hovered = true
         onExited:  root.hovered = false
     }

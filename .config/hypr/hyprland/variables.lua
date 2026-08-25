@@ -29,4 +29,4 @@ workspaceGroupSize = 10
 -- Options: end4, impulse, theme, classic, standard, fast, high, dynamic,
 --   optimized, moving, vertical, diablo-1, diablo-2, me-1, me-2,
 --   minimal-1, minimal-2, ja, LimeFrenzy, disable
-animationPreset = "impulse"
+animationPreset = "classic"

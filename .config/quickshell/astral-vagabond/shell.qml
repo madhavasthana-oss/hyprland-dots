@@ -4,7 +4,6 @@ import Quickshell.Wayland
 import Quickshell.Io
 import "bars"
 import "widgets/rightBarWidgets"
-import "widgets/centerBarWidgets"
 import "widgets/leftBarWidgets"
 import "bottom"
 
@@ -175,15 +174,19 @@ ShellRoot {
     PanelWindow {
         id: centerBarWindow
         anchors { top: true }
-        // Collapsed: HUD width × same height as left/right bars.
-        // Expanded: centerSmallerWidth × centerHeight.
-        implicitWidth: Globals.activeCenterPanel !== ""
+        // Collapsed: HUD strip. Expanded: HUD + separator + chosen widget.
+        implicitWidth: Globals.activeWidget !== ""
             ? Tokens.centerExpandedWidth
             : Tokens.centerCollapsedWidth
-        implicitHeight: Tokens.centerHeight
+        implicitHeight: Globals.activeWidget !== ""
+            ? Tokens.centerHeight
+                + Math.max(1, Math.round(Tokens.strokeWidth))
+                + Tokens.centerExpandedHeight
+            : Tokens.centerHeight
         color: "transparent"
         margins.top: Tokens.topMargin
         exclusiveZone: Tokens.exclusiveZone
+        focusable: Globals.activeWidget !== ""
         WlrLayershell.layer:     WlrLayer.Top
         WlrLayershell.namespace: "astral-vagabond-center"
 
@@ -200,50 +203,9 @@ ShellRoot {
             }
         }
 
+        Keys.onEscapePressed: Globals.closeWidget()
+
         CenterBar { anchors.fill: parent }
-    }
-
-    PanelWindow {
-        id: centerDropdownWindow
-        anchors { top: true }
-        implicitWidth:  centerPanel.implicitWidth
-        implicitHeight: Globals.activeCenterPanel !== "" ? centerPanel.implicitHeight : 0
-
-        Behavior on implicitWidth {
-            NumberAnimation {
-                duration: Tokens.animInstant
-                easing.type: Easing.OutQuart
-            }
-        }
-        Behavior on implicitHeight {
-            NumberAnimation { duration: Tokens.animInstant; easing.type: Easing.OutQuart }
-        }
-        
-        color:         "transparent"
-        exclusiveZone: 0
-        // Keyboard for notes / todo fields on dashboard
-        focusable: Globals.activeCenterPanel !== ""
-        WlrLayershell.layer:         WlrLayer.Top
-        WlrLayershell.namespace:     "astral-vagabond-center-dropdown"
-        WlrLayershell.margins.top:   Tokens.spacingXs
-        visible: Globals.activeCenterPanel !== "" 
-
-        Rectangle {
-            id: centerPanelBg
-            anchors.fill: parent
-            radius:       Tokens.radiusXl
-            color:        Theme.bgConsole
-            opacity:      Theme.opacityConsole
-            border.color: Theme.borderConsole
-            border.width: Tokens.strokeWidth
-        }
-
-        CenterPanel {
-            id: centerPanel
-            anchors.fill: parent
-            // Keep a hair of inset so border radius doesn't clip card chrome
-            anchors.margins: Tokens.borderXss
-        }
     }
 
     // Power menu --- bottom action strip only. No dim overlay.
@@ -269,9 +231,6 @@ ShellRoot {
             anchors.fill: parent
         }
     }
-
-    // Wi‑Fi / Bluetooth / settings / notifications live under
-    // widgets/centerBarWidgets/console/ (see ConsoleWidget.qml).
 
     Component.onCompleted: Globals.releaseEdgePanel()
 }

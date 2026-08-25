@@ -222,9 +222,7 @@ Item {
     }
 
     Timer {
-        interval: (Globals.activeCenterPanel === "console"
-                   && Globals.activeEdgePanel === "notifications")
-                  ? 1000 : 2000
+        interval: Globals.activeWidget === "notifications" ? 1000 : 2000
         running: true
         repeat: true
         triggeredOnStart: true
@@ -233,13 +231,8 @@ Item {
 
     Connections {
         target: Globals
-        function onActiveEdgePanelChanged() {
-            if (Globals.activeEdgePanel === "notifications")
-                root.refresh()
-        }
-        function onActiveCenterPanelChanged() {
-            if (Globals.activeCenterPanel === "console"
-                    && Globals.activeEdgePanel === "notifications")
+        function onActiveWidgetChanged() {
+            if (Globals.activeWidget === "notifications")
                 root.refresh()
         }
     }

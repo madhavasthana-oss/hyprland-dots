@@ -9,15 +9,16 @@ import QtQuick.Controls 2.15
 import QtQuick.Shapes
 import "../utils"
 import ".."
+import "../widgets"
 
 Item {
     id: centerBar
     // Window size is driven by shell.qml
-    // (collapsed: leftWidth×leftHeight ↔ expanded: centerSmallerWidth×centerHeight)
+    // Collapsed: HUD strip. Expanded: HUD + separator + chosen widget.
     width: parent ? parent.width : Tokens.leftWidth
     height: parent ? parent.height : Tokens.leftHeight
 
-    readonly property bool expanded: Globals.activeCenterPanel !== ""
+    readonly property bool expanded: Globals.activeWidget !== ""
 
     property var statusMessages: [
         "SYSTEM NOMINAL",
@@ -96,15 +97,8 @@ Item {
         pendingStatus = msg
         overrideActive = true
         alertActive = !!opts.alert
-        // Only type into the bar while expanded; alerts still pulse chrome collapsed
-        if (expanded) {
-            messageAnimator.transitionTo(msg)
-            overrideHoldTimer.interval = opts.holdMs || 4000
-            overrideHoldTimer.restart()
-        } else {
-            overrideHoldTimer.interval = opts.holdMs || 4000
-            overrideHoldTimer.restart()
-        }
+        overrideHoldTimer.interval = opts.holdMs || 4000
+        overrideHoldTimer.restart()
     }
 
     function pickStatusMessage() {
@@ -159,8 +153,6 @@ Item {
         onTriggered: {
             centerBar.overrideActive = false
             centerBar.alertActive = false
-            if (centerBar.expanded)
-                messageTimer.pickAndShow()
         }
     }
 
@@ -170,18 +162,8 @@ Item {
         duration: Tokens.animFadeDelay
     }
 
-    onExpandedChanged: {
-        if (expanded) {
-            revealStatus()
-        } else {
-            clearStatus()
-        }
-    }
-
     Component.onCompleted: {
         pendingStatus = statusMessages[0]
-        // No status typed while collapsed
-        messageAnimator.displayedText = ""
         centerBar.tickClock()
         centerBar.initBatteryState()
         weatherProc.running = true
@@ -546,20 +528,31 @@ Item {
         expanded:     centerBar.expanded
     }
 
-    // Content keeps natural width; equal fillWidth spacers share leftover space.
-    // Collapsed:  clock | fill | launch | fill | meta
-    // Expanded:   clock | fill | launch | fill | status | fill | meta
-    RowLayout {
-        id: hudRow
+    ColumnLayout {
+        id: morphCol
         anchors.fill: parent
-        anchors.leftMargin:  Tokens.paddingH + Tokens.spacingSm
-        anchors.rightMargin: (notifBadge.visible
-            ? notifBadge.width + Tokens.paddingH + Tokens.spacingSm
-            : Tokens.paddingH + Tokens.spacingSm)
-        anchors.topMargin:    Tokens.spacingXss
-        anchors.bottomMargin: Tokens.spacingXss
-        spacing: Tokens.spacingSm
-        clip: true
+        spacing: 0
+
+        Item {
+            id: hudStrip
+            Layout.fillWidth: true
+            Layout.preferredHeight: Tokens.centerHeight
+            Layout.minimumHeight: Tokens.centerHeight
+            Layout.maximumHeight: Tokens.centerHeight
+            clip: true
+
+            // Collapsed/expanded HUD is the same: clock | fill | launch | fill | meta
+            RowLayout {
+                id: hudRow
+                anchors.fill: parent
+                anchors.leftMargin:  Tokens.paddingH + Tokens.spacingSm
+                anchors.rightMargin: (notifBadge.visible
+                    ? notifBadge.width + Tokens.paddingH + Tokens.spacingSm
+                    : Tokens.paddingH + Tokens.spacingSm)
+                anchors.topMargin:    Tokens.spacingXss
+                anchors.bottomMargin: Tokens.spacingXss
+                spacing: Tokens.spacingSm
+                clip: true
 
         // --- clock ring + day / date / time (astral-vagabond) ---
         RowLayout {
@@ -690,45 +683,6 @@ Item {
         // dynamic gap
         Item { Layout.fillWidth: true; Layout.minimumWidth: Tokens.spacingXs }
 
-        // --- status (content-sized only when expanded; does not eat free space) ---
-        Item {
-            id: statusSlot
-            visible: centerBar.expanded
-            Layout.alignment: Qt.AlignVCenter
-            Layout.fillWidth: false
-            Layout.fillHeight: true
-            // Full string width — no elide; spacers absorb leftover room
-            Layout.preferredWidth: statusText.implicitWidth
-            Layout.minimumWidth: 0
-            clip: true
-            opacity: messageAnimator.displayedText.length > 0 ? 1 : 0.35
-
-            Behavior on opacity {
-                NumberAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
-            }
-
-            Text {
-                id: statusText
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: messageAnimator.displayedText.length
-                    ? ("<< " + messageAnimator.displayedText + " >>")
-                    : ""
-                horizontalAlignment: Text.AlignHCenter
-                maximumLineCount: 1
-                font.family: Theme.fontDisplay
-                font.pixelSize: Tokens.fontSizeMedium
-                color: Theme.textPrimary
-            }
-        }
-
-        // dynamic gap (only when status is present so collapsed stays balanced)
-        Item {
-            visible: centerBar.expanded
-            Layout.fillWidth: true
-            Layout.minimumWidth: Tokens.spacingXs
-        }
-
         // --- weather · wifi (content-sized) ---
         ColumnLayout {
             id: metaCol
@@ -762,92 +716,113 @@ Item {
                 text: centerBar.wifiSsid
             }
         }
-    }
+            }
 
-    // Launch strip overlaid on the layout slot so it stacks above the bar toggle
-    QuickLaunch {
-        id: quickLaunch
-        z: 3
-        x: hudRow.x + launchSlot.x
-        y: hudRow.y + launchSlot.y + Math.round((launchSlot.height - height) / 2)
-    }
+            QuickLaunch {
+                id: quickLaunch
+                z: 3
+                x: hudRow.x + launchSlot.x
+                y: hudRow.y + launchSlot.y + Math.round((launchSlot.height - height) / 2)
+            }
 
-    // Notification badge --- trailing edge of center bar; opens console notifications
-    Item {
-        id: notifBadge
-        anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.rightMargin: Tokens.paddingH
-        width: badgeChrome.width
-        height: badgeChrome.height
-        z: 3
-        visible: Globals.notifCount > 0 || Globals.notifDnd || Globals.notifSilent
+            Item {
+                id: notifBadge
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.rightMargin: Tokens.paddingH
+                width: badgeChrome.width
+                height: badgeChrome.height
+                z: 3
+                visible: Globals.notifCount > 0 || Globals.notifDnd || Globals.notifSilent
 
-        Rectangle {
-            id: badgeChrome
-            width: Math.max(Tokens.iconSizeLarge + Tokens.spacingXs,
-                            badgeLabel.implicitWidth + 2 * Tokens.paddingH)
-            height: Tokens.listRowHeight
-            radius: Tokens.radiusSm
-            color: badgeMouse.containsMouse ? Theme.bgElevated : Theme.bgSurface
-            border.color: Globals.notifDnd
-                ? Theme.stateCritical
-                : (Globals.notifCount > 0 ? Theme.borderActive : Theme.borderIdle)
-            border.width: Tokens.strokeWidth
+                Rectangle {
+                    id: badgeChrome
+                    width: Math.max(Tokens.iconSizeLarge + Tokens.spacingXs,
+                                    badgeLabel.implicitWidth + 2 * Tokens.paddingH)
+                    height: Tokens.listRowHeight
+                    radius: Tokens.radiusSm
+                    color: badgeMouse.containsMouse ? Theme.bgElevated : Theme.bgSurface
+                    border.color: Globals.notifDnd
+                        ? Theme.stateCritical
+                        : (Globals.notifCount > 0 ? Theme.borderActive : Theme.borderIdle)
+                    border.width: Tokens.strokeWidth
 
-            Text {
-                id: badgeLabel
-                anchors.centerIn: parent
-                text: {
-                    if (Globals.notifDnd)
-                        return Globals.notifCount > 0 ? "DND " + Globals.notifCount : "DND"
-                    if (Globals.notifSilent)
-                        return Globals.notifCount > 0 ? "S " + Globals.notifCount : "S"
-                    return Globals.notifCount > 99 ? "99+" : String(Globals.notifCount)
+                    Text {
+                        id: badgeLabel
+                        anchors.centerIn: parent
+                        text: {
+                            if (Globals.notifDnd)
+                                return Globals.notifCount > 0 ? "DND " + Globals.notifCount : "DND"
+                            if (Globals.notifSilent)
+                                return Globals.notifCount > 0 ? "S " + Globals.notifCount : "S"
+                            return Globals.notifCount > 99 ? "99+" : String(Globals.notifCount)
+                        }
+                        font.family: Theme.fontDisplay
+                        font.pixelSize: Tokens.fontSizeLabel
+                        color: Globals.notifDnd
+                            ? Theme.stateCritical
+                            : (Globals.notifCount > 0 ? Theme.accent : Theme.textDim)
+                    }
+
+                    MouseArea {
+                        id: badgeMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: (mouse) => {
+                            Globals.toggleWidget("notifications")
+                            mouse.accepted = true
+                        }
+                    }
                 }
-                font.family: Theme.fontDisplay
-                font.pixelSize: Tokens.fontSizeLabel
-                color: Globals.notifDnd
-                    ? Theme.stateCritical
-                    : (Globals.notifCount > 0 ? Theme.accent : Theme.textDim)
             }
 
             MouseArea {
-                id: badgeMouse
                 anchors.fill: parent
-                hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                // Consume click so center panel toggle does not fire
-                onClicked: (mouse) => {
-                    Globals.toggleEdgePanel("notifications")
-                    mouse.accepted = true
+                anchors.rightMargin: notifBadge.visible ? notifBadge.width + Tokens.paddingH : 0
+                z: 1
+
+                onClicked: {
+                    const lx = quickLaunch.x
+                    const ly = quickLaunch.y
+                    if (mouseX >= lx && mouseX <= lx + quickLaunch.width
+                        && mouseY >= ly && mouseY <= ly + quickLaunch.height)
+                        return
+
+                    if (Globals.activeWidget !== "")
+                        Globals.closeWidget()
+                    else
+                        Globals.openWidget(Globals.lastWidget)
                 }
             }
         }
-    }
 
-    MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        // Leave room for badge hit target on the right
-        anchors.rightMargin: notifBadge.visible ? notifBadge.width + Tokens.paddingH : 0
-        // Below launch (z:3) and badge (z:3); HUD chrome still toggles last panel
-        z: 1
+        Rectangle {
+            id: morphSep
+            visible: centerBar.expanded
+            Layout.fillWidth: true
+            Layout.leftMargin: Tokens.paddingH
+            Layout.rightMargin: Tokens.paddingH
+            Layout.preferredHeight: centerBar.expanded
+                ? Math.max(1, Math.round(Tokens.strokeWidth))
+                : 0
+            Layout.maximumHeight: centerBar.expanded
+                ? Math.max(1, Math.round(Tokens.strokeWidth))
+                : 0
+            color: Theme.borderIdle
+            opacity: 0.5
+        }
 
-        onClicked: {
-            // Ignore clicks on the launch strip (also covered by QuickLaunch z:3)
-            const lx = quickLaunch.x
-            const ly = quickLaunch.y
-            if (mouseX >= lx && mouseX <= lx + quickLaunch.width
-                && mouseY >= ly && mouseY <= ly + quickLaunch.height)
-                return
-
-            if (Globals.activeCenterPanel !== "") {
-                Globals.lastCenterPanel = Globals.activeCenterPanel
-                Globals.activeCenterPanel = ""
-            } else {
-                Globals.activeCenterPanel = Globals.lastCenterPanel
-            }
+        WidgetHost {
+            id: widgetHost
+            visible: centerBar.expanded
+            Layout.fillWidth: true
+            Layout.fillHeight: centerBar.expanded
+            Layout.preferredHeight: centerBar.expanded ? Tokens.centerExpandedHeight : 0
+            Layout.minimumHeight: 0
+            Layout.maximumHeight: centerBar.expanded ? Tokens.centerExpandedHeight : 0
+            clip: true
         }
     }
 }
