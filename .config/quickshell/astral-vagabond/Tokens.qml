@@ -85,6 +85,53 @@ QtObject {
     // Fixed content footprint for center dropdown (tabs sit above this)
     readonly property int centerExpandedHeight:  Math.round(420 * scale)
 
+    // Per-widget body sizes (HUD chrome sits outside these).
+    // Compact utilities stay small; dashboard / media keep a wide throne.
+    readonly property int widgetDashboardWidth:  centerSmallerWidth
+    readonly property int widgetDashboardHeight: centerExpandedHeight
+    readonly property int widgetMediaWidth:      Math.round(560 * scale)
+    readonly property int widgetMediaHeight:     Math.round(340 * scale)
+    readonly property int widgetWifiWidth:       Math.round(300 * scale)
+    readonly property int widgetWifiHeight:      Math.round(260 * scale)
+    readonly property int widgetBluetoothWidth:  Math.round(300 * scale)
+    readonly property int widgetBluetoothHeight: Math.round(280 * scale)
+    readonly property int widgetSettingsWidth:   Math.round(340 * scale)
+    readonly property int widgetSettingsHeight:  Math.round(360 * scale)
+    readonly property int widgetNotifWidth:      Math.round(320 * scale)
+    readonly property int widgetNotifHeight:     Math.round(300 * scale)
+    readonly property int widgetCpuWidth:        rightWidth
+    readonly property int widgetCpuHeight:       rightWidth
+    readonly property int widgetGpuWidth:        rightWidth
+    readonly property int widgetGpuHeight:       rightWidth
+
+    function widgetWidthFor(id) {
+        switch (id) {
+        case "dashboard":     return widgetDashboardWidth
+        case "media":         return widgetMediaWidth
+        case "wifi":          return widgetWifiWidth
+        case "bluetooth":     return widgetBluetoothWidth
+        case "settings":      return widgetSettingsWidth
+        case "notifications": return widgetNotifWidth
+        case "cpu":           return widgetCpuWidth
+        case "gpu":           return widgetGpuWidth
+        default:              return widgetWifiWidth
+        }
+    }
+
+    function widgetHeightFor(id) {
+        switch (id) {
+        case "dashboard":     return widgetDashboardHeight
+        case "media":         return widgetMediaHeight
+        case "wifi":          return widgetWifiHeight
+        case "bluetooth":     return widgetBluetoothHeight
+        case "settings":      return widgetSettingsHeight
+        case "notifications": return widgetNotifHeight
+        case "cpu":           return widgetCpuHeight
+        case "gpu":           return widgetGpuHeight
+        default:              return widgetWifiHeight
+        }
+    }
+
     readonly property int angleOffsetCollapsed: Math.round(30 * scale)
     readonly property int angleOffsetExpanded:  0
     readonly property int angleOffsetDefault:   Math.round(45 * scale)
@@ -236,6 +283,40 @@ QtObject {
     readonly property real strokeWidth:       1.0 * scale
     readonly property real strokeWidthActive: 1.5 * scale
 
+    // Extra hitbox around the morphing chrome. Scale-invariant; keeps the
+    // input mask off the border AA and taller than the dashboard body.
+    readonly property int centerMaskPad: Math.round(12 * scale)
+    readonly property int centerBodyGap: Math.max(1, Math.round(strokeWidth))
+    readonly property int centerChromeMaxHeight: centerHeight
+        + centerBodyGap
+        + Math.max(
+            widgetDashboardHeight,
+            widgetMediaHeight,
+            widgetWifiHeight,
+            widgetBluetoothHeight,
+            widgetSettingsHeight,
+            widgetNotifHeight
+        )
+    // Always taller than the dashboard body: HUD + gap + dashboard + inner
+    // padding + mask pad on both sides.
+    readonly property int centerMaskHeight: Math.max(
+        centerChromeMaxHeight + paddingV + 2 * centerMaskPad,
+        widgetDashboardHeight + 2 * centerMaskPad
+    )
+
+    // Center layer surface stays this size so Hyprland never resizes/re-centers it.
+    // Inner chrome morphs inside; input mask is padded to centerMaskHeight.
+    readonly property int centerSurfaceWidth: Math.max(
+        centerCollapsedWidth,
+        widgetDashboardWidth,
+        widgetMediaWidth,
+        widgetWifiWidth,
+        widgetBluetoothWidth,
+        widgetSettingsWidth,
+        widgetNotifWidth
+    ) + 2 * centerMaskPad
+    readonly property int centerSurfaceHeight: centerMaskHeight
+
     readonly property int blurRadius: Math.round(18 * scale)
 
     readonly property int barInset: Math.round(6 * scale)
@@ -287,4 +368,6 @@ QtObject {
     readonly property int animExpand:     300
     readonly property int animFadeIn:     150
     readonly property int animFadeDelay:  450
+    // Inner chrome morph only — never used on the Wayland surface size.
+    readonly property int widgetMorphMs:  animExpand
 }

@@ -44,6 +44,7 @@ Item {
         anchors.fill: parent
         radius:       root.radius
 
+        antialiasing: true
         color: Qt.rgba(
             root.fillColor.r,
             root.fillColor.g,
@@ -56,15 +57,10 @@ Item {
                           : root.hovered
                               ? Theme.accentWarm
                               : root.strokeColor
-        border.width: root.hovered
-                          ? Tokens.borderXss
-                          : root.strokeWidth
+        border.width: root.strokeWidth
 
         Behavior on border.color {
             ColorAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
-        }
-        Behavior on border.width {
-            NumberAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
         }
     }
 

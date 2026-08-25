@@ -13,7 +13,7 @@ import "../widgets"
 
 Item {
     id: centerBar
-    // Window size is driven by shell.qml
+    // Window size is driven by shell.qml chrome.
     // Collapsed: HUD strip. Expanded: HUD + separator + chosen widget.
     width: parent ? parent.width : Tokens.leftWidth
     height: parent ? parent.height : Tokens.leftHeight
@@ -528,31 +528,24 @@ Item {
         expanded:     centerBar.expanded
     }
 
-    ColumnLayout {
-        id: morphCol
-        anchors.fill: parent
-        spacing: 0
+    Item {
+        id: hudStrip
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: Tokens.centerHeight
 
-        Item {
-            id: hudStrip
-            Layout.fillWidth: true
-            Layout.preferredHeight: Tokens.centerHeight
-            Layout.minimumHeight: Tokens.centerHeight
-            Layout.maximumHeight: Tokens.centerHeight
-            clip: true
-
-            // Collapsed/expanded HUD is the same: clock | fill | launch | fill | meta
-            RowLayout {
-                id: hudRow
-                anchors.fill: parent
-                anchors.leftMargin:  Tokens.paddingH + Tokens.spacingSm
-                anchors.rightMargin: (notifBadge.visible
-                    ? notifBadge.width + Tokens.paddingH + Tokens.spacingSm
-                    : Tokens.paddingH + Tokens.spacingSm)
-                anchors.topMargin:    Tokens.spacingXss
-                anchors.bottomMargin: Tokens.spacingXss
-                spacing: Tokens.spacingSm
-                clip: true
+        // Collapsed/expanded HUD is the same: clock | fill | launch | fill | meta
+        RowLayout {
+            id: hudRow
+            anchors.fill: parent
+            anchors.leftMargin:  Tokens.paddingH + Tokens.spacingSm
+            anchors.rightMargin: (notifBadge.visible
+                ? notifBadge.width + Tokens.paddingH + Tokens.spacingSm
+                : Tokens.paddingH + Tokens.spacingSm)
+            anchors.topMargin:    Tokens.spacingXss
+            anchors.bottomMargin: Tokens.spacingXss
+            spacing: Tokens.spacingSm
 
         // --- clock ring + day / date / time (astral-vagabond) ---
         RowLayout {
@@ -798,31 +791,40 @@ Item {
             }
         }
 
-        Rectangle {
-            id: morphSep
-            visible: centerBar.expanded
-            Layout.fillWidth: true
-            Layout.leftMargin: Tokens.paddingH
-            Layout.rightMargin: Tokens.paddingH
-            Layout.preferredHeight: centerBar.expanded
-                ? Math.max(1, Math.round(Tokens.strokeWidth))
-                : 0
-            Layout.maximumHeight: centerBar.expanded
-                ? Math.max(1, Math.round(Tokens.strokeWidth))
-                : 0
-            color: Theme.borderIdle
-            opacity: 0.5
+    Rectangle {
+        id: morphSep
+        anchors.top: hudStrip.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: Tokens.paddingH
+        anchors.rightMargin: Tokens.paddingH
+        height: centerBar.expanded ? Math.max(1, Math.round(Tokens.strokeWidth)) : 0
+        color: Theme.borderIdle
+        opacity: centerBar.expanded ? 0.5 : 0
+        Behavior on opacity {
+            NumberAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
+        }
+    }
+
+    // Clip only the expanding body, never the HUD / chrome border.
+    Item {
+        id: bodySlot
+        anchors.top: morphSep.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: Tokens.paddingH
+        anchors.rightMargin: Tokens.paddingH
+        anchors.bottomMargin: Tokens.paddingV
+        clip: true
+        opacity: centerBar.expanded ? 1 : 0
+        Behavior on opacity {
+            NumberAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
         }
 
         WidgetHost {
             id: widgetHost
-            visible: centerBar.expanded
-            Layout.fillWidth: true
-            Layout.fillHeight: centerBar.expanded
-            Layout.preferredHeight: centerBar.expanded ? Tokens.centerExpandedHeight : 0
-            Layout.minimumHeight: 0
-            Layout.maximumHeight: centerBar.expanded ? Tokens.centerExpandedHeight : 0
-            clip: true
+            anchors.fill: parent
         }
     }
 }

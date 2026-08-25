@@ -101,12 +101,15 @@ ShellRoot {
 
         Behavior on implicitWidth {
             NumberAnimation {
-                duration: Tokens.animInstant
-                easing.type: Easing.OutQuart
+                duration: Tokens.widgetMorphMs
+                easing.type: Easing.OutCubic
             }
         }
         Behavior on implicitHeight {
-            NumberAnimation { duration: Tokens.animInstant; easing.type: Easing.OutQuart }
+            NumberAnimation {
+                duration: Tokens.widgetMorphMs
+                easing.type: Easing.OutCubic
+            }
         }
 
         readonly property int widgetLeft: {
