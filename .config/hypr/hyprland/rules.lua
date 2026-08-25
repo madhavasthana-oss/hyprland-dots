@@ -173,6 +173,11 @@ hl.layer_rule({ match = { namespace = "quickshell:wTaskView" }, no_anim = true})
 -- Launchers need to be FAST
 hl.layer_rule({ match = { namespace = "gtk4-layer-shell" }, no_anim = true})
 
+-- Astral-Vagabond: never compositor-animate these layers.
+-- Resizing a layer under Hyprland fade/slide leaves a black trail of the old buffer.
+hl.layer_rule({ match = { namespace = "astral-vagabond-.*" }, no_anim = true })
+hl.layer_rule({ match = { namespace = "quickshell:astral-vagabond-.*" }, no_anim = true })
+
 -- Astral-Vagabond cava desktop overlay (kitty --class astral-vagabond-cava)
 -- border_size = 0 only (no no_border / no_focus — those throw).
 hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, float = true })

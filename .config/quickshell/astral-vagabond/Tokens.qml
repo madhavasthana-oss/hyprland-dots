@@ -283,6 +283,40 @@ QtObject {
     readonly property real strokeWidth:       1.0 * scale
     readonly property real strokeWidthActive: 1.5 * scale
 
+    // Extra hitbox around the morphing chrome. Scale-invariant; keeps the
+    // input mask off the border AA and taller than the dashboard body.
+    readonly property int centerMaskPad: Math.round(12 * scale)
+    readonly property int centerBodyGap: Math.max(1, Math.round(strokeWidth))
+    readonly property int centerChromeMaxHeight: centerHeight
+        + centerBodyGap
+        + Math.max(
+            widgetDashboardHeight,
+            widgetMediaHeight,
+            widgetWifiHeight,
+            widgetBluetoothHeight,
+            widgetSettingsHeight,
+            widgetNotifHeight
+        )
+    // Always taller than the dashboard body: HUD + gap + dashboard + inner
+    // padding + mask pad on both sides.
+    readonly property int centerMaskHeight: Math.max(
+        centerChromeMaxHeight + paddingV + 2 * centerMaskPad,
+        widgetDashboardHeight + 2 * centerMaskPad
+    )
+
+    // Center layer surface stays this size so Hyprland never resizes/re-centers it.
+    // Inner chrome morphs inside; input mask is padded to centerMaskHeight.
+    readonly property int centerSurfaceWidth: Math.max(
+        centerCollapsedWidth,
+        widgetDashboardWidth,
+        widgetMediaWidth,
+        widgetWifiWidth,
+        widgetBluetoothWidth,
+        widgetSettingsWidth,
+        widgetNotifWidth
+    ) + 2 * centerMaskPad
+    readonly property int centerSurfaceHeight: centerMaskHeight
+
     readonly property int blurRadius: Math.round(18 * scale)
 
     readonly property int barInset: Math.round(6 * scale)
@@ -334,5 +368,6 @@ QtObject {
     readonly property int animExpand:     300
     readonly property int animFadeIn:     150
     readonly property int animFadeDelay:  450
-    readonly property int widgetMorphMs:  30
+    // Inner chrome morph only — never used on the Wayland surface size.
+    readonly property int widgetMorphMs:  animExpand
 }
