@@ -325,7 +325,7 @@ Item {
         return isNaN(pct) ? 0 : Math.max(0, Math.min(100, pct))
     }
 
-    // Bar status + mako toast. Same event, two surfaces.
+    // Bar status + desktop toast. Same event, two surfaces.
     function notifyBattery(summary, opts) {
         if (!centerBar.batteryInitialized)
             return

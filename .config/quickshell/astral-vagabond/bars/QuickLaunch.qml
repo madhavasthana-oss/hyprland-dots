@@ -1,4 +1,4 @@
-// QuickLaunch.qml --- dashboard · wifi · bluetooth · settings · notifs · media
+// QuickLaunch.qml --- dashboard · console · wifi · bluetooth · settings · notifs · media
 import QtQuick
 import QtQuick.Layouts 1.15
 import Qt5Compat.GraphicalEffects
@@ -17,7 +17,7 @@ Item {
         Math.min(Tokens.centerHeight - Tokens.spacingXss * 2, Tokens.listRowHeight + Tokens.spacingXs)
     )
     readonly property int gap: Tokens.spacingXss
-    readonly property int btnCount: 6
+    readonly property int btnCount: 7
 
     // Fixed footprint so RowLayout cannot push neighbors out of the bar
     implicitWidth: hit * btnCount + gap * (btnCount - 1)
@@ -108,6 +108,10 @@ Item {
         LaunchBtn {
             iconSource: Theme.iconDashboard
             widgetId: "dashboard"
+        }
+        LaunchBtn {
+            iconSource: Theme.iconConsole
+            widgetId: "console"
         }
         LaunchBtn {
             iconSource: Theme.iconWifi

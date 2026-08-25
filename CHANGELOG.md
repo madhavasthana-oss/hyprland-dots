@@ -5,6 +5,15 @@ Newest entries first.
 
 ---
 
+## 2026-08-25 — Quickshell console launcher + notification toasts
+
+- **Console** is a first-class center-bar widget (QuickLaunch icon). Super+A / `qs -c astral-vagabond ipc call launcher toggle` opens it.
+- Console lists every desktop app and applet (`DesktopEntries` + actions), with type-to-filter.
+- Tokens: `consoleWidgetWidth` / `consoleWidgetHeight` (620×400). Other center widgets each have a unique width and height so the morph is distinct.
+- **Notifications** are owned by Quickshell (`NotifServer` + top-right toasts). Mako is no longer started. Inbox / DND / silent stay in the notifications widget.
+- Hypr layer `no_anim` is unchanged (still on for astral-vagabond surfaces). Toast and console motion is QML only.
+- Fuzzel remains only for Super+. emoji and Super+V clipboard dmenu.
+
 ## 2026-08-25 — Wallust clients + fuzzel chrome
 
 - Wallust / Ash loaders also paint **mako** and **fuzzel** from `active-colors.json` (`hypr/hyprland/scripts/apply-theme-clients.sh`)

@@ -27,12 +27,11 @@ QtObject {
     property string activeWidget : ""
     property string lastWidget   : "dashboard"
 
-    // Notification modes (mako) + live count for bar badge
+    // Notification modes + live count for bar badge (owned by NotifServer)
     property bool notifSilent : false
     property bool notifDnd    : false
     property int  notifCount  : 0
-    // Session-local: mako history cannot be deleted, so the console inbox
-    // filters these ids until quickshell restarts.
+    // Session-local dismissed ids (survives toast expiry, not a full restart).
     property var notifClearedIds: ({})
     property var notifKnownIds: ({})
     property var notifDndDroppedIds: ({})
@@ -122,8 +121,8 @@ QtObject {
         powerMenuOpen = false
     }
 
-    // Fire a mako toast via notify-send. Empty summary = no-op.
-    // appName becomes notify-send -a (mako criteria), not "mako".
+    // Fire a desktop toast via notify-send (Quickshell NotificationServer).
+    // Empty summary = no-op. appName becomes notify-send -a.
     // urgency: "low" | "normal" | "critical" (default low, matches existing callers)
     function toast(summary, body, appName, urgency, timeoutMs) {
         if (summary === undefined || summary === null)
@@ -163,7 +162,7 @@ QtObject {
     }
 
     function isCenterWidget(id) {
-        return id === "dashboard" || id === "media"
+        return id === "dashboard" || id === "console" || id === "media"
     }
 
     function closeWidget() {

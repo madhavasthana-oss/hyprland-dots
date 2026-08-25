@@ -1,4 +1,4 @@
-// ConsoleWidget.qml --- apps list (left) + console controls (right): wifi/bt/settings/notifs
+// ConsoleWidget.qml --- system app / applet launcher (DesktopEntries)
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
@@ -6,10 +6,6 @@ import Quickshell
 import "../.."
 import "../../utils"
 import "console"
-import "console/network"
-import "console/bluetooth"
-import "console/settings"
-import "console/notifications"
 
 Item {
     id: root
@@ -17,22 +13,23 @@ Item {
 
     property int selectedIndex: 0
 
-    ConsoleModel { id: codex }
+    ConsoleModel { id: catalog }
 
     function selectIndex(i) {
-        if (i < 0 || i >= codex.codexModel.count)
+        if (catalog.model.count <= 0) {
+            selectedIndex = 0
             return
-        selectedIndex = i
-        if (appList.currentIndex !== i)
-            appList.currentIndex = i
-        appList.positionViewAtIndex(i, ListView.Contain)
+        }
+        const next = Math.max(0, Math.min(catalog.model.count - 1, i))
+        selectedIndex = next
+        if (appList.currentIndex !== next)
+            appList.currentIndex = next
+        appList.positionViewAtIndex(next, ListView.Contain)
     }
 
     function launchSelected() {
-        const row = codex.codexModel.get(selectedIndex)
-        if (!row)
-            return
-        Quickshell.execDetached(["bash", "-lc", row.execCmd])
+        if (catalog.launchIndex(selectedIndex))
+            Globals.closeWidget()
     }
 
     function iconSource(name) {
@@ -40,94 +37,53 @@ Item {
         return p && p.length ? p : ""
     }
 
-    function switchEdgePanel(panel) {
-        Globals.activeEdgePanel = panel
-        Globals.lastEdgePanel = panel
-        Qt.callLater(root.grabEdgeFocus)
-    }
-
     function grabListFocus() {
-        appList.forceActiveFocus()
-    }
-
-    function grabEdgeFocus() {
-        const panel = Globals.activeEdgePanel
-        if (panel === "wifi")
-            wifiPage.grabListFocus()
-        else if (panel === "bluetooth")
-            btPage.grabListFocus()
-        else if (panel === "notifications")
-            notifPage.grabListFocus()
-        else
-            edgeHost.forceActiveFocus()
+        searchInput.forceActiveFocus()
     }
 
     function grabConsoleFocus() {
-        // Prefer apps list; edge pages steal focus when their tab is used
         grabListFocus()
     }
 
     Component.onCompleted: {
+        catalog.rebuild()
         selectIndex(0)
-        if (Globals.activeCenterPanel === "console")
+        if (Globals.activeWidget === "console")
             grabConsoleFocus()
     }
 
     Connections {
         target: Globals
-        function onActiveCenterPanelChanged() {
-            if (Globals.activeCenterPanel === "console")
+        function onActiveWidgetChanged() {
+            if (Globals.activeWidget === "console")
                 Qt.callLater(root.grabConsoleFocus)
         }
-        function onActiveEdgePanelChanged() {
-            if (Globals.activeCenterPanel === "console")
-                Qt.callLater(root.grabEdgeFocus)
+    }
+
+    Connections {
+        target: catalog.model
+        function onCountChanged() {
+            if (catalog.model.count === 0) {
+                selectedIndex = 0
+                return
+            }
+            if (selectedIndex >= catalog.model.count)
+                selectIndex(catalog.model.count - 1)
+            else
+                selectIndex(selectedIndex)
         }
     }
 
     focus: true
-    Keys.forwardTo: [appList]
-    Keys.onPressed: (event) => {
-        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-            root.launchSelected()
-            event.accepted = true
-        } else if (event.key === Qt.Key_Up) {
-            root.selectIndex(root.selectedIndex - 1)
-            event.accepted = true
-        } else if (event.key === Qt.Key_Down) {
-            root.selectIndex(root.selectedIndex + 1)
-            event.accepted = true
-        } else if (event.key === Qt.Key_1) {
-            root.switchEdgePanel("wifi")
-            event.accepted = true
-        } else if (event.key === Qt.Key_2) {
-            root.switchEdgePanel("bluetooth")
-            event.accepted = true
-        } else if (event.key === Qt.Key_3) {
-            root.switchEdgePanel("settings")
-            event.accepted = true
-        } else if (event.key === Qt.Key_4) {
-            root.switchEdgePanel("notifications")
-            event.accepted = true
-        }
-    }
+    Keys.forwardTo: [searchInput, appList]
 
-    RowLayout {
-        id: mainRow
+    ColumnLayout {
         anchors.fill: parent
         anchors.margins: Tokens.paddingH
-        spacing: Tokens.spacingMd
+        spacing: Tokens.spacingXs
 
-        // -- LEFT: application list (fixed narrow column; never steal edge space) ---
-        ColumnLayout {
-            id: appsCol
-            // ~1/3 of console; hard caps so ListView cannot expand the row
-            Layout.fillWidth: false
-            Layout.fillHeight: true
-            Layout.preferredWidth: Math.round(Tokens.listPanelWidth * 1.7)
-            Layout.minimumWidth: Tokens.listPanelWidth
-            Layout.maximumWidth: Math.round(Tokens.centerSmallerWidth * 0.32)
-            Layout.alignment: Qt.AlignTop
+        RowLayout {
+            Layout.fillWidth: true
             spacing: Tokens.spacingXs
 
             Text {
@@ -135,186 +91,213 @@ Item {
                 font.family: Theme.fontDisplay
                 font.pixelSize: Tokens.fontSizeLabel
                 color: Theme.accent
-                Layout.fillWidth: true
             }
 
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumWidth: 0
-                Layout.minimumHeight: 0
-                radius: Tokens.radiusMd
-                color: Theme.bgSurface
-                border.color: Theme.borderIdle
-                border.width: Tokens.strokeWidth
+            Item { Layout.fillWidth: true }
+
+            Text {
+                text: catalog.matchCount + (catalog.query.length ? " MATCH" : " ON DEVICE")
+                font.family: Theme.fontMono
+                font.pixelSize: Tokens.fontSizeTiny
+                color: Theme.textSecondary
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: Tokens.listRowHeight + Tokens.paddingV
+            radius: Tokens.radiusSm
+            color: Theme.bgElevated
+            border.color: searchInput.activeFocus ? Theme.borderActive : Theme.borderIdle
+            border.width: Tokens.strokeWidth
+
+            TextInput {
+                id: searchInput
+                anchors.fill: parent
+                anchors.leftMargin: Tokens.paddingH
+                anchors.rightMargin: Tokens.paddingH
+                verticalAlignment: TextInput.AlignVCenter
+                color: Theme.textPrimary
+                selectedTextColor: Theme.bgPrimary
+                selectionColor: Theme.accent
+                font.family: Theme.fontMono
+                font.pixelSize: Tokens.fontSizeSmall
                 clip: true
-
-                ListView {
-                    id: appList
-                    anchors.fill: parent
-                    anchors.margins: Tokens.paddingH
-                    clip: true
-                    // Prevent implicit width from content blowing out the column
-                    implicitWidth: 0
-                    spacing: Tokens.spacingXss
-                    model: codex.codexModel
-                    currentIndex: root.selectedIndex
-                    focus: true
-                    activeFocusOnTab: true
-                    keyNavigationEnabled: false
-                    highlightFollowsCurrentItem: true
-                    boundsBehavior: Flickable.StopAtBounds
-                    flickableDirection: Flickable.VerticalFlick
-                    interactive: contentHeight > height
-                    ScrollBar.vertical: MonoScrollBar {}
-
-                    Keys.onPressed: (event) => {
-                        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                            root.launchSelected()
-                            event.accepted = true
-                        } else if (event.key === Qt.Key_Up) {
-                            root.selectIndex(root.selectedIndex - 1)
-                            event.accepted = true
-                        } else if (event.key === Qt.Key_Down) {
-                            root.selectIndex(root.selectedIndex + 1)
+                focus: true
+                onTextChanged: {
+                    catalog.query = text
+                    root.selectIndex(0)
+                }
+                Keys.onPressed: (event) => {
+                    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                        root.launchSelected()
+                        event.accepted = true
+                    } else if (event.key === Qt.Key_Down) {
+                        root.selectIndex(root.selectedIndex + 1)
+                        event.accepted = true
+                    } else if (event.key === Qt.Key_Up) {
+                        root.selectIndex(root.selectedIndex - 1)
+                        event.accepted = true
+                    } else if (event.key === Qt.Key_Escape) {
+                        if (searchInput.text.length) {
+                            searchInput.text = ""
                             event.accepted = true
                         }
                     }
+                }
+            }
 
-                    delegate: Rectangle {
-                        width: Math.max(0, appList.width
-                            - (appList.contentHeight > appList.height
-                                ? Tokens.borderXs + Tokens.spacingXss + 2
-                                : 0))
-                        height: Tokens.statBoxHeight
-                        radius: Tokens.radiusSm
-                        color: index === root.selectedIndex ? Theme.bgElevated : "transparent"
-                        border.color: index === root.selectedIndex ? Theme.borderActive : "transparent"
-                        border.width: Tokens.strokeWidth
+            Text {
+                anchors.fill: parent
+                anchors.leftMargin: Tokens.paddingH
+                verticalAlignment: Text.AlignVCenter
+                visible: searchInput.text.length === 0
+                enabled: false
+                text: "search apps & applets"
+                font.family: Theme.fontMono
+                font.pixelSize: Tokens.fontSizeSmall
+                color: Theme.textDim
+            }
+        }
 
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: Tokens.paddingH
-                            spacing: Tokens.spacingXs
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.minimumWidth: 0
+            Layout.minimumHeight: 0
+            radius: Tokens.radiusMd
+            color: Theme.bgSurface
+            border.color: Theme.borderIdle
+            border.width: Tokens.strokeWidth
+            clip: true
 
-                            Image {
-                                Layout.preferredWidth: Tokens.iconSizeLarge
-                                Layout.preferredHeight: Tokens.iconSizeLarge
-                                source: root.iconSource(model.icon)
-                                sourceSize: Qt.size(Tokens.iconSizeLarge, Tokens.iconSizeLarge)
-                                fillMode: Image.PreserveAspectFit
-                                asynchronous: true
+            ListView {
+                id: appList
+                anchors.fill: parent
+                anchors.margins: Tokens.paddingH
+                clip: true
+                implicitWidth: 0
+                spacing: Tokens.spacingXss
+                model: catalog.model
+                currentIndex: root.selectedIndex
+                focus: true
+                activeFocusOnTab: true
+                keyNavigationEnabled: false
+                highlightFollowsCurrentItem: true
+                boundsBehavior: Flickable.StopAtBounds
+                flickableDirection: Flickable.VerticalFlick
+                interactive: contentHeight > height
+                ScrollBar.vertical: MonoScrollBar {}
+
+                Keys.onPressed: (event) => {
+                    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                        root.launchSelected()
+                        event.accepted = true
+                    } else if (event.key === Qt.Key_Up) {
+                        root.selectIndex(root.selectedIndex - 1)
+                        event.accepted = true
+                    } else if (event.key === Qt.Key_Down) {
+                        root.selectIndex(root.selectedIndex + 1)
+                        event.accepted = true
+                    } else if (event.text && event.text.length && event.text[0] >= " ") {
+                        searchInput.forceActiveFocus()
+                        searchInput.text += event.text
+                        event.accepted = true
+                    }
+                }
+
+                delegate: Rectangle {
+                    width: Math.max(0, appList.width
+                        - (appList.contentHeight > appList.height
+                            ? Tokens.borderXs + Tokens.spacingXss + 2
+                            : 0))
+                    height: Math.max(Tokens.statBoxHeight, rowCol.implicitHeight + Tokens.paddingV)
+                    radius: Tokens.radiusSm
+                    color: index === root.selectedIndex ? Theme.bgElevated : "transparent"
+                    border.color: index === root.selectedIndex ? Theme.borderActive : "transparent"
+                    border.width: Tokens.strokeWidth
+
+                    RowLayout {
+                        id: rowCol
+                        anchors.fill: parent
+                        anchors.leftMargin: Tokens.paddingH
+                        anchors.rightMargin: Tokens.paddingH
+                        spacing: Tokens.spacingXs
+
+                        Image {
+                            Layout.preferredWidth: Tokens.iconSizeLarge
+                            Layout.preferredHeight: Tokens.iconSizeLarge
+                            source: root.iconSource(model.icon)
+                            sourceSize: Qt.size(Tokens.iconSizeLarge * 2, Tokens.iconSizeLarge * 2)
+                            fillMode: Image.PreserveAspectFit
+                            asynchronous: true
+                            smooth: true
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 0
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: model.title
+                                font.family: Theme.fontDisplay
+                                font.pixelSize: Tokens.fontSizeLabel
+                                color: index === root.selectedIndex ? Theme.accent : Theme.textPrimary
+                                elide: Text.ElideRight
                             }
 
                             Text {
                                 Layout.fillWidth: true
-                                text: model.title.toUpperCase()
-                                font.family: Theme.fontDisplay
-                                font.pixelSize: Tokens.fontSizeLabel
-                                color: index === root.selectedIndex ? Theme.accent : Theme.textMuted
+                                visible: (model.classification && model.classification.length)
+                                    || (model.description && model.description.length)
+                                text: {
+                                    const a = model.classification || ""
+                                    const b = model.description || ""
+                                    if (a.length && b.length)
+                                        return a + " · " + b
+                                    return a.length ? a : b
+                                }
+                                font.family: Theme.fontMono
+                                font.pixelSize: Tokens.fontSizeTiny
+                                color: Theme.textSecondary
                                 elide: Text.ElideRight
                             }
                         }
+                    }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                root.selectIndex(index)
-                                appList.forceActiveFocus()
-                            }
-                            onDoubleClicked: {
-                                root.selectIndex(index)
-                                root.launchSelected()
-                            }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            root.selectIndex(index)
+                            appList.forceActiveFocus()
+                        }
+                        onDoubleClicked: {
+                            root.selectIndex(index)
+                            root.launchSelected()
                         }
                     }
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    visible: appList.count === 0
+                    text: catalog.query.length ? "NO MATCH" : "NO APPS"
+                    font.family: Theme.fontDisplay
+                    font.pixelSize: Tokens.fontSizeLabel
+                    color: Theme.textDim
                 }
             }
         }
 
-        // -- RIGHT: console control panes (wifi / bt / settings / notifs) ---
-        Item {
-            id: edgeHost
+        Text {
             Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.preferredWidth: 1   // stretch factor vs fixed apps col
-            Layout.minimumWidth: 0
-            Layout.minimumHeight: 0
-            clip: true
-            focus: true
-
-            ColumnLayout {
-                anchors.fill: parent
-                spacing: Tokens.spacingSm
-
-                ConsoleTabs {
-                    id: edgeTabs
-                    Layout.fillWidth: true
-                    Layout.minimumWidth: 0
-                    Layout.maximumHeight: edgeTabs.implicitHeight
-                    active: Globals.activeEdgePanel
-                    onSwitched: (panel) => root.switchEdgePanel(panel)
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: Tokens.strokeWidth
-                    color: Theme.borderIdle
-                    opacity: 0.5
-                }
-
-                StackLayout {
-                    id: edgeStack
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.minimumWidth: 0
-                    Layout.minimumHeight: 0
-                    clip: true
-
-                    currentIndex: {
-                        const panels = ["wifi", "bluetooth", "settings", "notifications"]
-                        const idx = panels.indexOf(Globals.activeEdgePanel)
-                        return idx < 0 ? 0 : idx
-                    }
-
-                    NetworkFrontend {
-                        id: wifiPage
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.minimumWidth: 0
-                        Layout.minimumHeight: 0
-                    }
-
-                    BluetoothFrontend {
-                        id: btPage
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.minimumWidth: 0
-                        Layout.minimumHeight: 0
-                    }
-
-                    SettingsFrontend {
-                        id: settingsPage
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.minimumWidth: 0
-                        Layout.minimumHeight: 0
-                        onRequestClose: {
-                            Globals.lastCenterPanel = Globals.activeCenterPanel
-                            Globals.activeCenterPanel = ""
-                        }
-                    }
-
-                    NotifFrontend {
-                        id: notifPage
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.minimumWidth: 0
-                        Layout.minimumHeight: 0
-                    }
-                }
-            }
+            text: "TYPE to filter * ENTER launch * ESC close"
+            font.family: Theme.fontMono
+            font.pixelSize: Tokens.fontSizeTiny
+            color: Theme.textDim
+            horizontalAlignment: Text.AlignHCenter
         }
     }
 }

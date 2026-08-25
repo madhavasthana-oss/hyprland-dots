@@ -2,3 +2,4 @@ singleton Theme Theme.qml
 singleton Globals Globals.qml
 singleton Tokens Tokens.qml
 singleton WorkspaceHub WorkspaceHub.qml
+singleton NotifServer NotifServer.qml

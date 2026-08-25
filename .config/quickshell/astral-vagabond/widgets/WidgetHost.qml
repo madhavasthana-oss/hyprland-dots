@@ -15,6 +15,7 @@ Item {
 
     readonly property var widgetOrder: [
         "dashboard",
+        "console",
         "wifi",
         "bluetooth",
         "settings",
@@ -36,7 +37,9 @@ Item {
 
     function grabActiveFocus() {
         const id = root.displayedWidget
-        if (id === "wifi")
+        if (id === "console")
+            consolePage.grabListFocus()
+        else if (id === "wifi")
             wifiPage.grabListFocus()
         else if (id === "bluetooth")
             btPage.grabListFocus()
@@ -115,6 +118,14 @@ Item {
 
         DashboardWidget {
             id: dashboardPage
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.minimumWidth: 0
+            Layout.minimumHeight: 0
+        }
+
+        ConsoleWidget {
+            id: consolePage
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.minimumWidth: 0

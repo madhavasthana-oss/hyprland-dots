@@ -11,7 +11,7 @@ QtObject {
     readonly property real dpiScale: primaryScreen ? 
                                          primaryScreen.devicePixelRatio : 1.0
 
-    property real customScale: -1
+    property real customScale: 1.25
 
     readonly property real resScale: primaryScreen ?
         Math.min(primaryScreen.width / 1920, primaryScreen.height / 1080) : 1.0
@@ -79,26 +79,33 @@ QtObject {
     // Collapsed: same height as left/right bars; width sized for HUD content.
     // Expanded: centerSmallerWidth × centerHeight (taller for typed status).
     // Keep a floor so shrinking panel height cannot collapse media art / week forecast.
-    readonly property int centerCollapsedWidth:  Math.round(480 * scale)
+    readonly property int centerCollapsedWidth:  Math.round(520 * scale)
     readonly property int centerCollapsedHeight: leftHeight
     readonly property int centerExpandedWidth:   centerSmallerWidth
     // Fixed content footprint for center dropdown (tabs sit above this)
     readonly property int centerExpandedHeight:  Math.round(420 * scale)
 
     // Per-widget body sizes (HUD chrome sits outside these).
-    // Compact utilities stay small; dashboard / media keep a wide throne.
+    // Every center-bar widget has a unique width AND unique height so the
+    // morph is obvious. Dashboard stays the wide throne.
     readonly property int widgetDashboardWidth:  centerSmallerWidth
     readonly property int widgetDashboardHeight: centerExpandedHeight
-    readonly property int widgetMediaWidth:      Math.round(560 * scale)
-    readonly property int widgetMediaHeight:     Math.round(340 * scale)
+    // Console launcher body. QML property names cannot start with uppercase,
+    // so these are consoleWidgetWidth / consoleWidgetHeight (not ConsoleWidget*).
+    readonly property int consoleWidgetWidth:    Math.round(620 * scale)
+    readonly property int consoleWidgetHeight:   Math.round(400 * scale)
+    readonly property int widgetConsoleWidth:    consoleWidgetWidth
+    readonly property int widgetConsoleHeight:   consoleWidgetHeight
+    readonly property int widgetMediaWidth:      Math.round(545 * scale)
+    readonly property int widgetMediaHeight:     Math.round(345 * scale)
+    readonly property int widgetSettingsWidth:   Math.round(415 * scale)
+    readonly property int widgetSettingsHeight:  Math.round(365 * scale)
+    readonly property int widgetNotifWidth:      Math.round(370 * scale)
+    readonly property int widgetNotifHeight:     Math.round(315 * scale)
+    readonly property int widgetBluetoothWidth:  Math.round(335 * scale)
+    readonly property int widgetBluetoothHeight: Math.round(285 * scale)
     readonly property int widgetWifiWidth:       Math.round(300 * scale)
-    readonly property int widgetWifiHeight:      Math.round(260 * scale)
-    readonly property int widgetBluetoothWidth:  Math.round(300 * scale)
-    readonly property int widgetBluetoothHeight: Math.round(280 * scale)
-    readonly property int widgetSettingsWidth:   Math.round(340 * scale)
-    readonly property int widgetSettingsHeight:  Math.round(360 * scale)
-    readonly property int widgetNotifWidth:      Math.round(320 * scale)
-    readonly property int widgetNotifHeight:     Math.round(300 * scale)
+    readonly property int widgetWifiHeight:      Math.round(250 * scale)
     readonly property int widgetCpuWidth:        rightWidth
     readonly property int widgetCpuHeight:       rightWidth
     readonly property int widgetGpuWidth:        rightWidth
@@ -107,6 +114,7 @@ QtObject {
     function widgetWidthFor(id) {
         switch (id) {
         case "dashboard":     return widgetDashboardWidth
+        case "console":       return consoleWidgetWidth
         case "media":         return widgetMediaWidth
         case "wifi":          return widgetWifiWidth
         case "bluetooth":     return widgetBluetoothWidth
@@ -121,6 +129,7 @@ QtObject {
     function widgetHeightFor(id) {
         switch (id) {
         case "dashboard":     return widgetDashboardHeight
+        case "console":       return consoleWidgetHeight
         case "media":         return widgetMediaHeight
         case "wifi":          return widgetWifiHeight
         case "bluetooth":     return widgetBluetoothHeight
@@ -172,6 +181,14 @@ QtObject {
     readonly property int updatesRefreshMs:     300000   // 5 min background
     readonly property int updatesRefreshActiveMs: 60000  // 1 min while dashboard open
     readonly property int notifBadgePollMs:     3000
+    readonly property int toastWidth:           Math.round(360 * scale)
+    readonly property int toastMaxVisible:      5
+    readonly property int toastTimeoutMs:       6000
+    readonly property int toastCardMinHeight:   Math.round(76 * scale)
+    readonly property int toastSurfaceWidth:    toastWidth + 2 * centerMaskPad
+    readonly property int toastSurfaceHeight:   toastMaxVisible
+        * (toastCardMinHeight + spacingLg + spacingXs)
+        + 2 * centerMaskPad
     readonly property int wallpaperScanMax:     48
     readonly property int wallpaperListRows:    6
     // Side-by-side DISK (arc) + NET (bars) — keep short so weather/patches can flex
@@ -291,6 +308,7 @@ QtObject {
         + centerBodyGap
         + Math.max(
             widgetDashboardHeight,
+            consoleWidgetHeight,
             widgetMediaHeight,
             widgetWifiHeight,
             widgetBluetoothHeight,
@@ -309,6 +327,7 @@ QtObject {
     readonly property int centerSurfaceWidth: Math.max(
         centerCollapsedWidth,
         widgetDashboardWidth,
+        consoleWidgetWidth,
         widgetMediaWidth,
         widgetWifiWidth,
         widgetBluetoothWidth,

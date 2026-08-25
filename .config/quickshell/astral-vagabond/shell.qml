@@ -6,69 +6,27 @@ import "bars"
 import "widgets/rightBarWidgets"
 import "widgets/leftBarWidgets"
 import "bottom"
+import "utils"
 
 ShellRoot {
     id:shellRoot
 
-    // Live mako count for center-bar notification badge (inlined ---
-    // directory-import types under ShellRoot are unreliable on this qs build)
-    Item {
-        id: notifCountPoller
-
-        function refresh() {
-            notifCountProc.running = true
+    IpcHandler {
+        target: "launcher"
+        function toggle(): void { Globals.toggleWidget("console") }
+        function open(): void { Globals.openWidget("console") }
+        function close(): void {
+            if (Globals.activeWidget === "console")
+                Globals.closeWidget()
         }
+    }
 
-        Process {
-            id: notifCountProc
-            command: [
-                "python3", "-c",
-                "import json, subprocess as s\n"
-                + "def load(cmd):\n"
-                + "    try:\n"
-                + "        d = json.loads(s.check_output(cmd, stderr=s.DEVNULL) or b'[]')\n"
-                + "        return d if isinstance(d, list) else []\n"
-                + "    except Exception:\n"
-                + "        return []\n"
-                + "print(json.dumps({'active': load(['makoctl', 'list', '-j']), 'history': load(['makoctl', 'history', '-j'])}))\n"
-            ]
-            stdout: StdioCollector {
-                onStreamFinished: {
-                    try {
-                        const data = JSON.parse(text.length ? text : "{}")
-                        const active = Array.isArray(data.active) ? data.active : []
-                        const history = Array.isArray(data.history) ? data.history : []
-                        const seen = ({})
-                        let n = 0
-                        const all = active.concat(history)
-                        for (let i = 0; i < all.length; i++) {
-                            const id = all[i] && all[i].id
-                            if (id === undefined || id === null)
-                                continue
-                            const key = String(id)
-                            if (seen[key])
-                                continue
-                            seen[key] = true
-                            if (!Globals.notifAcceptIncoming(id))
-                                continue
-                            n++
-                        }
-                        Globals.notifCloseIncomingBatch()
-                        Globals.notifCount = n
-                    } catch (e) {
-                        Globals.notifCount = 0
-                    }
-                }
-            }
-        }
-
-        Timer {
-            interval: Tokens.notifBadgePollMs
-            running: true
-            repeat: true
-            triggeredOnStart: true
-            onTriggered: notifCountPoller.refresh()
-        }
+    IpcHandler {
+        target: "notifications"
+        function toggle(): void { Globals.toggleWidget("notifications") }
+        function dismissAll(): void { NotifServer.dismissAll() }
+        function dndToggle(): void { NotifServer.toggleDnd() }
+        function silentToggle(): void { NotifServer.toggleSilent() }
     }
 
     PanelWindow { 
@@ -287,6 +245,52 @@ ShellRoot {
                 }
 
                 CenterBar { anchors.fill: parent }
+            }
+        }
+    }
+
+    // Notification toasts --- fixed overlay surface (never resize: Hypr smears).
+    // QML animates the cards. Layer stays no_anim via astral-vagabond-*.
+    PanelWindow {
+        id: toastWindow
+        anchors { top: true; right: true }
+        implicitWidth:  Tokens.toastSurfaceWidth
+        implicitHeight: Tokens.toastSurfaceHeight
+        margins.top:    Tokens.topMargin + Tokens.exclusiveZone + Tokens.spacingSm
+        margins.right:  Tokens.sideMargin
+        color:          "transparent"
+        exclusiveZone:  0
+        exclusionMode:  ExclusionMode.Ignore
+        visible:        NotifServer.toasts.count > 0 || toastWrap.opacity > 0.01
+        WlrLayershell.layer:     WlrLayer.Overlay
+        WlrLayershell.namespace: "astral-vagabond-toasts"
+
+        mask: toastWindow.visible && toastStack.height > 1 ? toastMask : null
+
+        Region {
+            id: toastMask
+            item: toastStack
+        }
+
+        Item {
+            id: toastWrap
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.topMargin: Tokens.centerMaskPad
+            anchors.rightMargin: Tokens.centerMaskPad
+            width: Tokens.toastWidth
+            height: Math.max(1, toastStack.height)
+            opacity: NotifServer.toasts.count > 0 ? 1 : 0
+            enabled: NotifServer.toasts.count > 0
+
+            Behavior on opacity {
+                NumberAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
+            }
+
+            NotifToasts {
+                id: toastStack
+                anchors.top: parent.top
+                anchors.right: parent.right
             }
         }
     }

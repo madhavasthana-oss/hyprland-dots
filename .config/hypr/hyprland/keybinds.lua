@@ -369,7 +369,7 @@ hl.bind("SUPER + X", hl.dsp.exec_cmd(textEditor), { description = "App: Text edi
 hl.bind("CTRL + SUPER + V", hl.dsp.exec_cmd(volumeMixer), { description = "App: Volume mixer" })
 hl.bind("SUPER + I", hl.dsp.exec_cmd(settingsApp), { description = "App: Settings app" })
 hl.bind("CTRL + SHIFT + Escape", hl.dsp.exec_cmd(taskManager), { description = "App: Task manager" })
-hl.bind("SUPER + A", hl.dsp.exec_cmd(appManager), { description = "App: App Manager"})
+hl.bind("SUPER + A", hl.dsp.exec_cmd(appManager), { description = "App: Console launcher"})
 -- Emoji picker (fuzzel-emoji in hyprland/scripts)
 hl.bind(
 	"SUPER + Period",

@@ -21,7 +21,8 @@ Rectangle {
     property int pendingCount: 0
     property string statusLine: "…"
     property bool checking: false
-    property bool dashboardOpen: Globals.activeCenterPanel === "dashboard"
+    property bool dashboardOpen: Globals.activeWidget === "dashboard"
+        || Globals.activeCenterPanel === "dashboard"
 
     ListModel { id: pkgModel }
 

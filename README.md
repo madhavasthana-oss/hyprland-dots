@@ -12,8 +12,8 @@ Soft charcoal surfaces, silver accents, low-glare text. Functional over flashy.
 |------|------|
 | [`.config/quickshell/astral-vagabond/`](./.config/quickshell/astral-vagabond/) | Bar, center console, system panels |
 | [`.config/hypr/`](./.config/hypr/) | Hyprland (Lua), hyprlock, hypridle |
-| [`.config/mako/`](./.config/mako/) | Notifications |
-| [`.config/fuzzel/`](./.config/fuzzel/) | App launcher |
+| [`.config/mako/`](./.config/mako/) | Legacy notification template (unused; toasts are Quickshell) |
+| [`.config/fuzzel/`](./.config/fuzzel/) | Emoji / clipboard dmenu only |
 | [`.config/kitty/`](./.config/kitty/) · [ghostty/](./.config/ghostty/) · [wezterm/](./.config/wezterm/) | Terminals (Ash) |
 | [`.config/fish/`](./.config/fish/) · [nvim/](./.config/nvim/) · [oh-my-posh/](./.config/oh-my-posh/) | Shell + editor |
 | [`install`](./install) | Package + config installer (Arch / CachyOS) |
@@ -38,14 +38,14 @@ Soft charcoal surfaces, silver accents, low-glare text. Functional over flashy.
 - No pure black / pure white (easier on the eyes)
 - Hierarchy via luminance, not neon hues
 - Utility labels over lore
-- One palette across Hypr, astral-vagabond, terminals, mako, fuzzel, nvim
+- One palette across Hypr, astral-vagabond, terminals, nvim
 
 **Wallust (optional)**  
-Tints astral-vagabond **text + icon accents**, Hyprland **active window borders**, **mako** notifications, and **fuzzel** from the wallpaper. Surfaces stay Ash. Activate from console → configuration, `SUPER+W`, or:
+Tints astral-vagabond **text + icon accents** and Hyprland **active window borders** from the wallpaper. Surfaces stay Ash. Activate from settings, `SUPER+W`, or:
 
 ```bash
 ~/.config/quickshell/astral-vagabond/utils/scripts/load-wallust-colors.sh --from-awww
-# restore Ash (astral-vagabond + hypr + mako + fuzzel): SUPER+SHIFT+W, or:
+# restore Ash (astral-vagabond + hypr): SUPER+SHIFT+W, or:
 ~/.config/quickshell/astral-vagabond/utils/scripts/load-legacy-colors.sh --activate
 ```
 
@@ -99,8 +99,8 @@ quickshell -c astral-vagabond
 .config/quickshell/astral-vagabond/colors/            # active / legacy / wallust
 .config/hypr/hyprland/colors.lua                # window borders
 .config/kitty/theme.conf · ghostty/theme.conf   # terminals
-.config/mako/config.tmpl · fuzzel/colors.ini    # notifications + launcher (wallust)
-scripts/bash/                                   # helpers (fuzzel, wallpaper, etc.)
+.config/quickshell/astral-vagabond/NotifServer.qml  # notification daemon + toasts
+scripts/bash/                                   # helpers (wallpaper, etc.)
 ```
 
 ---

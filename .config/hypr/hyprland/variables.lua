@@ -20,7 +20,7 @@ settingsApp =
 	"XDG_CURRENT_DESKTOP=GNOME ~/.config/hypr/hyprland/scripts/launch_first_available.sh 'gnome-control-center' 'nwg-look' 'systemsettings' 'better-control'"
 taskManager =
 	"~/.config/hypr/hyprland/scripts/launch_first_available.sh 'gnome-system-monitor' 'plasma-systemmonitor --page-name Processes' 'command -v btop && kitty -1 fish -c btop'"
-appManager = "~/.config/fuzzel/launch.sh"
+appManager = "qs -c astral-vagabond ipc call launcher toggle"
 
 -- Number-key bank size for Super+1..0 (relative nav is infinite, non-wrapping)
 workspaceGroupSize = 10

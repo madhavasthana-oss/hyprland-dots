@@ -34,8 +34,8 @@ qt6-base
 qt6-declarative
 
 
-# APP LAUNCHER + DMENU (fuzzel — replaces rofi)
-#   Super+A  → app launcher (~/.config/fuzzel/launch.sh)
+# CLIPBOARD + EMOJI (fuzzel dmenu only — app launcher is Quickshell console)
+#   Super+A  → qs ipc launcher toggle (astral-vagabond console)
 #   Super+.  → emoji picker (hyprland/scripts/fuzzel-emoji.sh)
 #   Super+V  → cliphist + fuzzel
 

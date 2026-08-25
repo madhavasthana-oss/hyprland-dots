@@ -19,8 +19,9 @@ hl.on("hyprland.start", function()
 	-- Ghostty via systemd user unit (D-Bus activation, instant new windows)
 	hl.exec_cmd("systemctl --user start app-com.mitchellh.ghostty.service")
 
-	-- notification daemon initializer
-	hl.exec_cmd("mako")
+	-- Notifications: Quickshell NotificationServer (NotifServer.qml).
+	-- Kill leftover mako so it cannot own org.freedesktop.Notifications.
+	hl.exec_cmd("pkill -u \"$USER\" -x mako 2>/dev/null || true")
 
 	-- Audio
 	hl.exec_cmd("easyeffects --hide-window --service-mode")
