@@ -367,6 +367,7 @@ install_configs() {
   # Ensure wallust / color loaders are executable
   if [[ "$DRY_RUN" -eq 0 ]]; then
     chmod +x "${LIVE_CONFIG}/quickshell/astral-vagabond/utils/scripts/"*.sh 2>/dev/null || true
+    chmod +x "${LIVE_CONFIG}/hypr/hyprland/scripts/"*.sh 2>/dev/null || true
   fi
 
   if [[ "$DRY_RUN" -eq 0 ]] && command -v hyprctl >/dev/null 2>&1; then

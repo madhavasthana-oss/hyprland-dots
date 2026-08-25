@@ -11,6 +11,7 @@
 # Theme.qml always watches:  <astral-vagabond>/colors/active-colors.json
 # Source marker:             <astral-vagabond>/colors/source   ("legacy" | "wallust")
 # Hyprland: also rewrites ~/.config/hypr/hyprland/colors.lua + live hyprctl keywords
+# Clients:  mako/config + fuzzel/colors.ini via apply-theme-clients.sh
 #
 # Extraction is a simple regex over:
 #   readonly property color <name>:  "#RRGGBB"
@@ -234,6 +235,17 @@ keyword misc:background_color rgb(${bg})" >/dev/null 2>&1 \
     fi
 }
 
+# Paint mako + fuzzel from the same role JSON (Ash chrome, wallpaper accents).
+apply_theme_clients_from_json() {
+    local json="$1"
+    local helper="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/hyprland/scripts/apply-theme-clients.sh"
+    if [[ ! -x "$helper" ]]; then
+        echo "warning: skip mako/fuzzel theme — missing $helper" >&2
+        return 0
+    fi
+    "$helper" "$json" || echo "warning: apply-theme-clients.sh failed" >&2
+}
+
 activate_legacy() {
     mkdir -p "$COLORS_DIR"
     if [[ ! -f "$LEGACY_JSON" ]]; then
@@ -245,6 +257,7 @@ activate_legacy() {
     printf 'legacy\n' > "$SOURCE_FILE"
     echo "activated: legacy → $ACTIVE_JSON"
     apply_hyprland_colors_from_json "$ACTIVE_JSON"
+    apply_theme_clients_from_json "$ACTIVE_JSON"
 }
 
 status() {

@@ -10,6 +10,7 @@
 #
 # Theme.qml watches: <astral-vagabond>/colors/active-colors.json
 # Hyprland: also rewrites ~/.config/hypr/hyprland/colors.lua + live hyprctl keywords
+# Clients:  mako/config + fuzzel/colors.ini via apply-theme-clients.sh
 #
 # Ash monochrome BASE is always kept for surfaces/chrome:
 #   bgPrimary, bgSurface, bgElevated, bgConsole, borderIdle, borderConsole,
@@ -315,6 +316,17 @@ keyword misc:background_color rgb(${bg})" >/dev/null 2>&1 \
     fi
 }
 
+# Paint mako + fuzzel from the same role JSON (Ash chrome, wallpaper accents).
+apply_theme_clients_from_json() {
+    local json="$1"
+    local helper="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/hyprland/scripts/apply-theme-clients.sh"
+    if [[ ! -x "$helper" ]]; then
+        echo "warning: skip mako/fuzzel theme — missing $helper" >&2
+        return 0
+    fi
+    "$helper" "$json" || echo "warning: apply-theme-clients.sh failed" >&2
+}
+
 activate_wallust() {
     mkdir -p "$COLORS_DIR"
     if [[ ! -f "$WALLUST_JSON" ]]; then
@@ -343,6 +355,7 @@ PY
     printf 'wallust\n' > "$SOURCE_FILE"
     echo "activated: wallust → $ACTIVE_JSON"
     apply_hyprland_colors_from_json "$ACTIVE_JSON"
+    apply_theme_clients_from_json "$ACTIVE_JSON"
 }
 
 run_wallust_on() {

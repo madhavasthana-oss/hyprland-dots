@@ -96,10 +96,16 @@ hl.layer_rule({ match = { namespace = "hyprpicker" }, no_anim = true})
 hl.layer_rule({ match = { namespace = "noanim" }, no_anim = true})
 hl.layer_rule({ match = { namespace = "gtk-layer-shell" }, blur = true})
 hl.layer_rule({ match = { namespace = "gtk-layer-shell" }, ignore_alpha = 0})
+-- Fuzzel (layer-shell namespace "launcher")
+hl.layer_rule({ match = { namespace = "launcher" }, no_anim = true})
 hl.layer_rule({ match = { namespace = "launcher" }, blur = true})
-hl.layer_rule({ match = { namespace = "launcher" }, ignore_alpha = 0.5})
+hl.layer_rule({ match = { namespace = "launcher" }, ignore_alpha = 0.45})
+hl.layer_rule({ match = { namespace = "launcher" }, xray = false})
+-- Mako
+hl.layer_rule({ match = { namespace = "notifications" }, no_anim = true})
 hl.layer_rule({ match = { namespace = "notifications" }, blur = true})
 hl.layer_rule({ match = { namespace = "notifications" }, ignore_alpha = 0.69})
+hl.layer_rule({ match = { namespace = "notifications" }, xray = false})
 hl.layer_rule({ match = { namespace = "logout_dialog" }, blur = true}) -- wlogout
 
 -- ags

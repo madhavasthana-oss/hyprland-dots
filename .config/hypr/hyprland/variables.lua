@@ -1,9 +1,9 @@
 -- Apps
 -- PULL REQUESTS ADDING MORE WILL NOT BE ACCEPTED, CONFIG FOR YOURSELF
 terminalPrimary =
-"~/.config/hypr/hyprland/scripts/launch_first_available.sh 'kitty -1' 'alacritty' 'wezterm' 'konsole' 'kgx' 'uxterm' 'xterm'"
-terminalSecondary =
 "~/.config/hypr/hyprland/scripts/launch_first_available.sh 'ghostty +new-window' 'kitty -1' 'alacritty' 'wezterm' 'konsole' 'kgx' 'uxterm' 'xterm'"
+terminalSecondary =
+"~/.config/hypr/hyprland/scripts/launch_first_available.sh 'kitty -1' 'alacritty' 'wezterm' 'konsole' 'kgx' 'uxterm' 'xterm'"
 terminalTertiary =
 	"~/.config/hypr/hyprland/scripts/launch_first_available.sh 'wezterm' 'konsole' 'kgx' 'uxterm' 'xterm'"
 fileManager =

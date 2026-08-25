@@ -5,6 +5,15 @@ Newest entries first.
 
 ---
 
+## 2026-08-25 — Wallust clients + fuzzel chrome
+
+- Wallust / Ash loaders also paint **mako** and **fuzzel** from `active-colors.json` (`hypr/hyprland/scripts/apply-theme-clients.sh`)
+- Mako layout lives in `mako/config.tmpl`; generated `mako/config` is what mako reads
+- Fuzzel palette is `fuzzel/colors.ini` (included last); launcher is a compact rounded-rect card (2px accent border, radius 8)
+- Hypr layer rules for `launcher` and `notifications`: blur, no anim, xray off
+
+---
+
 ## 2026-08 — Astral-Vagabond rework (current)
 
 ### Console layout (directory)

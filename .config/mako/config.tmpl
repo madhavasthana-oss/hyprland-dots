@@ -45,89 +45,89 @@ border-radius=8
 
 # ── palette (bgConsole @ ~0.95) ─────────────────────────────
 font=Fira Code 11
-background-color=#161616F2
-text-color=#F0E2EFFF
-border-color=#333333FF
-progress-color=over #FF1EF3FF
+background-color={{bgConsole}}F2
+text-color={{textSecondary}}FF
+border-color={{borderIdle}}FF
+progress-color=over {{accent}}FF
 
-format=<span foreground="#F0E2EF"><b>%s</b></span>\n<span foreground="#F0E2EF">%b</span>
+format=<span foreground="{{textPrimary}}"><b>%s</b></span>\n<span foreground="{{textSecondary}}">%b</span>
 text-alignment=left
 
 # ── grouped stack header ────────────────────────────────────
 [grouped]
-format=<span foreground="#F0E2EF"><b>(%g) %s</b></span>\n<span foreground="#F0E2EF">%b</span>
+format=<span foreground="{{textPrimary}}"><b>(%g) %s</b></span>\n<span foreground="{{textSecondary}}">%b</span>
 
 [group-index=0]
 
 # ── urgency: low ────────────────────────────────────────────
 [urgency=low]
-border-color=#333333FF
-text-color=#FF1EF3FF
-background-color=#121212E6
+border-color={{borderIdle}}FF
+text-color={{textMuted}}FF
+background-color={{bgPrimary}}E6
 default-timeout=4000
-format=<span foreground="#F0E2EF"><b>%s</b></span>\n<span foreground="#FF1EF3">%b</span>
+format=<span foreground="{{textSecondary}}"><b>%s</b></span>\n<span foreground="{{textMuted}}">%b</span>
 
 # ── urgency: normal ─────────────────────────────────────────
 [urgency=normal]
-border-color=#333333FF
-text-color=#F0E2EFFF
-background-color=#161616F2
+border-color={{borderIdle}}FF
+text-color={{textSecondary}}FF
+background-color={{bgConsole}}F2
 default-timeout=6000
 
 # ── urgency: critical ───────────────────────────────────────
 [urgency=critical]
-border-color=#E8E8E8FF
+border-color={{stateCritical}}FF
 border-size=3
-text-color=#F0E2EFFF
-background-color=#242424FF
+text-color={{textPrimary}}FF
+background-color={{bgElevated}}FF
 default-timeout=0
 ignore-timeout=1
-format=<span foreground="#E8E8E8"><b>⚠ %s</b></span>\n<span foreground="#F0E2EF">%b</span>
-progress-color=over #E8E8E8FF
+format=<span foreground="{{stateCritical}}"><b>⚠ %s</b></span>\n<span foreground="{{textSecondary}}">%b</span>
+progress-color=over {{stateCritical}}FF
 
 # ── app polish ──────────────────────────────────────────────
 [app-name="Astral-Vagabond"]
-border-color=#FF1EF3FF
-format=<span foreground="#F0E2EF"><b>◆ %s</b></span>\n<span foreground="#F0E2EF">%b</span>
+border-color={{accent}}FF
+format=<span foreground="{{textPrimary}}"><b>◆ %s</b></span>\n<span foreground="{{textSecondary}}">%b</span>
 
 [app-name="Quickshell"]
-border-color=#FF1EF3FF
+border-color={{accent}}FF
 default-timeout=4000
-format=<span foreground="#F0E2EF"><b>◆ %s</b></span>\n<span foreground="#F0E2EF">%b</span>
+format=<span foreground="{{textPrimary}}"><b>◆ %s</b></span>\n<span foreground="{{textSecondary}}">%b</span>
 
 [app-name="Settings"]
-border-color=#FF1EF3FF
+border-color={{accent}}FF
 default-timeout=4000
 
 [app-name="Bluetooth"]
-border-color=#FF1EF3FF
+border-color={{accent}}FF
 default-timeout=4000
 
 [app-name="Network"]
-border-color=#FF1EF3FF
+border-color={{accent}}FF
 default-timeout=4000
 
 [app-name="Notifications"]
-border-color=#FF1EF3FF
+border-color={{accent}}FF
 default-timeout=3000
 
 [app-name="Battery"]
-border-color=#FF1EF3FF
+border-color={{accent}}FF
 default-timeout=4000
-format=<span foreground="#F0E2EF"><b>◆ %s</b></span>\n<span foreground="#F0E2EF">%b</span>
+format=<span foreground="{{textPrimary}}"><b>◆ %s</b></span>\n<span foreground="{{textSecondary}}">%b</span>
 
 [app-name="Hyprland"]
-border-color=#FF1EF3FF
+border-color={{accent}}FF
 default-timeout=4000
 
 [app-name="notify-send"]
 
 [app-name="volumectl"]
-format=<span foreground="#F0E2EF"><b>%s</b></span>
+format=<span foreground="{{textPrimary}}"><b>%s</b></span>
 default-timeout=1500
 
 [app-name="brightnessctl"]
-format=<span foreground="#F0E2EF"><b>%s</b></span>
+format=<span foreground="{{textPrimary}}"><b>%s</b></span>
 default-timeout=1500
 
 # ── modes ───────────────────────────────────────────────────

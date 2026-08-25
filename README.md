@@ -41,11 +41,11 @@ Soft charcoal surfaces, silver accents, low-glare text. Functional over flashy.
 - One palette across Hypr, astral-vagabond, terminals, mako, fuzzel, nvim
 
 **Wallust (optional)**  
-Tints astral-vagabond **text + icon accents** and Hyprland **active window borders** from the wallpaper. Surfaces stay Ash. Activate from console → configuration, `SUPER+W`, or:
+Tints astral-vagabond **text + icon accents**, Hyprland **active window borders**, **mako** notifications, and **fuzzel** from the wallpaper. Surfaces stay Ash. Activate from console → configuration, `SUPER+W`, or:
 
 ```bash
 ~/.config/quickshell/astral-vagabond/utils/scripts/load-wallust-colors.sh --from-awww
-# restore Ash (astral-vagabond + hypr borders): SUPER+SHIFT+W, or:
+# restore Ash (astral-vagabond + hypr + mako + fuzzel): SUPER+SHIFT+W, or:
 ~/.config/quickshell/astral-vagabond/utils/scripts/load-legacy-colors.sh --activate
 ```
 
@@ -99,6 +99,7 @@ quickshell -c astral-vagabond
 .config/quickshell/astral-vagabond/colors/            # active / legacy / wallust
 .config/hypr/hyprland/colors.lua                # window borders
 .config/kitty/theme.conf · ghostty/theme.conf   # terminals
+.config/mako/config.tmpl · fuzzel/colors.ini    # notifications + launcher (wallust)
 scripts/bash/                                   # helpers (fuzzel, wallpaper, etc.)
 ```
 
