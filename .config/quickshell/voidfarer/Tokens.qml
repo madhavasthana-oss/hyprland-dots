@@ -93,6 +93,52 @@ QtObject {
     // Fixed content footprint for center dropdown (tabs sit above this)
     readonly property int centerExpandedHeight:  Math.round(420 * scale)
 
+    // Per-widget body sizes (popup chrome sits outside these).
+    readonly property int widgetDashboardWidth:  centerSmallerWidth
+    readonly property int widgetDashboardHeight: centerExpandedHeight
+    readonly property int widgetMediaWidth:      Math.round(560 * scale)
+    readonly property int widgetMediaHeight:     Math.round(340 * scale)
+    readonly property int widgetWifiWidth:       Math.round(300 * scale)
+    readonly property int widgetWifiHeight:      Math.round(260 * scale)
+    readonly property int widgetBluetoothWidth:  Math.round(300 * scale)
+    readonly property int widgetBluetoothHeight: Math.round(280 * scale)
+    readonly property int widgetSettingsWidth:   Math.round(340 * scale)
+    readonly property int widgetSettingsHeight:  Math.round(360 * scale)
+    readonly property int widgetNotifWidth:      Math.round(320 * scale)
+    readonly property int widgetNotifHeight:     Math.round(300 * scale)
+    readonly property int widgetCpuWidth:        rightWidth
+    readonly property int widgetCpuHeight:       rightWidth
+    readonly property int widgetGpuWidth:        rightWidth
+    readonly property int widgetGpuHeight:       rightWidth
+
+    function widgetWidthFor(id) {
+        switch (id) {
+        case "dashboard":     return widgetDashboardWidth
+        case "media":         return widgetMediaWidth
+        case "wifi":          return widgetWifiWidth
+        case "bluetooth":     return widgetBluetoothWidth
+        case "settings":      return widgetSettingsWidth
+        case "notifications": return widgetNotifWidth
+        case "cpu":           return widgetCpuWidth
+        case "gpu":           return widgetGpuWidth
+        default:              return widgetWifiWidth
+        }
+    }
+
+    function widgetHeightFor(id) {
+        switch (id) {
+        case "dashboard":     return widgetDashboardHeight
+        case "media":         return widgetMediaHeight
+        case "wifi":          return widgetWifiHeight
+        case "bluetooth":     return widgetBluetoothHeight
+        case "settings":      return widgetSettingsHeight
+        case "notifications": return widgetNotifHeight
+        case "cpu":           return widgetCpuHeight
+        case "gpu":           return widgetGpuHeight
+        default:              return widgetWifiHeight
+        }
+    }
+
     readonly property int angleOffsetCollapsed: Math.round(30 * scale)
     readonly property int angleOffsetExpanded:  0
     readonly property int angleOffsetDefault:   Math.round(45 * scale)
@@ -295,4 +341,5 @@ QtObject {
     readonly property int animExpand:     300
     readonly property int animFadeIn:     150
     readonly property int animFadeDelay:  450
+    readonly property int widgetMorphMs:  animExpand
 }

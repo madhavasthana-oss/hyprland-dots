@@ -174,15 +174,22 @@ ShellRoot {
     PanelWindow {
         id: centerBarWindow
         anchors { top: true }
-        // Collapsed: HUD strip. Expanded: HUD + separator + chosen widget.
-        implicitWidth: Globals.activeWidget !== ""
-            ? Tokens.centerExpandedWidth
-            : Tokens.centerCollapsedWidth
-        implicitHeight: Globals.activeWidget !== ""
-            ? Tokens.centerHeight
+        // Collapsed: HUD strip. Expanded: HUD + separator + utility-sized widget.
+        implicitWidth: {
+            if (Globals.activeWidget === "")
+                return Tokens.centerCollapsedWidth
+            return Math.max(
+                Tokens.centerCollapsedWidth,
+                Tokens.widgetWidthFor(Globals.activeWidget)
+            )
+        }
+        implicitHeight: {
+            if (Globals.activeWidget === "")
+                return Tokens.centerHeight
+            return Tokens.centerHeight
                 + Math.max(1, Math.round(Tokens.strokeWidth))
-                + Tokens.centerExpandedHeight
-            : Tokens.centerHeight
+                + Tokens.widgetHeightFor(Globals.activeWidget)
+        }
         color: "transparent"
         margins.top: Tokens.topMargin
         exclusiveZone: Tokens.exclusiveZone
@@ -192,14 +199,14 @@ ShellRoot {
 
         Behavior on implicitWidth {
             NumberAnimation {
-                duration: Tokens.animInstant
-                easing.type: Easing.OutQuart
+                duration: Tokens.widgetMorphMs
+                easing.type: Easing.OutCubic
             }
         }
         Behavior on implicitHeight {
             NumberAnimation {
-                duration: Tokens.animInstant
-                easing.type: Easing.OutQuart
+                duration: Tokens.widgetMorphMs
+                easing.type: Easing.OutCubic
             }
         }
 

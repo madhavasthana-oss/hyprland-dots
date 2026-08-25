@@ -819,9 +819,10 @@ Item {
             visible: centerBar.expanded
             Layout.fillWidth: true
             Layout.fillHeight: centerBar.expanded
-            Layout.preferredHeight: centerBar.expanded ? Tokens.centerExpandedHeight : 0
+            Layout.preferredHeight: centerBar.expanded
+                ? Tokens.widgetHeightFor(Globals.activeWidget)
+                : 0
             Layout.minimumHeight: 0
-            Layout.maximumHeight: centerBar.expanded ? Tokens.centerExpandedHeight : 0
             clip: true
         }
     }
