@@ -38,7 +38,7 @@ Item {
 
     Component.onCompleted: {
         backend.refresh()
-        if (Globals.activeEdgePanel === "notifications")
+        if (Globals.activeWidget === "notifications")
             grabListFocus()
     }
 
@@ -49,8 +49,8 @@ Item {
 
     Connections {
         target: Globals
-        function onActiveEdgePanelChanged() {
-            if (Globals.activeEdgePanel === "notifications")
+        function onActiveWidgetChanged() {
+            if (Globals.activeWidget === "notifications")
                 Qt.callLater(root.grabListFocus)
         }
     }

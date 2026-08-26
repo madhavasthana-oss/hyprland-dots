@@ -1,12 +1,6 @@
 // ---
 //  CenterRect.qml
-//  ASTRAL_VAGABOND --- Command Throne
 //  Rounded rectangle bar chrome for the center bar.
-//
-//  Width = second-longest edge of CenterTrapezoid:
-//    top    = full W  (screen edge)   — longest
-//    bottom = W - 2H  (pinched)       — second-longest  ← this
-//    diags  = H√2
 // ---
 
 import QtQuick 2.15
@@ -30,8 +24,6 @@ Item {
 
     property bool hovered:     false
     property bool alertActive: false
-    property bool clicked:     false
-    property bool expanded:    false
 
     implicitWidth:  barWidth
     implicitHeight: barHeight

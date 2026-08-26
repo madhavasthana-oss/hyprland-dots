@@ -1,13 +1,6 @@
 // ---
 //  SideRect.qml
-//  ASTRAL_VAGABOND --- Command Throne
 //  Rounded rectangle bar chrome for left / right bars.
-//
-//  Width = second-longest edge of Left/RightTrapezoid:
-//    bottom   = full W  (wide parallel)  — longest
-//    top      = W - H   (pinched side)   — second-longest  ← this
-//    vertical = H
-//    diagonal = H√2
 // ---
 
 import QtQuick 2.15

@@ -1,11 +1,8 @@
 import Quickshell
-import Quickshell.Wayland
-import Quickshell.Hyprland
 import Quickshell.Services.UPower
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts 1.15
-import QtQuick.Controls 2.15
 import QtQuick.Shapes
 import "../utils"
 import ".."
@@ -19,25 +16,6 @@ Item {
     height: parent ? parent.height : Tokens.leftHeight
 
     readonly property bool expanded: Globals.activeWidget !== ""
-
-    property var statusMessages: [
-        "SYSTEM NOMINAL",
-        "SESSION ACTIVE",
-        "COMPOSITOR STABLE",
-        "WORKSPACE READY",
-        "NETWORK STABLE",
-        "AUDIO PIPELINE OK",
-        "FOCUS MODE",
-        "ALL SERVICES UP",
-        "IDLE THRESHOLD CLEAR",
-        "CLIPBOARD READY",
-        "UPDATES CHECKED"
-    ]
-    property int lastMessageIndex: 0
-    // Last status string (typed only while expanded)
-    property string pendingStatus: statusMessages[0]
-
-    property bool overrideActive: false
     property bool alertActive: false
 
     // --- Live clock (astral-vagabond style: ring + day / date / time) ---
@@ -63,7 +41,6 @@ Item {
         centerBar.dayName = Qt.formatDate(now, "ddd").toUpperCase()
         centerBar.dateLine = Qt.formatDate(now, "dd MMM")
         centerBar.timeLine = Qt.formatTime(now, "hh:mm:ss")
-        centerBar.checkTimeOfDay()
     }
 
     readonly property string wifiBars: {
@@ -92,78 +69,7 @@ Item {
         return bits.join("  ·  ")
     }
 
-    function pushStatus(msg, opts) {
-        opts = opts || {}
-        pendingStatus = msg
-        overrideActive = true
-        alertActive = !!opts.alert
-        overrideHoldTimer.interval = opts.holdMs || 4000
-        overrideHoldTimer.restart()
-    }
-
-    function pickStatusMessage() {
-        let idx
-        do {
-            idx = Math.floor(Math.random() * statusMessages.length)
-        } while (idx === lastMessageIndex && statusMessages.length > 1)
-        lastMessageIndex = idx
-        pendingStatus = statusMessages[idx]
-        return pendingStatus
-    }
-
-    // Reveal status with typewriter after expand width has started moving
-    function revealStatus() {
-        messageAnimator.stop()
-        messageAnimator.displayedText = ""
-        messageAnimator.mode = AnimatedText.Mode.Typewriter
-        const msg = pendingStatus && pendingStatus.length
-            ? pendingStatus
-            : pickStatusMessage()
-        // Slight delay so width expansion leads, then type
-        typeRevealTimer.restart()
-        typeRevealTimer.pending = msg
-    }
-
-    function clearStatus() {
-        typeRevealTimer.stop()
-        messageTimer.stop()
-        overrideHoldTimer.stop()
-        messageAnimator.stop()
-        messageAnimator.displayedText = ""
-        overrideActive = false
-        // keep alertActive if still in warning window — cleared by overrideHoldTimer
-    }
-
-    Timer {
-        id: typeRevealTimer
-        property string pending: ""
-        interval: Tokens.animInstant
-        repeat: false
-        onTriggered: {
-            if (!centerBar.expanded)
-                return
-            messageAnimator.transitionTo(pending)
-            messageTimer.restart()
-        }
-    }
-
-    Timer {
-        id: overrideHoldTimer
-        repeat: false
-        onTriggered: {
-            centerBar.overrideActive = false
-            centerBar.alertActive = false
-        }
-    }
-
-    AnimatedText {
-        id: messageAnimator
-        mode: AnimatedText.Mode.Typewriter
-        duration: Tokens.animFadeDelay
-    }
-
     Component.onCompleted: {
-        pendingStatus = statusMessages[0]
         centerBar.tickClock()
         centerBar.initBatteryState()
         weatherProc.running = true
@@ -178,23 +84,9 @@ Item {
     }
 
     Timer {
-        id: messageTimer
-        running: false
-        repeat: true
-        interval: 60000
-
-        function pickAndShow() {
-            if (!centerBar.expanded)
-                return
-            const msg = centerBar.pickStatusMessage()
-            messageAnimator.transitionTo(msg)
-        }
-
-        onTriggered: {
-            if (centerBar.overrideActive || !centerBar.expanded)
-                return
-            pickAndShow()
-        }
+        id: alertHoldTimer
+        repeat: false
+        onTriggered: centerBar.alertActive = false
     }
 
     // Lightweight weather — wttr one-liner, same cadence as dashboard
@@ -283,7 +175,7 @@ Item {
 
     // Prefer UPower.onBattery for plug/unplug: with charge thresholds enabled,
     // displayDevice.state is often PendingCharge (not Charging) while AC is connected,
-    // so state-based AC detection never flips and status messages never fire.
+    // so state-based AC detection never flips and battery toasts never fire.
     property var battery: UPower.displayDevice
     property bool batteryInitialized: false
     property bool batteryEventsArmed: false
@@ -325,13 +217,17 @@ Item {
         return isNaN(pct) ? 0 : Math.max(0, Math.min(100, pct))
     }
 
-    // Bar status + desktop toast. Same event, two surfaces.
+    // Desktop toast; low/critical also pulses the bar chrome.
     function notifyBattery(summary, opts) {
         if (!centerBar.batteryInitialized)
             return
         opts = opts || {}
         const holdMs = opts.holdMs || 4000
-        centerBar.pushStatus(summary, { holdMs: holdMs, alert: !!opts.alert })
+        if (opts.alert) {
+            centerBar.alertActive = true
+            alertHoldTimer.interval = holdMs
+            alertHoldTimer.restart()
+        }
         Globals.toast(
             summary,
             opts.body || "",
@@ -485,47 +381,12 @@ Item {
         }
     }
 
-    property string lastTimeGreetingDate: ""
-
-    function checkTimeOfDay() {
-        const now = new Date()
-        const h = now.getHours()
-        const dateStr = Qt.formatDate(now, "yyyy-MM-dd")
-
-        let window = ""
-        let msg = ""
-
-        if (h >= 5 && h < 8) {
-            window = "dawn"
-            msg = "GOOD MORNING"
-        } else if (h >= 8 && h < 12) {
-            window = "morning"
-            msg = "GOOD MORNING"
-        } else if (h >= 17 && h < 21) {
-            window = "evening"
-            msg = "GOOD EVENING"
-        } else if (h >= 0 && h < 5) {
-            window = "night"
-            msg = "LATE SESSION"
-        } else {
-            return
-        }
-
-        const guardKey = dateStr + "|" + window
-        if (centerBar.lastTimeGreetingDate === guardKey)
-            return
-
-        centerBar.lastTimeGreetingDate = guardKey
-        centerBar.pushStatus(msg, { holdMs: 5000 })
-    }
-
     CenterRect {
         anchors.fill: parent
         barWidth:     centerBar.width
         barHeight:    centerBar.height
         radius:       Tokens.radiusLg
         alertActive:  centerBar.alertActive
-        expanded:     centerBar.expanded
     }
 
     Item {

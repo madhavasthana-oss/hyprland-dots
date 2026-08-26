@@ -48,14 +48,14 @@ Item {
     }
 
     Component.onCompleted: {
-        if (Globals.activeEdgePanel === "wifi")
+        if (Globals.activeWidget === "wifi")
             grabListFocus()
     }
 
     Connections {
         target: Globals
-        function onActiveEdgePanelChanged() {
-            if (Globals.activeEdgePanel === "wifi")
+        function onActiveWidgetChanged() {
+            if (Globals.activeWidget === "wifi")
                 Qt.callLater(root.grabListFocus)
         }
     }

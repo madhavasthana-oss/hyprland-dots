@@ -22,7 +22,6 @@ Rectangle {
     property string statusLine: "…"
     property bool checking: false
     property bool dashboardOpen: Globals.activeWidget === "dashboard"
-        || Globals.activeCenterPanel === "dashboard"
 
     ListModel { id: pkgModel }
 
@@ -97,8 +96,8 @@ Rectangle {
     // Refresh immediately when user opens the dashboard
     Connections {
         target: Globals
-        function onActiveCenterPanelChanged() {
-            if (Globals.activeCenterPanel === "dashboard")
+        function onActiveWidgetChanged() {
+            if (Globals.activeWidget === "dashboard")
                 root.refresh()
         }
     }

@@ -6,24 +6,12 @@ QtObject {
     // Workspace bank size — board + hub show one bank at a time (1–10, 11–20, …)
     // Matches hypr workspaceGroupSize for Super+1..0; relative nav is infinite.
     readonly property int workspaceBankSize: 10
-    // Back-compat alias (count of tiles per board page)
-    readonly property int workspaceNumber: workspaceBankSize
 
     property string activePanel    : ""
     property string lastPanel      : "cpu"
 
-
-    property string activeCenterPanel : ""
-    property string lastCenterPanel   : "dashboard"
-
-    // Console control pane --- last wifi/bt/settings/notifs page (legacy + backends)
-    property string activeEdgePanel : "wifi"   // "wifi" | "bluetooth" | "settings" | "notifications"
-    property string lastEdgePanel   : "wifi"
-    // Legacy force-pin flag (right-edge panel removed; kept for API stability)
-    property bool edgeForced : false
-
-    // Center bar morphs around this: dashboard | wifi | bluetooth | settings |
-    // notifications | media | ""
+    // Center bar morphs around this: dashboard | console | wifi | bluetooth |
+    // settings | notifications | media | ""
     property string activeWidget : ""
     property string lastWidget   : "dashboard"
 
@@ -75,7 +63,7 @@ QtObject {
         notifBaselineReady = true
     }
 
-    // Screen capture --- edge panel closes itself before launching tools
+    // Screen capture --- settings widget closes itself before launching tools
     property bool screenRecording : false
 
     // Cava desktop overlay (toggled from Media panel)
@@ -86,9 +74,6 @@ QtObject {
 
     // Bottom power menu --- click the bar icon to open/close (not hover)
     property bool powerMenuOpen : false
-
-    // Last toast summary (debug breadcrumb; not an event bus)
-    property string lastAction : ""
 
     function toggleWorkspaceBoard() {
         workspaceBoardOpen = !workspaceBoardOpen
@@ -152,46 +137,21 @@ QtObject {
         if (bod.length)
             args.push(bod)
 
-        lastAction = sum
         Quickshell.execDetached(args)
-    }
-
-    function isEdgeWidget(id) {
-        return id === "wifi" || id === "bluetooth"
-            || id === "settings" || id === "notifications"
-    }
-
-    function isCenterWidget(id) {
-        return id === "dashboard" || id === "console" || id === "media"
     }
 
     function closeWidget() {
         if (activeWidget !== "")
             lastWidget = activeWidget
-        if (activeCenterPanel !== "")
-            lastCenterPanel = activeCenterPanel
-        if (activeEdgePanel !== "")
-            lastEdgePanel = activeEdgePanel
         activeWidget = ""
-        activeCenterPanel = ""
     }
 
     function openWidget(id) {
         const target = (id !== undefined && id !== null && String(id).length)
             ? String(id)
             : lastWidget
-        edgeForced = false
         lastWidget = target
         activeWidget = target
-
-        if (isEdgeWidget(target)) {
-            activeEdgePanel = target
-            lastEdgePanel = target
-            activeCenterPanel = ""
-        } else if (isCenterWidget(target)) {
-            activeCenterPanel = target
-            lastCenterPanel = target
-        }
     }
 
     function toggleWidget(id) {
@@ -205,24 +165,9 @@ QtObject {
         openWidget(target)
     }
 
-    // Compat wrappers — prefer toggleWidget(id)
-    function openEdgePanel(panel) {
-        openWidget(panel)
-    }
-
-    function releaseEdgePanel() {
-        edgeForced = false
-    }
-
-    function toggleEdgePanel(panel) {
-        toggleWidget(panel)
-    }
-
-    function toggleCenterPanel(panel) {
-        toggleWidget(panel)
-    }
-
-    function openCenterPanel(panel) {
-        openWidget(panel)
+    // Session lock — Lock.qml listens and raises WlSessionLock.
+    signal lockRequested
+    function lockSession() {
+        lockRequested()
     }
 }

@@ -57,14 +57,14 @@ Item {
     Component.onCompleted: {
         if (backend.powered)
             backend.setDiscovering(true)
-        if (Globals.activeEdgePanel === "bluetooth")
+        if (Globals.activeWidget === "bluetooth")
             grabListFocus()
     }
 
     Connections {
         target: Globals
-        function onActiveEdgePanelChanged() {
-            if (Globals.activeEdgePanel === "bluetooth")
+        function onActiveWidgetChanged() {
+            if (Globals.activeWidget === "bluetooth")
                 Qt.callLater(root.grabListFocus)
         }
     }

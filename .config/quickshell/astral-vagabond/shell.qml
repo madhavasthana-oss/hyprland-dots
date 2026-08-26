@@ -7,9 +7,14 @@ import "widgets/rightBarWidgets"
 import "widgets/leftBarWidgets"
 import "bottom"
 import "utils"
+import "lock"
 
 ShellRoot {
     id:shellRoot
+
+    Lock {
+        id: sessionLock
+    }
 
     IpcHandler {
         target: "launcher"
@@ -336,5 +341,4 @@ ShellRoot {
         }
     }
 
-    Component.onCompleted: Globals.releaseEdgePanel()
 }

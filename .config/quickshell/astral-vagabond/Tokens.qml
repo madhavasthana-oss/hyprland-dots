@@ -38,12 +38,10 @@ QtObject {
     readonly property int borderLg:  Math.round(16 * scale)
     
     readonly property int columnSpacing: Math.round(4 * scale)
-    readonly property int marginTop:     0
 
     readonly property int paddingH: Math.round(6 * scale)
     readonly property int paddingV: Math.round(6 * scale)
 
-    readonly property int barGap:       Math.round(0 * scale)
     readonly property int barMarginTop: Math.round(8 * scale)
 
     // RADII
@@ -55,11 +53,8 @@ QtObject {
     readonly property int radiusXl: Math.round(24 * scale)
 
     // BAR GEOMETRY
-    // Full widths are the longest trapezoid edge (screen-hugging parallel).
-    // Rect chrome uses the second-longest edge (the pinched parallel):
-    //   CenterTrapezoid: top=W, bottom=W-2H (45° both sides)  → centerSmallerWidth
-    //   Left/RightTrapezoid: bottom=W, top=W-H (45° one side) → left/rightSmallerWidth
-    // Left matches right bar width; left shows a sliding window of N workspaces
+    // Left matches right bar width; left shows a sliding window of N workspaces.
+    // centerSmallerWidth is the dashboard / bottom-bar width.
     readonly property int rightWidth:   Math.round(350 * scale)
     readonly property int rightHeight:  Math.round(35  * scale)
     readonly property int leftWidth:    rightWidth
@@ -70,19 +65,12 @@ QtObject {
 
     readonly property int centerSmallerWidth: centerWidth - 2 * centerHeight
 
-    readonly property int preferredWidthNoGreeting: Math.round(80  * scale)
-    readonly property int greetingWidth:            Math.round(204 * scale)
-
     readonly property int exclusiveZone: Math.round(45 * scale)
 
     // CENTER EXPANSION GEOMETRY
-    // Collapsed: same height as left/right bars; width sized for HUD content.
-    // Expanded: centerSmallerWidth × centerHeight (taller for typed status).
-    // Keep a floor so shrinking panel height cannot collapse media art / week forecast.
+    // Collapsed: HUD-sized pill. Expanded: HUD + gap + per-widget body.
     readonly property int centerCollapsedWidth:  Math.round(520 * scale)
     readonly property int centerCollapsedHeight: leftHeight
-    readonly property int centerExpandedWidth:   centerSmallerWidth
-    // Fixed content footprint for center dropdown (tabs sit above this)
     readonly property int centerExpandedHeight:  Math.round(420 * scale)
 
     // Per-widget body sizes (HUD chrome sits outside these).
@@ -94,8 +82,6 @@ QtObject {
     // so these are consoleWidgetWidth / consoleWidgetHeight (not ConsoleWidget*).
     readonly property int consoleWidgetWidth:    Math.round(620 * scale)
     readonly property int consoleWidgetHeight:   Math.round(400 * scale)
-    readonly property int widgetConsoleWidth:    consoleWidgetWidth
-    readonly property int widgetConsoleHeight:   consoleWidgetHeight
     readonly property int widgetMediaWidth:      Math.round(545 * scale)
     readonly property int widgetMediaHeight:     Math.round(345 * scale)
     readonly property int widgetSettingsWidth:   Math.round(415 * scale)
@@ -106,10 +92,6 @@ QtObject {
     readonly property int widgetBluetoothHeight: Math.round(285 * scale)
     readonly property int widgetWifiWidth:       Math.round(300 * scale)
     readonly property int widgetWifiHeight:      Math.round(250 * scale)
-    readonly property int widgetCpuWidth:        rightWidth
-    readonly property int widgetCpuHeight:       rightWidth
-    readonly property int widgetGpuWidth:        rightWidth
-    readonly property int widgetGpuHeight:       rightWidth
 
     function widgetWidthFor(id) {
         switch (id) {
@@ -120,8 +102,6 @@ QtObject {
         case "bluetooth":     return widgetBluetoothWidth
         case "settings":      return widgetSettingsWidth
         case "notifications": return widgetNotifWidth
-        case "cpu":           return widgetCpuWidth
-        case "gpu":           return widgetGpuWidth
         default:              return widgetWifiWidth
         }
     }
@@ -135,26 +115,15 @@ QtObject {
         case "bluetooth":     return widgetBluetoothHeight
         case "settings":      return widgetSettingsHeight
         case "notifications": return widgetNotifHeight
-        case "cpu":           return widgetCpuHeight
-        case "gpu":           return widgetGpuHeight
         default:              return widgetWifiHeight
         }
     }
-
-    readonly property int angleOffsetCollapsed: Math.round(30 * scale)
-    readonly property int angleOffsetExpanded:  0
-    readonly property int angleOffsetDefault:   Math.round(45 * scale)
-
-    // PANEL DIMENSIONS
-    readonly property int statPanelWidth:  Math.round(580 * scale)
-    readonly property int statPanelHeight: Math.round(190 * scale)
 
     // DROPDOWN / LIST GEOMETRY
     readonly property int listPanelWidth:   Math.round(108 * scale)
     readonly property int listRowHeight:    Math.round(22  * scale)
     readonly property int statBoxHeight:    Math.round(40  * scale)
     readonly property int actionBtnHeight:  Math.round(28  * scale)
-    readonly property int tabHeight:        Math.round(20  * scale)
     readonly property int sliderTrackWidth: Math.round(50  * scale)
     readonly property int sliderTrackDepth: Math.round(4   * scale)
     readonly property int usageBarWidth:    Math.round(50  * scale)
@@ -198,65 +167,14 @@ QtObject {
     readonly property int netBarGap:         Math.max(1, Math.round(2 * scale))
 
 
-    // SCREEN GEOMETRY --- centers & edge midpoints
     readonly property int screenWidth:  primaryScreen ? primaryScreen.width  : 0
     readonly property int screenHeight: primaryScreen ? primaryScreen.height : 0
 
-    readonly property int screenCenterX: Math.round(screenWidth  / 2)
-    readonly property int screenCenterY: Math.round(screenHeight / 2)
-
-    readonly property int screenTopCenterX:    screenCenterX
-    readonly property int screenBottomCenterX: screenCenterX
-    readonly property int screenLeftCenterY:   screenCenterY
-    readonly property int screenRightCenterY:  screenCenterY
-
-    readonly property int screenTopY:    0
-    readonly property int screenBottomY: screenHeight
-    readonly property int screenLeftX:   0
-    readonly property int screenRightX:  screenWidth
-
-    // EDGE PANELS
-    readonly property int edgeHoverZoneWidth: Math.round(45  * scale)
-    readonly property int edgePanelWidth:     Math.round(280 * scale)
-    readonly property int edgeToggleHeight:   Math.round(48  * scale)
-    readonly property int edgeHotzonePx:      Math.round(4   * scale)
+    readonly property int edgeToggleHeight: Math.round(48 * scale)
 
     // BOTTOM POWER BAR --- width tracks centerSmallerWidth, height tracks center bar
     readonly property int bottomBarWidth:  centerSmallerWidth
     readonly property int bottomBarHeight: centerHeight
-    readonly property int bottomBarOriginX: screenBottomCenterX - Math.round(bottomBarWidth / 2)
-
-    // RIGHT EDGE WIDGET --- vertical strip, right-center (mirror of bottom bar axes)
-    //
-    // Bottom bar:  fixed WIDTH,  variable HEIGHT, margins on LEFT/RIGHT from originX
-    // Right edge:  fixed HEIGHT, variable WIDTH,  margins on TOP/BOTTOM from originY
-    //
-    // originY must use HEIGHT/2, never width:
-    //   topMargin = bottomMargin = centerY - windowHeight/2
-    //   -> forced window height (top+bottom anchors) = windowHeight
-    //
-    // Pad is *inside* the panel root so the rounded card never touches the
-    // square layer-surface clip bounds (top/bottom/side borders stay visible).
-    // Generous enough for radiusXl + border on both sides of the edge.
-    readonly property int edgePanelPad: Math.max(radiusXl + borderXs, borderMd + borderXs)
-    readonly property int edgeWidgetWidth:  edgePanelWidth
-    readonly property int edgeWidgetHeight: Math.round(edgePanelWidth * 1.5)
-    readonly property int edgeWindowWidth:  edgeWidgetWidth  + 2 * edgePanelPad
-    readonly property int edgeWindowHeight: edgeWidgetHeight + 2 * edgePanelPad
-    // Top offset for a right-only-anchored window (not top+bottom forced height)
-    readonly property int edgeWidgetOriginY: screenRightCenterY - Math.round(edgeWindowHeight / 2)
-
-    // Collapsed hotzone stays flush to the physical right edge.
-    readonly property int edgeHoverZoneCollapsed: Math.max(edgeHotzonePx, barInset)
-
-    // Slightly taller than a pure 1-4px edge so hover isn't lost to jitter,
-    // still small enough to stay out of the way when collapsed.
-    readonly property int bottomHoverZoneHeight: Math.max(edgeHotzonePx, barInset)
-    readonly property int bottomBarMargin: barMarginTop
-    readonly property int bottomHideDelay: animMedium
-    readonly property int edgeHideDelay:   animMedium
-    // Badge / IPC force-open auto-releases if the pointer never takes over
-    readonly property int edgeForceTimeoutMs: 10000
 
     // MEDIA / CAVA
     readonly property int mediaPollMs:            1000
@@ -336,12 +254,7 @@ QtObject {
     ) + 2 * centerMaskPad
     readonly property int centerSurfaceHeight: centerMaskHeight
 
-    readonly property int blurRadius: Math.round(18 * scale)
-
-    readonly property int barInset: Math.round(6 * scale)
-
     readonly property int workspaceToggleMargin: Math.round(10 * scale)
-    readonly property int workspaceMargins:      Math.round(6  * scale)
     readonly property int workspacePollMs:       750
     // Compact workspace number cell (icons live in a separate strip, not in-cell)
     readonly property int workspaceCellWidth:    Math.round(fontSizeSmall + spacingSm)
@@ -389,4 +302,16 @@ QtObject {
     readonly property int animFadeDelay:  450
     // Inner chrome morph only — never used on the Wayland surface size.
     readonly property int widgetMorphMs:  animExpand
+
+    // LOCK SCREEN (ext-session-lock via WlSessionLock)
+    readonly property real lockHeightFrac:        0.70
+    readonly property real lockWidthFrac:         0.88
+    readonly property real lockRatio:             1.82
+    readonly property int  lockPad:               Math.round(24 * scale)
+    readonly property int  lockCenterWidth:       Math.round(300 * scale)
+    readonly property int  lockClockSize:         Math.round(86 * scale)
+    readonly property int  lockDotSize:           Math.round(10 * scale)
+    readonly property int  lockFaceSize:          Math.round(96 * scale)
+    readonly property int  lockInputHeight:       Math.round(48 * scale)
+    readonly property int  lockShowForecastHeight: Math.round(520 * scale)
 }

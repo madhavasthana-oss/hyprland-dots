@@ -103,7 +103,7 @@ Item {
             ])
             break
         case "lock":
-            Quickshell.execDetached(["bash", "-lc", "pidof hyprlock >/dev/null || hyprlock"])
+            Globals.lockSession()
             break
         case "sleep":
             Quickshell.execDetached(["systemctl", "suspend"])

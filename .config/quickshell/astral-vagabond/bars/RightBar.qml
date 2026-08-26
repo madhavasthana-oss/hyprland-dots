@@ -17,7 +17,6 @@ import "../widgets/rightBarWidgets/system/RAM"
 
 Item {
     id: rightBar
-    // Rect width tracks RightTrapezoid's second-longest edge (pinched top).
     width: Tokens.rightWidth
     height: Tokens.rightHeight
 
