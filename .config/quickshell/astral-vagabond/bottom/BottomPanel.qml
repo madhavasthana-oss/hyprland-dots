@@ -103,6 +103,8 @@ Item {
             ])
             break
         case "lock":
+            // Same-process Quickshell lock; lock-session.sh falls back to hyprlock
+            // if this shell is ever gone (Super+L / hypridle use that script).
             Globals.lockSession()
             break
         case "sleep":

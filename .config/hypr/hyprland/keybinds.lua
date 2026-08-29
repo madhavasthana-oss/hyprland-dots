@@ -344,7 +344,11 @@ hl.bind(
 ) --  [hidden]
 
 -- Session
-hl.bind("SUPER + L", hl.dsp.exec_cmd("qs -c astral-vagabond ipc call lock lock"), { description = "Session: Lock" })
+hl.bind(
+	"SUPER + L",
+	hl.dsp.exec_cmd("qs -c astral-vagabond ipc call lock lock"),
+	{ description = "Session: Lock" }
+)
 hl.bind(
 	"SUPER + SHIFT + L",
 	hl.dsp.exec_cmd("systemctl suspend || loginctl suspend"),
