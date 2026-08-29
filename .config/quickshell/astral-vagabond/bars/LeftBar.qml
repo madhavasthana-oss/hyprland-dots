@@ -4,7 +4,6 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts 1.15
-import QtQuick.Controls 2.15
 import "../utils"
 import ".."
 
@@ -181,12 +180,8 @@ Item {
 
                     MouseArea {
                         anchors.fill: parent
-                        hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: WorkspaceHub.focusWindow(modelData.address)
-                        ToolTip.visible: containsMouse
-                        ToolTip.delay: 350
-                        ToolTip.text: modelData.title || modelData.className || ""
                     }
                 }
             }
