@@ -5,6 +5,11 @@ Newest entries first.
 
 ---
 
+## 2026-09-01 — Clipboard wipe resets cliphist index
+
+- Super+V / Super+Shift+V go through `hypr/hyprland/scripts/fuzzel-clipboard.sh`
+- Super+Shift+V deletes the cliphist db (not just `cliphist wipe`) so IDs start at 1 again
+
 ## 2026-08-25 — Quickshell console launcher + notification toasts
 
 - **Console** is a first-class center-bar widget (QuickLaunch icon). Super+A / `qs -c astral-vagabond ipc call launcher toggle` opens it.

@@ -398,17 +398,17 @@ hl.bind(
 -- Make window not amogus large
 hl.bind("CTRL + SUPER + Backslash", hl.dsp.window.resize({ x = 640, y = 480, "exact" }))
 
--- Clipboard history
+-- Clipboard history (fuzzel-clipboard in hyprland/scripts)
 -- Needs: cliphist, wl-clipboard, fuzzel; daemon started in execs.lua
 hl.bind(
 	"SUPER + V",
-	hl.dsp.exec_cmd("cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"),
+	hl.dsp.exec_cmd(hyprScripts .. "/fuzzel-clipboard.sh pick"),
 	{ description = "Clipboard: history picker" }
 )
 hl.bind(
 	"SUPER + SHIFT + V",
-	hl.dsp.exec_cmd("cliphist wipe && notify-send -a Hyprland 'Clipboard' 'History wiped'"),
-	{ description = "Clipboard: wipe history" }
+	hl.dsp.exec_cmd(hyprScripts .. "/fuzzel-clipboard.sh wipe"),
+	{ description = "Clipboard: wipe history and reset index" }
 )
 
 -- Wallpaper cycler (also recolors astral-vagabond + hypr borders via wallust from live awww image)
