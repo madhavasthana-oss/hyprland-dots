@@ -3,6 +3,10 @@ local home_dir = os.getenv("HOME")
 -- Wayland
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
 
+-- awww treats an empty XDG_CACHE_HOME as a real path and then fails to store
+-- wallpaper cache (ENOENT). Pin the default so restore works.
+hl.env("XDG_CACHE_HOME", home_dir .. "/.cache")
+
 -- Applications
 local xdg_data_dirs_old = os.getenv("XDG_DATA_DIRS") or ""
 hl.env("XDG_DATA_DIRS", home_dir .. "/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share:" .. xdg_data_dirs_old)

@@ -5,6 +5,7 @@
 #   ./wallpaper.sh --next
 #   ./wallpaper.sh --random
 #   ./wallpaper.sh --set <name-or-path>
+#   ./wallpaper.sh --restore           # last selected wallpaper (session start)
 #   ./wallpaper.sh --live              # prefer live video wallpapers
 #   ./wallpaper.sh --status
 
@@ -15,6 +16,14 @@ WALL_DIR="${WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/doomslayer"
 STATE_FILE="$STATE_DIR/wallpaper.state"
 LIVE=false
+QUIET=false
+
+# awww's cache lookup treats an empty XDG_CACHE_HOME as a real path and then
+# fails to store cache (ENOENT), so the daemon cannot restore on next login.
+if [[ -z "${XDG_CACHE_HOME:-}" ]]; then
+    export XDG_CACHE_HOME="${HOME}/.cache"
+fi
+mkdir -p "${XDG_CACHE_HOME}/awww"
 
 # Animated switch defaults (override with env if you want)
 TRANSITION_TYPE="${AWWW_TRANSITION:-random}"
@@ -23,7 +32,7 @@ TRANSITION_FPS="${AWWW_TRANSITION_FPS:-60}"
 
 usage() {
     cat <<EOF
-Usage: $0 [--list|--next|--random|--status|--set <name>] [--live]
+Usage: $0 [--list|--next|--random|--status|--restore|--set <name>] [--live]
 
 Apply wallpapers from the Doomslayer-mod collection without depending on
 HyDE theme wallpaper caches.
@@ -32,6 +41,7 @@ HyDE theme wallpaper caches.
   --next              Cycle to the next wallpaper in order
   --random            Pick a random wallpaper
   --set <name|path>   Set by filename fragment or absolute path
+  --restore           Apply last selected wallpaper (used at Hyprland start)
   --live              Prefer video wallpapers under live-wallpapers-*/
   --status            Show last applied wallpaper
   -h, --help          This help
@@ -113,21 +123,24 @@ ensure_awww() {
     fi
 
     stop_hyprpaper
+    mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/awww"
 
+    # Hyprland exec-once starts the daemon in parallel. pgrep succeeding does
+    # not mean the socket is ready — always wait for query.
     if ! pgrep -u "$USER" -x awww-daemon >/dev/null 2>&1; then
-        awww-daemon >/dev/null 2>&1 &
+        awww-daemon --no-cache >/dev/null 2>&1 &
         disown 2>/dev/null || true
-        local i
-        for i in {1..50}; do
-            if awww query >/dev/null 2>&1; then
-                return 0
-            fi
-            sleep 0.1
-        done
-        echo "error: awww-daemon failed to start" >&2
-        return 1
     fi
-    return 0
+
+    local i
+    for i in {1..50}; do
+        if awww query >/dev/null 2>&1; then
+            return 0
+        fi
+        sleep 0.1
+    done
+    echo "error: awww-daemon failed to start" >&2
+    return 1
 }
 
 apply_static() {
@@ -226,7 +239,9 @@ apply_wall() {
         apply_static "$path"
         echo "Wallpaper: $path"
     fi
-    notify "Wallpaper" "$(basename "$path")"
+    if [[ "$QUIET" != "true" ]]; then
+        notify "Wallpaper" "$(basename "$path")"
+    fi
 
     # SUPER+W path: recolor quickshell from the live awww image
     theme_astral_vagabond_from_awww "$path"
@@ -317,6 +332,36 @@ random_wall() {
     apply_wall "${walls[$n]}"
 }
 
+# Session start: last wallpaper.sh/--set selection, else first image in the collection.
+restore_wall() {
+    QUIET=true
+    TRANSITION_TYPE="none"
+    TRANSITION_DURATION="0"
+
+    local saved=""
+    if [[ -f "$STATE_FILE" ]]; then
+        saved="$(tr -d '\r' < "$STATE_FILE" 2>/dev/null || true)"
+        saved="${saved#"${saved%%[![:space:]]*}"}"
+        saved="${saved%"${saved##*[![:space:]]}"}"
+    fi
+
+    if [[ -n "$saved" && -f "$saved" ]]; then
+        apply_wall "$saved"
+        return
+    fi
+
+    local -a walls=()
+    load_walls false walls
+    if [[ ${#walls[@]} -gt 0 ]]; then
+        echo "warning: no saved wallpaper; using ${walls[0]}" >&2
+        apply_wall "${walls[0]}"
+        return
+    fi
+
+    echo "error: no wallpaper to restore in $WALL_DIR" >&2
+    exit 1
+}
+
 status() {
     if [[ -f "$STATE_FILE" ]]; then
         echo "last wallpaper: $(cat "$STATE_FILE")"
@@ -345,6 +390,7 @@ while [[ $# -gt 0 ]]; do
         --next|-n)    ACTION="next" ;;
         --random|-r)  ACTION="random" ;;
         --status|-s)  ACTION="status" ;;
+        --restore)    ACTION="restore" ;;
         --live)       LIVE=true ;;
         --set)
             [[ $# -lt 2 ]] && usage
@@ -365,10 +411,11 @@ done
 [[ -d "$WALL_DIR" ]] || { echo "error: wallpaper dir missing: $WALL_DIR" >&2; exit 1; }
 
 case "$ACTION" in
-    list)   list_walls ;;
-    next)   next_wall ;;
-    random) random_wall ;;
-    status) status ;;
+    list)    list_walls ;;
+    next)    next_wall ;;
+    random)  random_wall ;;
+    restore) restore_wall ;;
+    status)  status ;;
     set)
         resolved="$(resolve_set_arg "$SET_ARG")" || {
             echo "error: no wallpaper matching '$SET_ARG'" >&2

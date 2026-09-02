@@ -5,6 +5,13 @@ Newest entries first.
 
 ---
 
+## 2026-09-02 — Restore selected wallpaper at login
+
+- Hyprland start now runs `wallpaper.sh --restore` (it defined the path and never called it)
+- Last Super+W / Settings pick is stored in `~/.local/state/doomslayer/wallpaper.state` and applied after `awww-daemon`
+- Settings wallpaper list goes through `wallpaper.sh --set` so that state stays in sync
+- Pin `XDG_CACHE_HOME` so awww can write its cache (empty value made store fail with ENOENT)
+
 ## 2026-09-01 — Clipboard wipe resets cliphist index
 
 - Super+V / Super+Shift+V go through `hypr/hyprland/scripts/fuzzel-clipboard.sh`

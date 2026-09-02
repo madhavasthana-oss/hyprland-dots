@@ -26,6 +26,7 @@ Item {
     readonly property string wallustScript: Quickshell.shellDir + "/utils/scripts/load-wallust-colors.sh"
     readonly property string legacyScript:  Quickshell.shellDir + "/utils/scripts/load-legacy-colors.sh"
     readonly property string idleToggleScript: Quickshell.shellDir + "/utils/scripts/idle-toggle.sh"
+    readonly property string wallpaperScript: Quickshell.env("HOME") + "/.config/hypr/hyprland/scripts/wallpaper.sh"
 
     ListModel { id: wallpaperModel }
     property alias wallpapers: wallpaperModel
@@ -417,19 +418,15 @@ Item {
     Process {
         id: wallSet
         property string path: ""
-        // PATH includes cargo so wallust is found even when qs strips env
+        // Go through wallpaper.sh so ~/.local/state/doomslayer/wallpaper.state
+        // stays in sync with Super+W and Hyprland startup --restore.
         command: [
             "bash", "-c",
             "export PATH=\"$HOME/.cargo/bin:/usr/local/bin:$PATH\"; "
-                + "IMG=\"$1\"; SCRIPT=\"$2\"; "
-                + "if command -v awww >/dev/null 2>&1; then "
-                + "  awww img \"$IMG\" --transition-type any --transition-fps 60 2>/dev/null "
-                + "    || awww img \"$IMG\"; "
-                + "fi; "
-                + "exec bash \"$SCRIPT\" \"$IMG\"",
+                + "exec bash \"$1\" --set \"$2\"",
             "wallset",
-            path,
-            root.wallustScript
+            root.wallpaperScript,
+            path
         ]
         stdout: StdioCollector {
             onStreamFinished: {

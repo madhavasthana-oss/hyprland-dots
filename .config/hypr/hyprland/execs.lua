@@ -7,7 +7,6 @@ hl.on("hyprland.start", function()
 	
 	-- Bar, wallpaper
 	hl.exec_cmd("$HOME/.config/hypr/hyprland/scripts/start_geoclue_agent.sh")
-	hl.exec_cmd("$HOME/.config/hypr/custom/scripts/__restore_video_wallpaper.sh")
 
 	-- Core components (authentication, lock screen, notification daemon)
 	hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
@@ -33,10 +32,11 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("hyprctl setcursor Bibata-Modern-Classic 24")
 
 	-- Wallpaper: awww (replaces hyprpaper; animated transitions + native GIF)
-	-- Kill legacy hyprpaper if anything still spawns it, start the daemon, then
-	-- apply the default image via wallpaper.sh (waits for the socket + fade).
+	-- --no-cache avoids flashing a stale awww cache before wallpaper.sh
+	-- --restore applies the last Super+W / Settings selection.
 	hl.exec_cmd("pkill -x hyprpaper 2>/dev/null || true")
-	hl.exec_cmd("sh -c 'pgrep -u \"$USER\" -x awww-daemon >/dev/null || exec awww-daemon'")
+	hl.exec_cmd("sh -c 'pgrep -u \"$USER\" -x awww-daemon >/dev/null || exec awww-daemon --no-cache'")
+	hl.exec_cmd(string.format("%s --restore", wallpaper_script_path))
 
 	-- load quickshell
 	hl.exec_cmd(string.format("quickshell -c %s",quickshell_cfg_main))
