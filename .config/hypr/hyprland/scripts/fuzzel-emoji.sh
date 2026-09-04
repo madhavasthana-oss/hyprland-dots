@@ -19,7 +19,7 @@ fi
 unset LC_ALL 2>/dev/null || true
 
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/fuzzel/fuzzel.ini"
-FUZZEL_ARGS=(--match-mode fzf --dmenu --prompt "EMOJI " --placeholder "search emoji...")
+FUZZEL_ARGS=(--match-mode fzf --dmenu --mesg EMOJI --prompt "󰇲  " --placeholder "search emoji...")
 if [[ -f "$CONFIG" ]]; then
 	FUZZEL_ARGS+=(--config "$CONFIG")
 fi

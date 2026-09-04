@@ -27,6 +27,9 @@ Singleton {
     // Set while a board chip is mid-drag so poll won't rebuild the model
     property bool dragActive: false
 
+    // class → themed icon URL. Same DesktopEntries catalog SUPER+A console uses.
+    property var iconCache: ({})
+
     // Highest workspace id seen with clients (or focused); grows with infinite nav
     property int maxWorkspace: Globals.workspaceBankSize
 
@@ -86,25 +89,132 @@ Singleton {
         return a.length ? ("address:" + a) : ""
     }
 
+    function themedIcon(name) {
+        if (!name || !String(name).length)
+            return ""
+        const s = String(name)
+        if (s.startsWith("file:"))
+            return s
+        if (s.startsWith("/"))
+            return "file://" + s
+        const p = Quickshell.iconPath(s, true)
+        return (p && p.length) ? p : ""
+    }
+
+    function classKeys(cls) {
+        const c = String(cls || "").trim()
+        if (!c.length)
+            return []
+        const keys = []
+        const seen = ({})
+        function add(s) {
+            if (!s || !String(s).length)
+                return
+            const v = String(s)
+            if (seen[v])
+                return
+            seen[v] = true
+            keys.push(v)
+        }
+        add(c)
+        add(c.toLowerCase())
+        const noDesktop = c.replace(/\.desktop$/i, "")
+        add(noDesktop)
+        add(noDesktop.toLowerCase())
+        const parts = noDesktop.split(".")
+        if (parts.length > 1) {
+            const last = parts[parts.length - 1]
+            add(last)
+            add(last.toLowerCase())
+        }
+        const stripped = noDesktop.replace(/-bin$/i, "")
+        add(stripped)
+        add(stripped.toLowerCase())
+        return keys
+    }
+
+    function desktopEntryForClass(cls) {
+        const keys = classKeys(cls)
+        for (let i = 0; i < keys.length; i++) {
+            const k = keys[i]
+            try {
+                const heur = DesktopEntries.heuristicLookup(k)
+                if (heur)
+                    return heur
+            } catch (e) {
+                // heuristicLookup arrived in later Quickshell; byId still works
+            }
+            try {
+                const exact = DesktopEntries.byId(k)
+                if (exact)
+                    return exact
+            } catch (e) {}
+        }
+
+        let list = []
+        try {
+            const m = DesktopEntries.applications
+            list = m && m.values ? m.values : []
+        } catch (e) {
+            return null
+        }
+
+        const lowered = keys.map(function (k) { return k.toLowerCase() })
+        for (let i = 0; i < list.length; i++) {
+            const entry = list[i]
+            if (!entry)
+                continue
+            const id = String(entry.id || "").toLowerCase().replace(/\.desktop$/i, "")
+            const idLast = id.split(".").pop()
+            const start = String(entry.startupClass || "").toLowerCase()
+            const icon = String(entry.icon || "").toLowerCase()
+            const iconBase = icon.split("/").pop().replace(/\.(svg|png|xpm)$/i, "")
+            for (let j = 0; j < lowered.length; j++) {
+                const n = lowered[j]
+                if (!n.length)
+                    continue
+                if (id === n || idLast === n || start === n || icon === n || iconBase === n)
+                    return entry
+                if (id.endsWith("." + n) || start.endsWith("." + n))
+                    return entry
+            }
+        }
+        return null
+    }
+
     function iconForClass(cls) {
         if (!cls || !String(cls).length)
             return ""
-        const c = String(cls)
-        let p = Quickshell.iconPath(c, true)
-        if (p && p.length)
-            return p
-        // reverse-domain → last segment (com.mitchellh.ghostty → ghostty)
-        const parts = c.split(".")
-        if (parts.length > 1) {
-            p = Quickshell.iconPath(parts[parts.length - 1], true)
-            if (p && p.length)
-                return p
-            p = Quickshell.iconPath(parts[parts.length - 1].toLowerCase(), true)
-            if (p && p.length)
-                return p
+        const key = String(cls)
+        if (Object.prototype.hasOwnProperty.call(root.iconCache, key))
+            return root.iconCache[key]
+
+        let p = ""
+        const entry = desktopEntryForClass(key)
+        if (entry)
+            p = root.themedIcon(entry.icon)
+
+        if (!p.length) {
+            const keys = classKeys(key)
+            for (let i = 0; i < keys.length; i++) {
+                p = root.themedIcon(keys[i])
+                if (p.length)
+                    break
+            }
         }
-        p = Quickshell.iconPath(c.toLowerCase(), true)
-        return (p && p.length) ? p : ""
+
+        root.iconCache[key] = p
+        return p
+    }
+
+    function iconForClient(cls, initialClass) {
+        let p = iconForClass(cls)
+        if (p.length)
+            return p
+        const initial = String(initialClass || "")
+        if (initial.length && initial !== String(cls || ""))
+            return iconForClass(initial)
+        return ""
     }
 
     // Bare hex address (no 0x) for matching HyprlandToplevel.address ↔ hyprctl
@@ -243,6 +353,7 @@ Singleton {
                 const at = c.at || [0, 0]
                 const sz = c.size || [0, 0]
                 const cls = c.class || c.initialClass || ""
+                const initial = c.initialClass || ""
                 rows.push({
                     address: normalizeAddress(c.address),
                     className: cls,
@@ -253,7 +364,7 @@ Singleton {
                     w: sz[0] || 0,
                     h: sz[1] || 0,
                     floating: !!c.floating,
-                    icon: iconForClass(cls)
+                    icon: iconForClient(cls, initial)
                 })
             }
 
@@ -325,6 +436,14 @@ Singleton {
         }
         function onActiveToplevelChanged() {
             refreshSoon.restart()
+        }
+    }
+
+    Connections {
+        target: DesktopEntries
+        function onApplicationsChanged() {
+            root.iconCache = ({})
+            root.refresh()
         }
     }
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Doomslayer fuzzel launcher --- fix locale for xkb compose, then launch.
+# Astral-Vagabond fuzzel launcher --- fix locale for xkb compose, then launch.
 # LANG=en_IN (non-UTF-8) maps to en_IN.ISO8859-1 which has no Compose file.
 # Args are forwarded to fuzzel (e.g. none = app launcher / drun).
 set -euo pipefail

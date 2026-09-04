@@ -43,7 +43,7 @@ wipe_reset() {
 
 pick() {
 	local config="${XDG_CONFIG_HOME:-$HOME/.config}/fuzzel/fuzzel.ini"
-	local fuzzel_args=(--dmenu --prompt "CLIP " --placeholder "search clipboard...")
+	local fuzzel_args=(--dmenu --mesg CLIP --prompt "󰅌  " --placeholder "search clipboard...")
 	if [[ -f "$config" ]]; then
 		fuzzel_args+=(--config "$config")
 	fi

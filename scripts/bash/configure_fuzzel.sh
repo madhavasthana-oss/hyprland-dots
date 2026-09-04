@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Apply Doomslayer-mod fuzzel config --> live ~/.config/fuzzel
+# Apply hyprland-dots fuzzel config --> live ~/.config/fuzzel
 set -euo pipefail
 
-MOD_ROOT="${HOME}/Doomslayer-mod"
+MOD_ROOT="${HOME}/hyprland-dots"
 SRC="${MOD_ROOT}/.config/fuzzel"
 DST="${XDG_CONFIG_HOME:-$HOME/.config}/fuzzel"
 
