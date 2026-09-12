@@ -4,7 +4,7 @@ import ".."
 Transition {
     NumberAnimation {
         properties: "x,y"
-        duration: Tokens.animMedium
-        easing.type: Easing.OutCubic
+        duration: Tokens.animFast
+        easing.type: Easing.OutQuad
     }
 }

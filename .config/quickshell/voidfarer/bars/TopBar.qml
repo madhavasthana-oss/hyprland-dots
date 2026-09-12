@@ -28,15 +28,6 @@ Item {
         anchors.right: parent.right
         height: root.barHeight
         color: root.barColor
-
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            height: Math.max(1, Math.round(Tokens.strokeWidth))
-            color: Theme.borderIdle
-            opacity: 0.45
-        }
     }
 
     BarCorner {

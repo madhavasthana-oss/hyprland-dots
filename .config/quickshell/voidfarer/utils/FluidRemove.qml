@@ -6,14 +6,14 @@ Transition {
         NumberAnimation {
             property: "opacity"
             to: 0
-            duration: Tokens.animFast
-            easing.type: Easing.InCubic
+            duration: Tokens.animInstant
+            easing.type: Easing.InQuad
         }
         NumberAnimation {
             property: "scale"
-            to: 0.94
-            duration: Tokens.animFast
-            easing.type: Easing.InCubic
+            to: 0.96
+            duration: Tokens.animInstant
+            easing.type: Easing.InQuad
         }
     }
 }

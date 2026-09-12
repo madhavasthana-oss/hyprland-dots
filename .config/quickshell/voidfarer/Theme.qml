@@ -34,7 +34,24 @@ Singleton {
         "borderIdle":    "#333333",
         "bgConsole":     "#161616",
         "borderConsole": "#333333",
-        "glowConsole":   "#555555"
+        "glowConsole":   "#555555",
+        // ANSI 0–15. Ash greys by default; wallust overwrites with wallpaper hues.
+        "color0":  "#121212",
+        "color1":  "#8A8A8A",
+        "color2":  "#A3A3A3",
+        "color3":  "#B8B8B8",
+        "color4":  "#C8C8C8",
+        "color5":  "#A3A3A3",
+        "color6":  "#737373",
+        "color7":  "#E5E5E5",
+        "color8":  "#454545",
+        "color9":  "#8A8A8A",
+        "color10": "#A3A3A3",
+        "color11": "#B8B8B8",
+        "color12": "#C8C8C8",
+        "color13": "#A3A3A3",
+        "color14": "#737373",
+        "color15": "#E5E5E5"
     })
 
     property var _palette: _defaults
@@ -116,6 +133,60 @@ Singleton {
     readonly property color bgConsole:     root._hexOf("bgConsole")
     readonly property color borderConsole: root._hexOf("borderConsole")
     readonly property color glowConsole:   root._hexOf("glowConsole")
+
+    // Wallust / ANSI scheme (color0–15). Ash greys when wallust is off.
+    function scheme(n) {
+        const i = Math.max(0, Math.min(15, Math.round(Number(n) || 0)))
+        return root._hexOf("color" + i)
+    }
+
+    function _hexLum(h) {
+        const s = String(h || "").replace("#", "")
+        if (s.length < 6)
+            return 0
+        const r = parseInt(s.substring(0, 2), 16)
+        const g = parseInt(s.substring(2, 4), 16)
+        const b = parseInt(s.substring(4, 6), 16)
+        if (isNaN(r) || isNaN(g) || isNaN(b))
+            return 0
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b
+    }
+
+    // Prefer the brighter of color N / N+8 so icons stay readable on Ash.
+    // If both are too dim, fall back to accent.
+    function inkOf(n) {
+        const i = Math.max(1, Math.min(6, Math.round(Number(n) || 1)))
+        const dark = String(root._hexOf("color" + i))
+        const bright = String(root._hexOf("color" + (i + 8)))
+        const pick = root._hexLum(bright) >= root._hexLum(dark) ? bright : dark
+        if (root._hexLum(pick) < 90)
+            return root._hexOf("accent")
+        return pick
+    }
+
+    readonly property color color0:  root.scheme(0)
+    readonly property color color1:  root.scheme(1)
+    readonly property color color2:  root.scheme(2)
+    readonly property color color3:  root.scheme(3)
+    readonly property color color4:  root.scheme(4)
+    readonly property color color5:  root.scheme(5)
+    readonly property color color6:  root.scheme(6)
+    readonly property color color7:  root.scheme(7)
+    readonly property color color8:  root.scheme(8)
+    readonly property color color9:  root.scheme(9)
+    readonly property color color10: root.scheme(10)
+    readonly property color color11: root.scheme(11)
+    readonly property color color12: root.scheme(12)
+    readonly property color color13: root.scheme(13)
+    readonly property color color14: root.scheme(14)
+    readonly property color color15: root.scheme(15)
+
+    readonly property color inkRed:     root.inkOf(1)
+    readonly property color inkGreen:   root.inkOf(2)
+    readonly property color inkYellow:  root.inkOf(3)
+    readonly property color inkBlue:    root.inkOf(4)
+    readonly property color inkMagenta: root.inkOf(5)
+    readonly property color inkCyan:    root.inkOf(6)
 
     // SYSTEM ICONS --- breeze symbolic, tinted at use site to theme colors
     readonly property string iconThemeActions: "file:///usr/share/icons/breeze/actions/22/"

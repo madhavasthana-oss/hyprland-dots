@@ -4,6 +4,7 @@ import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
+import Qt5Compat.GraphicalEffects
 import "../.."
 
 Item {
@@ -159,7 +160,14 @@ Item {
                         fillMode: Image.PreserveAspectFit
                         asynchronous: true
                         smooth: true
-                        visible: status === Image.Ready
+                        visible: false
+                    }
+
+                    ColorOverlay {
+                        anchors.fill: glyph
+                        source: glyph
+                        color: Theme.accent
+                        visible: glyph.status === Image.Ready
                     }
 
                     Text {
@@ -207,15 +215,15 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             radius: Tokens.radiusSm
             color: boardBtn.containsMouse || Globals.workspaceBoardOpen
-                ? Theme.bgElevated : "transparent"
-            border.color: Globals.workspaceBoardOpen ? Theme.borderActive : Theme.borderIdle
-            border.width: Tokens.strokeWidth
+                ? Qt.rgba(Theme.inkCyan.r, Theme.inkCyan.g, Theme.inkCyan.b, 0.16)
+                : "transparent"
+            border.width: 0
 
             Text {
                 anchors.centerIn: parent
                 text: "▦"
                 font.pixelSize: Tokens.fontSizeSmall
-                color: Globals.workspaceBoardOpen ? Theme.accent : Theme.textMuted
+                color: Globals.workspaceBoardOpen ? Theme.inkCyan : Theme.textMuted
             }
 
             MouseArea {

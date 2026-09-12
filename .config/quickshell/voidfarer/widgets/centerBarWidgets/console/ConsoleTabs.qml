@@ -70,7 +70,16 @@ Item {
                         ColorOverlay {
                             anchors.fill: glyph
                             source: glyph
-                            color: tile.isActive ? Theme.accent : Theme.textMuted
+                            color: {
+                                switch (modelData.id) {
+                                case "wifi":          return Theme.inkCyan
+                                case "bluetooth":     return Theme.inkBlue
+                                case "settings":      return Theme.inkMagenta
+                                case "notifications": return Theme.inkYellow
+                                default:              return Theme.accent
+                                }
+                            }
+                            opacity: tile.isActive ? 1 : 0.62
                         }
                     }
 

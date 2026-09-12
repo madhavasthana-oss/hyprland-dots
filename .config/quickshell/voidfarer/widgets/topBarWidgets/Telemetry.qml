@@ -36,7 +36,7 @@ Item {
     function usageColor(pct) {
         if (pct < 0)
             return Theme.textDim
-        return root.blend(Theme.stateSafe, Theme.stateCritical, Math.max(0, pct) / 100)
+        return root.blend(Theme.inkGreen, Theme.inkRed, Math.max(0, pct) / 100)
     }
 
     function togglePanel(panel, item) {
@@ -153,11 +153,10 @@ Item {
         implicitWidth: rings.implicitWidth + Tokens.paddingH * 2
         implicitHeight: Math.min(parent.height - 2, root.ringSize + Tokens.spacingXs)
         radius: Tokens.radiusSm
-        color: Qt.rgba(Theme.bgElevated.r, Theme.bgElevated.g, Theme.bgElevated.b, 0.45)
-        border.width: Tokens.strokeWidth
-        border.color: (Globals.activeWidget === "cpu" || Globals.activeWidget === "gpu")
-            ? Theme.borderActive
-            : Theme.borderIdle
+        color: (Globals.activeWidget === "cpu" || Globals.activeWidget === "gpu")
+            ? Qt.rgba(Theme.inkCyan.r, Theme.inkCyan.g, Theme.inkCyan.b, 0.16)
+            : Qt.rgba(Theme.bgElevated.r, Theme.bgElevated.g, Theme.bgElevated.b, 0.45)
+        border.width: 0
 
         RowLayout {
             id: rings

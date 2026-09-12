@@ -102,13 +102,13 @@ ShellRoot {
         Behavior on implicitWidth {
             NumberAnimation {
                 duration: Tokens.widgetMorphMs
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuad
             }
         }
         Behavior on implicitHeight {
             NumberAnimation {
                 duration: Tokens.widgetMorphMs
-                easing.type: Easing.OutCubic
+                easing.type: Easing.OutQuad
             }
         }
 

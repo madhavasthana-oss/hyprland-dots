@@ -196,11 +196,17 @@ accent = accent_pool[0] if accent_pool else c4
 accent_warm = next((h for h in accent_pool if h != accent), c3)
 accent_soft = next((h for h in accent_pool if h not in (accent, accent_warm)), c5)
 
-# Text: light scheme colors (readable on fixed Ash bg)
+# Text: light scheme colors (readable on fixed Ash bg).
+# Keep muted/dim off the accent inks so idle icons don't collapse to the same hue.
 text_primary = light[0]
 text_secondary = light[1] if len(light) > 1 else light[0]
-text_muted = muted_pool[len(muted_pool) // 2] if muted_pool else c8
-text_dim = muted_pool[0] if muted_pool else c8
+used_ink = {accent, accent_warm, accent_soft}
+text_muted = next((h for h in muted_pool if h not in used_ink), None)
+if text_muted is None:
+    text_muted = muted_pool[len(muted_pool) // 2] if muted_pool else c8
+text_dim = next((h for h in muted_pool if h not in used_ink and h != text_muted), None)
+if text_dim is None:
+    text_dim = muted_pool[0] if muted_pool else c8
 
 data = {
     "_comment": "Astral-Vagabond wallust — Ash surfaces fixed; only text + accents from wallpaper",

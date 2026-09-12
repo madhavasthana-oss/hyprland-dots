@@ -99,6 +99,10 @@ format=<span foreground="#F0E2EF"><b>◆ %s</b></span>\n<span foreground="#F0E2E
 border-color=#FF1EF3FF
 default-timeout=4000
 
+[app-name="Wallpaper"]
+border-color=#FF1EF3FF
+default-timeout=4000
+
 [app-name="Bluetooth"]
 border-color=#FF1EF3FF
 default-timeout=4000

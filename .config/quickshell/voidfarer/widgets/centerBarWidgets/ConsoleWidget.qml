@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import Qt5Compat.GraphicalEffects
 import Quickshell
 import "../.."
 import "../../utils"
@@ -197,13 +198,28 @@ Item {
                             anchors.margins: Tokens.paddingH
                             spacing: Tokens.spacingXs
 
-                            Image {
+                            Item {
                                 Layout.preferredWidth: Tokens.iconSizeLarge
                                 Layout.preferredHeight: Tokens.iconSizeLarge
-                                source: root.iconSource(model.icon)
-                                sourceSize: Qt.size(Tokens.iconSizeLarge, Tokens.iconSizeLarge)
-                                fillMode: Image.PreserveAspectFit
-                                asynchronous: true
+                                Layout.alignment: Qt.AlignVCenter
+
+                                Image {
+                                    id: appGlyph
+                                    anchors.fill: parent
+                                    source: root.iconSource(model.icon)
+                                    sourceSize: Qt.size(Tokens.iconSizeLarge, Tokens.iconSizeLarge)
+                                    fillMode: Image.PreserveAspectFit
+                                    asynchronous: true
+                                    visible: false
+                                }
+                                ColorOverlay {
+                                    anchors.fill: appGlyph
+                                    source: appGlyph
+                                    color: index === root.selectedIndex
+                                        ? Theme.accent
+                                        : Theme.inkBlue
+                                    opacity: index === root.selectedIndex ? 1 : 0.72
+                                }
                             }
 
                             Text {

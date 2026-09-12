@@ -86,8 +86,8 @@ Item {
             target: stack
             property: "opacity"
             to: 0
-            duration: Tokens.animFast
-            easing.type: Easing.InCubic
+            duration: Tokens.animInstant
+            easing.type: Easing.InQuad
         }
         ScriptAction {
             script: root.applyDisplayed(root.pendingWidget)
@@ -97,7 +97,7 @@ Item {
             property: "opacity"
             to: 1
             duration: Tokens.animFast
-            easing.type: Easing.OutCubic
+            easing.type: Easing.OutQuad
         }
     }
 

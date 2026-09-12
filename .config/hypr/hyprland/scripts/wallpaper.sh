@@ -41,7 +41,7 @@ HyDE theme wallpaper caches.
   --next              Cycle to the next wallpaper in order
   --random            Pick a random wallpaper
   --set <name|path>   Set by filename fragment or absolute path
-  --restore           Apply last selected wallpaper (used at Hyprland start)
+  --restore           Apply last selected wallpaper at Hyprland start (no toast)
   --live              Prefer video wallpapers under live-wallpapers-*/
   --status            Show last applied wallpaper
   -h, --help          This help
@@ -58,9 +58,11 @@ EOF
 }
 
 notify() {
-    local title="$1" body="$2"
+    # --restore (Hyprland start) must be silent: the daemon is not a user action.
+    [[ "$QUIET" == "true" ]] && return 0
+    local title="$1" body="$2" app="${3:-Wallpaper}"
     if command -v notify-send >/dev/null 2>&1; then
-        notify-send -a "Doomslayer" "$title" "$body" 2>/dev/null || true
+        notify-send -a "$app" "$title" "$body" 2>/dev/null || true
     fi
 }
 
@@ -199,13 +201,13 @@ theme_astral_vagabond_from_awww() {
     sleep 0.15
 
     if "$theme_script" --from-awww; then
-        notify "Theme" "wallust ← awww (astral-vagabond + hypr)"
+        notify "Theme" "wallust ← awww (astral-vagabond + hypr)" "Astral-Vagabond"
         return 0
     fi
 
     if [[ -n "$fallback" && -f "$fallback" ]] && ! is_video "$fallback"; then
         if "$theme_script" "$fallback"; then
-            notify "Theme" "wallust ← $(basename "$fallback") (astral-vagabond + hypr)"
+            notify "Theme" "wallust ← $(basename "$fallback") (astral-vagabond + hypr)" "Astral-Vagabond"
             return 0
         fi
     fi
@@ -239,9 +241,7 @@ apply_wall() {
         apply_static "$path"
         echo "Wallpaper: $path"
     fi
-    if [[ "$QUIET" != "true" ]]; then
-        notify "Wallpaper" "$(basename "$path")"
-    fi
+    notify "Wallpaper" "$(basename "$path")" "Wallpaper"
 
     # SUPER+W path: recolor quickshell from the live awww image
     theme_astral_vagabond_from_awww "$path"

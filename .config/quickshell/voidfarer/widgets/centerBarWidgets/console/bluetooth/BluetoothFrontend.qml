@@ -151,7 +151,8 @@ Item {
                 ColorOverlay {
                     anchors.fill: scanGlyph
                     source: scanGlyph
-                    color: backend.discovering ? Theme.accent : Theme.textMuted
+                    color: Theme.inkBlue
+                    opacity: backend.discovering ? 1 : 0.62
                 }
                 MouseArea {
                     anchors.fill: parent

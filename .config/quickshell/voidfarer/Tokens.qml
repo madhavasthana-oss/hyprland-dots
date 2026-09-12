@@ -333,13 +333,14 @@ QtObject {
     }
 
 
-    readonly property int animInstant:    60
-    readonly property int animFast:       120
-    readonly property int animMedium:     220
-    readonly property int animSlow:       400
-    readonly property int animStraighten: 150
-    readonly property int animExpand:     300
-    readonly property int animFadeIn:     150
-    readonly property int animFadeDelay:  450
-    readonly property int widgetMorphMs:  animExpand
+    readonly property int animInstant:    40
+    readonly property int animFast:       70
+    readonly property int animMedium:     130
+    readonly property int animSlow:       220
+    readonly property int animStraighten: 70
+    readonly property int animExpand:     140
+    readonly property int animFadeIn:     70
+    readonly property int animFadeDelay:  160
+    readonly property int animStagger:    12
+    readonly property int widgetMorphMs:  animFast
 }

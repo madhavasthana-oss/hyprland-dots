@@ -75,7 +75,7 @@ Item {
                     ColorOverlay {
                         anchors.fill: brightGlyph
                         source: brightGlyph
-                        color: Theme.textMuted
+                        color: Theme.inkYellow
                     }
                 }
 
@@ -140,7 +140,7 @@ Item {
                     ColorOverlay {
                         anchors.fill: volGlyph
                         source: volGlyph
-                        color: backend.muted ? Theme.stateCritical : Theme.textMuted
+                        color: backend.muted ? Theme.inkRed : Theme.inkCyan
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -209,7 +209,7 @@ Item {
                     ColorOverlay {
                         anchors.fill: kbdGlyph
                         source: kbdGlyph
-                        color: Theme.textMuted
+                        color: Theme.inkMagenta
                     }
                 }
 
@@ -317,12 +317,22 @@ Item {
                                     source: actGlyph
                                     color: {
                                         if (modelData.key === "rec" && Globals.screenRecording)
-                                            return Theme.stateCritical
+                                            return Theme.inkRed
                                         if (modelData.key === "caffeine" && backend.caffeineActive)
-                                            return Theme.accent
+                                            return Theme.inkYellow
                                         if (modelData.key === "nolock" && backend.idleLockDisabled)
-                                            return Theme.accent
-                                        return Theme.textMuted
+                                            return Theme.inkCyan
+                                        switch (modelData.key) {
+                                        case "gnome":    return Theme.inkMagenta
+                                        case "shot":     return Theme.inkBlue
+                                        case "rec":      return Theme.inkRed
+                                        case "mute":     return Theme.inkCyan
+                                        case "caffeine": return Theme.inkYellow
+                                        case "nolock":   return Theme.inkCyan
+                                        case "wallust":  return Theme.inkMagenta
+                                        case "legacy":   return Theme.accent
+                                        default:         return Theme.accent
+                                        }
                                     }
                                 }
                             }

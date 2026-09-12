@@ -16,11 +16,16 @@ Item {
                         badgeLabel.implicitWidth + 2 * Tokens.paddingH)
         height: Math.min(parent.height - 2, Tokens.listRowHeight)
         radius: Tokens.radiusSm
-        color: badgeMouse.containsMouse ? Theme.bgElevated : Theme.bgSurface
-        border.color: Globals.notifDnd
-            ? Theme.stateCritical
-            : (Globals.notifCount > 0 ? Theme.borderActive : Theme.borderIdle)
-        border.width: Tokens.strokeWidth
+        color: {
+            if (Globals.notifDnd)
+                return Qt.rgba(Theme.inkRed.r, Theme.inkRed.g, Theme.inkRed.b, 0.18)
+            if (badgeMouse.containsMouse)
+                return Theme.bgElevated
+            if (Globals.notifCount > 0)
+                return Qt.rgba(Theme.inkYellow.r, Theme.inkYellow.g, Theme.inkYellow.b, 0.16)
+            return Theme.bgSurface
+        }
+        border.width: 0
 
         Text {
             id: badgeLabel
@@ -35,8 +40,8 @@ Item {
             font.family: Theme.fontDisplay
             font.pixelSize: Tokens.fontSizeLabel
             color: Globals.notifDnd
-                ? Theme.stateCritical
-                : (Globals.notifCount > 0 ? Theme.accent : Theme.textDim)
+                ? Theme.inkRed
+                : (Globals.notifCount > 0 ? Theme.inkYellow : Theme.textDim)
         }
 
         MouseArea {

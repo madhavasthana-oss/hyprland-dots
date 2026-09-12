@@ -168,7 +168,8 @@ Item {
                     ColorOverlay {
                         anchors.fill: refreshGlyph
                         source: refreshGlyph
-                        color: backend.scanning ? Theme.accent : Theme.textMuted
+                        color: Theme.inkCyan
+                        opacity: backend.scanning ? 1 : 0.62
                     }
 
                     RotationAnimator on rotation {

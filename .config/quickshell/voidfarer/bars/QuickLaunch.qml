@@ -33,6 +33,7 @@ Item {
         id: btn
         property string iconSource: ""
         property string widgetId: ""
+        property color ink: Theme.accent
         property bool active: root.isOpen(widgetId)
         property bool hovered: mouse.containsMouse
         signal activated()
@@ -46,12 +47,9 @@ Item {
             height: width
             radius: Tokens.radiusSm
             color: btn.active
-                ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.16)
+                ? Qt.rgba(btn.ink.r, btn.ink.g, btn.ink.b, 0.18)
                 : (btn.hovered ? Theme.bgElevated : "transparent")
-            border.width: btn.active ? Tokens.strokeWidth : 0
-            border.color: btn.active
-                ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.45)
-                : "transparent"
+            border.width: 0
 
             Behavior on color {
                 ColorAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
@@ -77,12 +75,14 @@ Item {
         ColorOverlay {
             anchors.fill: glyph
             source: glyph
-            color: btn.active
-                ? Theme.accent
-                : (btn.hovered ? Theme.textPrimary : Theme.textMuted)
+            color: btn.ink
+            opacity: btn.active ? 1 : (btn.hovered ? 0.9 : 0.62)
 
             Behavior on color {
                 ColorAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
+            }
+            Behavior on opacity {
+                NumberAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
             }
         }
 
@@ -108,26 +108,32 @@ Item {
         LaunchBtn {
             iconSource: Theme.iconDashboard
             widgetId: "dashboard"
+            ink: Theme.inkBlue
         }
         LaunchBtn {
             iconSource: Theme.iconWifi
             widgetId: "wifi"
+            ink: Theme.inkCyan
         }
         LaunchBtn {
             iconSource: Theme.iconBluetooth
             widgetId: "bluetooth"
+            ink: Theme.inkBlue
         }
         LaunchBtn {
             iconSource: Theme.iconSettings
             widgetId: "settings"
+            ink: Theme.inkMagenta
         }
         LaunchBtn {
             iconSource: Theme.iconNotif
             widgetId: "notifications"
+            ink: Theme.inkYellow
         }
         LaunchBtn {
             iconSource: Theme.iconMedia
             widgetId: "media"
+            ink: Theme.inkMagenta
         }
     }
 }

@@ -18,12 +18,9 @@ Item {
         height: width
         radius: Tokens.radiusSm
         color: root.active
-            ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.16)
+            ? Qt.rgba(Theme.inkRed.r, Theme.inkRed.g, Theme.inkRed.b, 0.18)
             : (root.hovered ? Theme.bgElevated : "transparent")
-        border.width: root.active ? Tokens.strokeWidth : 0
-        border.color: root.active
-            ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.45)
-            : "transparent"
+        border.width: 0
 
         Behavior on color {
             ColorAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
@@ -49,12 +46,14 @@ Item {
     ColorOverlay {
         anchors.fill: powerGlyph
         source: powerGlyph
-        color: root.active
-            ? Theme.accent
-            : (root.hovered ? Theme.textPrimary : Theme.textMuted)
+        color: Theme.inkRed
+        opacity: root.active ? 1 : (root.hovered ? 0.9 : 0.62)
 
         Behavior on color {
             ColorAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
+        }
+        Behavior on opacity {
+            NumberAnimation { duration: Tokens.animFast; easing.type: Easing.OutCubic }
         }
     }
 

@@ -62,10 +62,26 @@ Item {
                 ColorOverlay {
                     anchors.fill: glyph
                     source:       glyph
-                    color: actionMouse.containsMouse ? Theme.accent : Theme.textMuted
+                    color: {
+                        switch (modelData.key) {
+                        case "poweroff": return Theme.inkRed
+                        case "reboot":   return Theme.inkYellow
+                        case "logout":   return Theme.inkBlue
+                        case "lock":     return Theme.inkCyan
+                        case "sleep":    return Theme.inkMagenta
+                        default:         return Theme.accent
+                        }
+                    }
+                    opacity: actionMouse.containsMouse ? 1 : 0.62
 
                     Behavior on color {
                         ColorAnimation {
+                            duration: Tokens.animFast
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    Behavior on opacity {
+                        NumberAnimation {
                             duration: Tokens.animFast
                             easing.type: Easing.OutCubic
                         }

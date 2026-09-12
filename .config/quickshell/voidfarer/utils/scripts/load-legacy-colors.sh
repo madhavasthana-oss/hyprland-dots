@@ -34,6 +34,8 @@ COLOR_KEYS=(
     stateCritical stateSafe stateWarning
     borderActive borderIdle
     bgConsole borderConsole glowConsole
+    color0 color1 color2 color3 color4 color5 color6 color7
+    color8 color9 color10 color11 color12 color13 color14 color15
 )
 
 declare -A FALLBACK=(
@@ -55,6 +57,22 @@ declare -A FALLBACK=(
     [bgConsole]="#161616"
     [borderConsole]="#333333"
     [glowConsole]="#555555"
+    [color0]="#121212"
+    [color1]="#8A8A8A"
+    [color2]="#A3A3A3"
+    [color3]="#B8B8B8"
+    [color4]="#C8C8C8"
+    [color5]="#A3A3A3"
+    [color6]="#737373"
+    [color7]="#E5E5E5"
+    [color8]="#454545"
+    [color9]="#8A8A8A"
+    [color10]="#A3A3A3"
+    [color11]="#B8B8B8"
+    [color12]="#C8C8C8"
+    [color13]="#A3A3A3"
+    [color14]="#737373"
+    [color15]="#E5E5E5"
 )
 
 usage() {

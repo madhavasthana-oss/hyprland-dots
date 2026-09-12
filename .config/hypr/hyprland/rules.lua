@@ -179,6 +179,10 @@ hl.layer_rule({ match = { namespace = "gtk4-layer-shell" }, no_anim = true})
 hl.layer_rule({ match = { namespace = "astral-vagabond-.*" }, no_anim = true })
 hl.layer_rule({ match = { namespace = "quickshell:astral-vagabond-.*" }, no_anim = true })
 
+-- Voidfarer: same — QML owns motion; compositor fade/slide fights the morph.
+hl.layer_rule({ match = { namespace = "voidfarer-.*" }, no_anim = true })
+hl.layer_rule({ match = { namespace = "quickshell:voidfarer-.*" }, no_anim = true })
+
 -- Astral-Vagabond cava desktop overlay (kitty --class astral-vagabond-cava)
 -- border_size = 0 only (no no_border / no_focus — those throw).
 hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, float = true })

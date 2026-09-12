@@ -5,6 +5,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
@@ -436,7 +437,13 @@ Item {
                                     fillMode: Image.PreserveAspectFit
                                     asynchronous: true
                                     smooth: true
-                                    visible: !preview.hasContent && status === Image.Ready
+                                    visible: false
+                                }
+                                ColorOverlay {
+                                    anchors.fill: chipIcon
+                                    source: chipIcon
+                                    color: Theme.accent
+                                    visible: !preview.hasContent && chipIcon.status === Image.Ready
                                 }
 
                                 Text {
@@ -456,10 +463,7 @@ Item {
                                 // (helps identify similar-looking windows)
                                 Image {
                                     id: cornerIcon
-                                    visible: preview.hasContent
-                                        && winChip.iconSource.length > 0
-                                        && parent.width >= root.iconSz + 10
-                                        && parent.height >= root.iconSz + 10
+                                    visible: false
                                     anchors.right: parent.right
                                     anchors.bottom: parent.bottom
                                     anchors.margins: 3
@@ -471,7 +475,17 @@ Item {
                                     fillMode: Image.PreserveAspectFit
                                     asynchronous: true
                                     smooth: true
+                                }
+                                ColorOverlay {
+                                    anchors.fill: cornerIcon
+                                    source: cornerIcon
+                                    color: Theme.accent
                                     opacity: 0.92
+                                    visible: preview.hasContent
+                                        && winChip.iconSource.length > 0
+                                        && parent.width >= root.iconSz + 10
+                                        && parent.height >= root.iconSz + 10
+                                        && cornerIcon.status === Image.Ready
                                 }
 
                                 // Light hover tint so chrome reads over busy previews
