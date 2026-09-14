@@ -89,29 +89,30 @@ Item {
         onTriggered: centerBar.alertActive = false
     }
 
-    // Lightweight weather — wttr one-liner, same cadence as dashboard
+    // Lightweight weather — Open-Meteo one-liner (wttr.in IP lookup is broken)
+    readonly property string weatherScript: Quickshell.shellDir + "/utils/scripts/weather-fetch.sh"
+
     Process {
         id: weatherProc
-        command: [
-            "bash", "-c",
-            "curl -s --max-time " + Tokens.weatherFetchTimeoutSec
-                + " 'wttr.in/?format=%c|%t' 2>/dev/null || echo ''"
-        ]
+        command: [centerBar.weatherScript, "--hud"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const raw = text.trim()
-                if (!raw.length) {
-                    // keep last good reading on blip
+                if (!raw.length)
                     return
-                }
+                // Never paint provider errors into the HUD
+                if (/location not found|unknown location/i.test(raw))
+                    return
                 const parts = raw.split("|")
-                // %c can include trailing space / emoji variation selectors
+                if (parts.length < 2)
+                    return
                 centerBar.weatherEmoji = (parts[0] || "").trim()
                 let temp = (parts[1] || "").trim()
-                // normalize "+22°C" → "22°"
                 temp = temp.replace(/^\+/, "").replace(/C$/i, "").replace(/°$/, "°")
                 if (temp.length && temp.indexOf("°") < 0)
                     temp = temp + "°"
+                if (!temp.length)
+                    return
                 centerBar.weatherTemp = temp
             }
         }

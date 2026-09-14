@@ -21,6 +21,7 @@ Rectangle {
 
     property string currentLine: "FETCHING..."
     property string currentDetail: ""
+    property string locationName: ""
     ListModel { id: weekModel }
 
     readonly property var dowShort: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
@@ -32,9 +33,28 @@ Rectangle {
     }
 
     function weatherEmoji(code) {
+        // WMO codes (Open-Meteo). Keep wttr.in ranges as a fallback.
         const c = parseInt(code)
         if (isNaN(c))
             return "*"
+        if (c === 0 || c === 1)
+            return "☀"
+        if (c === 2)
+            return "⛅"
+        if (c === 3)
+            return "☁"
+        if (c === 45 || c === 48)
+            return "fog"
+        if (c === 51 || c === 53 || c === 55 || c === 80 || c === 81 || c === 82)
+            return "🌦"
+        if (c === 61 || c === 63 || c === 65)
+            return "🌧"
+        if (c === 56 || c === 57 || c === 66 || c === 67
+                || c === 71 || c === 73 || c === 75 || c === 77
+                || c === 85 || c === 86)
+            return "❄"
+        if (c === 95 || c === 96 || c === 99)
+            return "⛈"
         if (c === 113)
             return "☀"
         if (c === 116)
@@ -45,9 +65,7 @@ Rectangle {
             return "fog"
         if (c >= 176 && c <= 266)
             return "🌦"
-        if (c >= 281 && c <= 314)
-            return "❄"
-        if (c >= 317 && c <= 350)
+        if (c >= 281 && c <= 350)
             return "❄"
         if (c >= 353 && c <= 377)
             return "🌧"
@@ -59,13 +77,22 @@ Rectangle {
     function parseForecast(text) {
         weekModel.clear()
         try {
+            if (/location not found|unknown location/i.test(text)) {
+                if (root.currentLine === "FETCHING...")
+                    root.currentLine = "NO DATA"
+                return
+            }
             const data = JSON.parse(text)
+            const area = data.nearest_area && data.nearest_area[0]
+            if (area && area.areaName && area.areaName[0] && area.areaName[0].value)
+                root.locationName = area.areaName[0].value
             const cur = data.current_condition && data.current_condition[0]
             if (cur) {
                 const desc = (cur.weatherDesc && cur.weatherDesc[0] && cur.weatherDesc[0].value) || ""
                 const temp = cur.temp_C !== undefined ? (cur.temp_C + "°C") : ""
                 const feels = cur.FeelsLikeC !== undefined ? (cur.FeelsLikeC + "°C") : ""
-                root.currentLine = [cur.weatherCode ? root.weatherEmoji(cur.weatherCode) : "", temp, desc]
+                const emoji = cur.weatherEmoji || (cur.weatherCode ? root.weatherEmoji(cur.weatherCode) : "")
+                root.currentLine = [emoji, temp, desc]
                     .filter(s => s && String(s).length).join("  ")
                 root.currentDetail = [
                     feels ? ("feels " + feels) : "",
@@ -98,11 +125,13 @@ Rectangle {
                 let code = ""
                 let desc = ""
                 let rain = ""
+                let sampleEmoji = ""
                 if (d.hourly && d.hourly.length) {
                     const midIdx = Math.min(Tokens.weatherHourlySampleIndex, d.hourly.length - 1)
                     const mid = d.hourly[midIdx]
                     code = mid.weatherCode || ""
                     desc = (mid.weatherDesc && mid.weatherDesc[0] && mid.weatherDesc[0].value) || ""
+                    sampleEmoji = mid.weatherEmoji || ""
                     if (mid.chanceofrain !== undefined && mid.chanceofrain !== "")
                         rain = mid.chanceofrain + "%"
                 }
@@ -112,7 +141,7 @@ Rectangle {
                     isToday: isToday,
                     hi: (d.maxtempC !== undefined ? d.maxtempC : "?") + "°",
                     lo: (d.mintempC !== undefined ? d.mintempC : "?") + "°",
-                    emoji: root.weatherEmoji(code),
+                    emoji: sampleEmoji || root.weatherEmoji(code),
                     desc: desc,
                     rain: rain
                 })
@@ -127,11 +156,7 @@ Rectangle {
 
     Process {
         id: fetch
-        command: [
-            "bash", "-c",
-            "curl -s --max-time " + Tokens.weatherFetchTimeoutSec
-                + " 'wttr.in/?format=j1' 2>/dev/null || echo '{}'"
-        ]
+        command: [Quickshell.shellDir + "/utils/scripts/weather-fetch.sh", "--json"]
         stdout: StdioCollector {
             onStreamFinished: root.parseForecast(text.length ? text : "{}")
         }
@@ -164,6 +189,15 @@ Rectangle {
                 color: Theme.accent
             }
             Item { Layout.fillWidth: true }
+            Text {
+                visible: root.locationName.length > 0
+                text: root.locationName
+                font.family: Theme.fontMono
+                font.pixelSize: Tokens.fontSizeTiny
+                color: Theme.textMuted
+                elide: Text.ElideRight
+                Layout.maximumWidth: Tokens.forecastTempWidth * 2
+            }
             Text {
                 text: "↻"
                 font.pixelSize: Tokens.fontSizeSmall

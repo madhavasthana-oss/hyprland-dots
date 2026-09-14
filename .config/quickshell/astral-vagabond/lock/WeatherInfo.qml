@@ -29,6 +29,24 @@ Rectangle {
         const c = parseInt(code)
         if (isNaN(c))
             return "*"
+        if (c === 0 || c === 1)
+            return "☀"
+        if (c === 2)
+            return "⛅"
+        if (c === 3)
+            return "☁"
+        if (c === 45 || c === 48)
+            return "fog"
+        if (c === 51 || c === 53 || c === 55 || c === 80 || c === 81 || c === 82)
+            return "🌦"
+        if (c === 61 || c === 63 || c === 65)
+            return "🌧"
+        if (c === 56 || c === 57 || c === 66 || c === 67
+                || c === 71 || c === 73 || c === 75 || c === 77
+                || c === 85 || c === 86)
+            return "❄"
+        if (c === 95 || c === 96 || c === 99)
+            return "⛈"
         if (c === 113)
             return "☀"
         if (c === 116)
@@ -57,7 +75,8 @@ Rectangle {
                 const desc = (cur.weatherDesc && cur.weatherDesc[0] && cur.weatherDesc[0].value) || ""
                 const temp = cur.temp_C !== undefined ? (cur.temp_C + "°C") : ""
                 const feels = cur.FeelsLikeC !== undefined ? (cur.FeelsLikeC + "°C") : ""
-                root.currentLine = [root.weatherEmoji(cur.weatherCode), temp, desc]
+                const emoji = cur.weatherEmoji || root.weatherEmoji(cur.weatherCode)
+                root.currentLine = [emoji, temp, desc]
                     .filter(s => s && String(s).length).join("  ")
                 root.currentDetail = [
                     feels ? ("feels " + feels) : "",
@@ -85,15 +104,17 @@ Rectangle {
                     }
                 }
                 let code = ""
+                let sampleEmoji = ""
                 if (d.hourly && d.hourly.length) {
                     const midIdx = Math.min(Tokens.weatherHourlySampleIndex, d.hourly.length - 1)
                     code = d.hourly[midIdx].weatherCode || ""
+                    sampleEmoji = d.hourly[midIdx].weatherEmoji || ""
                 }
                 weekModel.append({
                     label: label,
                     hi: (d.maxtempC !== undefined ? d.maxtempC : "?") + "°",
                     lo: (d.mintempC !== undefined ? d.mintempC : "?") + "°",
-                    emoji: root.weatherEmoji(code)
+                    emoji: sampleEmoji || root.weatherEmoji(code)
                 })
             }
             if (weekModel.count === 0 && root.currentLine === "FETCHING…")
@@ -106,11 +127,7 @@ Rectangle {
 
     Process {
         id: fetch
-        command: [
-            "bash", "-c",
-            "curl -s --max-time " + Tokens.weatherFetchTimeoutSec
-                + " 'wttr.in/?format=j1' 2>/dev/null || echo '{}'"
-        ]
+        command: [Quickshell.shellDir + "/utils/scripts/weather-fetch.sh", "--json"]
         stdout: StdioCollector {
             onStreamFinished: root.parseForecast(text.length ? text : "{}")
         }
