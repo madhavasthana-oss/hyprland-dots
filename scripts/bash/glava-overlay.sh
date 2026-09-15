@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Compatibility shim — cava overlay was replaced by glava.
+# Compatibility shim — real script lives in astral-vagabond/utils/scripts/
 # Prefer dots tree when testing; fall back to live config path.
 ROOT="${HYPRLAND_DOTS:-$HOME/hyprland-dots}"
 for candidate in \

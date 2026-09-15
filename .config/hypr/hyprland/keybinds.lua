@@ -390,8 +390,8 @@ hl.bind(
 )
 hl.bind(
 	"SUPER + ALT + V",
-	hl.dsp.exec_cmd("$HOME/Doomslayer-mod/scripts/bash/cava-overlay.sh toggle"),
-	{ description = "Media: Toggle cava overlay" }
+	hl.dsp.exec_cmd("$HOME/.config/quickshell/astral-vagabond/utils/scripts/glava-overlay.sh toggle"),
+	{ description = "Media: Toggle glava overlay" }
 )
 
 -- Cursed stuff

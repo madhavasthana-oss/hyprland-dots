@@ -11,7 +11,7 @@ QtObject {
     readonly property real dpiScale: primaryScreen ? 
                                          primaryScreen.devicePixelRatio : 1.0
 
-    property real customScale: 1.25
+    property real customScale: -1
 
     readonly property real resScale: primaryScreen ?
         Math.min(primaryScreen.width / 1920, primaryScreen.height / 1080) : 1.0
@@ -176,17 +176,15 @@ QtObject {
     readonly property int bottomBarWidth:  centerSmallerWidth
     readonly property int bottomBarHeight: centerHeight
 
-    // MEDIA / CAVA
+    // MEDIA / GLAVA
     readonly property int mediaPollMs:            1000
     readonly property int mediaArtMinSide:        statBoxHeight
     readonly property real mediaArtWidthFrac:     0.38
     readonly property real mediaArtHeightFrac:    0.42
-    readonly property int cavaBars:               80
-    readonly property int cavaFramerate:          60
-    readonly property int cavaSensitivity:        100
-    readonly property real cavaOverlayHeightFrac: 0.22
-    readonly property real cavaOverlayYFrac:      0.78
-    readonly property real cavaOverlayOpacity:    0.85
+    readonly property int glavaFramerate:         60
+    readonly property real glavaOverlayHeightFrac: 0.22
+    readonly property real glavaOverlayYFrac:      0.78
+    readonly property real glavaOverlayOpacity:    0.85
 
     // PIPEWIRE AUDIO INIT (never hard-stop; backoff after fast phase)
     readonly property int audioInitDelayMs:    300

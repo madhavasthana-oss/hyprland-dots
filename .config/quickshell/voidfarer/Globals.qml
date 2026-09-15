@@ -81,8 +81,8 @@ QtObject {
     // Screen capture --- edge panel closes itself before launching tools
     property bool screenRecording : false
 
-    // Cava desktop overlay (toggled from Media panel)
-    property bool cavaOverlay : false
+    // Glava desktop overlay (toggled from Media panel)
+    property bool glavaOverlay : false
 
     // Workspace board (drag windows between workspaces)
     property bool workspaceBoardOpen : false

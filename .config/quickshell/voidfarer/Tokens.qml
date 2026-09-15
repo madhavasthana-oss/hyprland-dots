@@ -248,17 +248,15 @@ QtObject {
     // Badge / IPC force-open auto-releases if the pointer never takes over
     readonly property int edgeForceTimeoutMs: 10000
 
-    // MEDIA / CAVA
+    // MEDIA / GLAVA
     readonly property int mediaPollMs:            1000
     readonly property int mediaArtMinSide:        statBoxHeight
     readonly property real mediaArtWidthFrac:     0.38
     readonly property real mediaArtHeightFrac:    0.42
-    readonly property int cavaBars:               80
-    readonly property int cavaFramerate:          60
-    readonly property int cavaSensitivity:        100
-    readonly property real cavaOverlayHeightFrac: 0.22
-    readonly property real cavaOverlayYFrac:      0.78
-    readonly property real cavaOverlayOpacity:    0.85
+    readonly property int glavaFramerate:         60
+    readonly property real glavaOverlayHeightFrac: 0.22
+    readonly property real glavaOverlayYFrac:      0.78
+    readonly property real glavaOverlayOpacity:    0.85
 
     // PIPEWIRE AUDIO INIT (never hard-stop; backoff after fast phase)
     readonly property int audioInitDelayMs:    300

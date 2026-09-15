@@ -1,4 +1,4 @@
-// MediaBackend.qml --- playerctl metadata (art/title) + cava overlay
+// MediaBackend.qml --- playerctl metadata (art/title) + glava overlay
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -13,14 +13,14 @@ Item {
     property string artist: ""
     property string album: ""
     property string artUrl: ""
-    property bool cavaOn: Globals.cavaOverlay
+    property bool glavaOn: Globals.glavaOverlay
 
     readonly property bool isPlaying: status === "Playing"
     readonly property bool hasTrack: title.length > 0 || artUrl.length > 0
     readonly property bool hasPlayer: playerName.length > 0
 
-    // Co-located with the shell: astral-vagabond/utils/scripts/cava-overlay.sh
-    readonly property string cavaScript: Quickshell.shellDir + "/utils/scripts/cava-overlay.sh"
+    // Co-located with the shell: voidfarer/utils/scripts/glava-overlay.sh
+    readonly property string glavaScript: Quickshell.shellDir + "/utils/scripts/glava-overlay.sh"
 
     // Unit separator --- titles/artists can contain | and commas
     readonly property string sep: "\x1f"
@@ -44,7 +44,7 @@ Item {
 
     function refresh() {
         metaProc.running = true
-        cavaStatusProc.running = true
+        glavaStatusProc.running = true
     }
 
     function playPause() {
@@ -60,15 +60,15 @@ Item {
         ctlProc.running = true
     }
 
-    function setCava(on) {
-        cavaToggle.mode = on ? "on" : "off"
-        cavaToggle.running = true
+    function setGlava(on) {
+        glavaToggle.mode = on ? "on" : "off"
+        glavaToggle.running = true
     }
 
-    function toggleCava() {
+    function toggleGlava() {
         // flip optimistically; status poll corrects
-        cavaToggle.mode = "toggle"
-        cavaToggle.running = true
+        glavaToggle.mode = "toggle"
+        glavaToggle.running = true
     }
 
     Process {
@@ -127,27 +127,27 @@ Item {
     }
 
     Process {
-        id: cavaToggle
+        id: glavaToggle
         property string mode: "toggle"
-        command: ["bash", root.cavaScript, mode]
+        command: ["bash", root.glavaScript, mode]
         stdout: StdioCollector {
             onStreamFinished: {
                 const s = text.trim()
-                root.cavaOn = (s === "on")
-                Globals.cavaOverlay = root.cavaOn
+                root.glavaOn = (s === "on")
+                Globals.glavaOverlay = root.glavaOn
             }
         }
-        onExited: cavaStatusProc.running = true
+        onExited: glavaStatusProc.running = true
     }
 
     Process {
-        id: cavaStatusProc
-        command: ["bash", root.cavaScript, "status"]
+        id: glavaStatusProc
+        command: ["bash", root.glavaScript, "status"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const s = text.trim()
-                root.cavaOn = (s === "on")
-                Globals.cavaOverlay = root.cavaOn
+                root.glavaOn = (s === "on")
+                Globals.glavaOverlay = root.glavaOn
             }
         }
     }
@@ -161,7 +161,7 @@ Item {
     }
 
     Component.onCompleted: {
-        Quickshell.execDetached(["chmod", "+x", root.cavaScript])
+        Quickshell.execDetached(["chmod", "+x", root.glavaScript])
         refresh()
     }
 }

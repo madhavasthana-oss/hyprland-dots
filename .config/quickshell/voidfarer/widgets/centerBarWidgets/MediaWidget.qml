@@ -1,4 +1,4 @@
-// MediaWidget.qml --- YT Music priority, Spotify/spotatui secondary, cava overlay toggle
+// MediaWidget.qml --- YT Music priority, Spotify/spotatui secondary, glava overlay toggle
 // Art + transport driven by MediaBackend (playerctl) for reliable Spotify art URLs.
 import QtQuick
 import QtQuick.Layouts
@@ -193,7 +193,7 @@ Item {
             opacity: Theme.opacityMuted
         }
 
-        // -- RIGHT: sources + cava ---
+        // -- RIGHT: sources + glava ---
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -299,13 +299,13 @@ Item {
                 }
             }
 
-            // CAVA overlay toggle
+            // GLAVA overlay toggle
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Tokens.edgeToggleHeight
                 radius: Tokens.radiusMd
-                color: backend.cavaOn ? Theme.bgElevated : Theme.bgSurface
-                border.color: backend.cavaOn ? Theme.borderActive : Theme.borderIdle
+                color: backend.glavaOn ? Theme.bgElevated : Theme.bgSurface
+                border.color: backend.glavaOn ? Theme.borderActive : Theme.borderIdle
                 border.width: Tokens.strokeWidth
 
                 RowLayout {
@@ -314,23 +314,23 @@ Item {
                     spacing: Tokens.spacingSm
                     Text {
                         text: "▁▂▃"
-                        color: backend.cavaOn ? Theme.accent : Theme.textMuted
+                        color: backend.glavaOn ? Theme.accent : Theme.textMuted
                         font.pixelSize: Tokens.fontSizeMedium
                     }
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 0
                         Text {
-                            text: "CAVA OVERLAY"
+                            text: "GLAVA OVERLAY"
                             font.family: Theme.fontDisplay
                             font.pixelSize: Tokens.fontSizeLabel
-                            color: backend.cavaOn ? Theme.accent : Theme.textPrimary
+                            color: backend.glavaOn ? Theme.accent : Theme.textPrimary
                         }
                         Text {
                             Layout.fillWidth: true
-                            text: backend.cavaOn
+                            text: backend.glavaOn
                                 ? "ON * desktop visualizer pinned"
-                                : "OFF * toggle audio bars on desktop"
+                                : "OFF * toggle OpenGL bars on desktop"
                             font.family: Theme.fontMono
                             font.pixelSize: Tokens.fontSizeTiny
                             color: Theme.textDim
@@ -342,7 +342,7 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: backend.toggleCava()
+                    onClicked: backend.toggleGlava()
                 }
             }
 

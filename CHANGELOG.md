@@ -5,6 +5,13 @@ Newest entries first.
 
 ---
 
+## 2026-09-15 — Media overlay: cava → glava
+
+- Media widget toggle launches **glava** (OpenGL bars) instead of cava-in-kitty
+- Bottom-strip placement unchanged (full width, 22% height, pinned, click-through)
+- Ash palette (`#454545` → `#C8C8C8`); shaders live in `astral-vagabond/assets/glava/`
+- Super+Alt+V and the old `cava-overlay.sh` shim both call `glava-overlay.sh`
+
 ## 2026-09-02 — Restore selected wallpaper at login
 
 - Hyprland start now runs `wallpaper.sh --restore` (it defined the path and never called it)

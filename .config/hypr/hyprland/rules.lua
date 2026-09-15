@@ -183,14 +183,14 @@ hl.layer_rule({ match = { namespace = "quickshell:astral-vagabond-.*" }, no_anim
 hl.layer_rule({ match = { namespace = "voidfarer-.*" }, no_anim = true })
 hl.layer_rule({ match = { namespace = "quickshell:voidfarer-.*" }, no_anim = true })
 
--- Astral-Vagabond cava desktop overlay (kitty --class astral-vagabond-cava)
+-- Glava desktop overlay (XWayland class GLava, title *-glava)
 -- border_size = 0 only (no no_border / no_focus — those throw).
-hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, float = true })
-hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, pin = true })
-hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, no_shadow = true })
-hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, border_size = 0 })
-hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, no_initial_focus = true })
-hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, size = { "100%", "22%" } })
-hl.window_rule({ match = { class = "^(astral-vagabond-cava)$" }, move = { "0", "78%" } })
+hl.window_rule({ match = { class = "^(GLava)$" }, float = true })
+hl.window_rule({ match = { class = "^(GLava)$" }, pin = true })
+hl.window_rule({ match = { class = "^(GLava)$" }, no_shadow = true })
+hl.window_rule({ match = { class = "^(GLava)$" }, border_size = 0 })
+hl.window_rule({ match = { class = "^(GLava)$" }, no_initial_focus = true })
+hl.window_rule({ match = { class = "^(GLava)$" }, size = { "100%", "22%" } })
+hl.window_rule({ match = { class = "^(GLava)$" }, move = { "0", "78%" } })
 
 
