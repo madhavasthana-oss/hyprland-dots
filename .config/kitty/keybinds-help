@@ -40,7 +40,7 @@
     Ctrl+K z          zoom / unzoom pane (stack layout)
     Ctrl+K =          equalize splits
 
-  FONT ZOOM  (no prefix — same as wezterm)
+  FONT ZOOM  (no prefix — current OS window only)
     Ctrl+=  or  Ctrl++   zoom in
     Ctrl+-               zoom out
     Ctrl+0               reset font size
