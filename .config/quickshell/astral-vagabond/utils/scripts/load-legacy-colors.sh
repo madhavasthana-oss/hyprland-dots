@@ -12,6 +12,7 @@
 # Source marker:             <astral-vagabond>/colors/source   ("legacy" | "wallust")
 # Hyprland: also rewrites ~/.config/hypr/hyprland/colors.lua + live hyprctl keywords
 # Clients:  mako/config + fuzzel/colors.ini via apply-theme-clients.sh
+#           glava bars via glava-overlay.sh recolor (accent + textDim)
 #
 # Extraction is a simple regex over:
 #   readonly property color <name>:  "#RRGGBB"
@@ -246,6 +247,16 @@ apply_theme_clients_from_json() {
     "$helper" "$json" || echo "warning: apply-theme-clients.sh failed" >&2
 }
 
+# Restart glava overlay if it is up so bars pick up accent + textDim.
+apply_glava_from_json() {
+    local script="${SCRIPT_DIR}/glava-overlay.sh"
+    if [[ ! -x "$script" ]]; then
+        echo "warning: skip glava theme — missing $script" >&2
+        return 0
+    fi
+    "$script" recolor || echo "warning: glava recolor failed" >&2
+}
+
 activate_legacy() {
     mkdir -p "$COLORS_DIR"
     if [[ ! -f "$LEGACY_JSON" ]]; then
@@ -258,6 +269,7 @@ activate_legacy() {
     echo "activated: legacy → $ACTIVE_JSON"
     apply_hyprland_colors_from_json "$ACTIVE_JSON"
     apply_theme_clients_from_json "$ACTIVE_JSON"
+    apply_glava_from_json
 }
 
 status() {

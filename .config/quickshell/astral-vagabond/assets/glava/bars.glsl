@@ -1,4 +1,5 @@
-/* Ash monochrome bars for the bottom overlay strip. */
+/* Overlay bars. COLOR / BAR_OUTLINE are painted at launch from
+   colors/active-colors.json (Ash defaults here; wallust tints accent + textDim). */
 
 #define C_LINE 0
 #define BAR_WIDTH 8

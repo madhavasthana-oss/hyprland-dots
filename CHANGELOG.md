@@ -5,6 +5,11 @@ Newest entries first.
 
 ---
 
+## 2026-09-15 — Glava follows wallust
+
+- Overlay bars paint from `colors/active-colors.json` (`textDim` → `accent`)
+- Wallust / Ash loaders restart glava when the overlay is already on
+
 ## 2026-09-15 — Media overlay: cava → glava
 
 - Media widget toggle launches **glava** (OpenGL bars) instead of cava-in-kitty

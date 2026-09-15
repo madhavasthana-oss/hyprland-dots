@@ -11,6 +11,7 @@
 # Theme.qml watches: <astral-vagabond>/colors/active-colors.json
 # Hyprland: also rewrites ~/.config/hypr/hyprland/colors.lua + live hyprctl keywords
 # Clients:  mako/config + fuzzel/colors.ini via apply-theme-clients.sh
+#           glava bars via glava-overlay.sh recolor (accent + textDim)
 #
 # Ash monochrome BASE is always kept for surfaces/chrome:
 #   bgPrimary, bgSurface, bgElevated, bgConsole, borderIdle, borderConsole,
@@ -26,6 +27,7 @@
 #   general.col.inactive_border ← borderIdle (Ash)
 #   misc.background_color       ← bgPrimary (Ash)
 #   pin window_rule border      ← accent + alpha
+# glava overlay bars: textDim → accent (restarted on activate if running)
 
 set -euo pipefail
 
@@ -333,6 +335,16 @@ apply_theme_clients_from_json() {
     "$helper" "$json" || echo "warning: apply-theme-clients.sh failed" >&2
 }
 
+# Restart glava overlay if it is up so bars pick up accent + textDim.
+apply_glava_from_json() {
+    local script="${SCRIPT_DIR}/glava-overlay.sh"
+    if [[ ! -x "$script" ]]; then
+        echo "warning: skip glava theme — missing $script" >&2
+        return 0
+    fi
+    "$script" recolor || echo "warning: glava recolor failed" >&2
+}
+
 activate_wallust() {
     mkdir -p "$COLORS_DIR"
     if [[ ! -f "$WALLUST_JSON" ]]; then
@@ -362,6 +374,7 @@ PY
     echo "activated: wallust → $ACTIVE_JSON"
     apply_hyprland_colors_from_json "$ACTIVE_JSON"
     apply_theme_clients_from_json "$ACTIVE_JSON"
+    apply_glava_from_json
 }
 
 run_wallust_on() {
